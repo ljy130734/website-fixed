@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>博物馆平面导览图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #f5f0e8;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+        }
+        h1 {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            letter-spacing: 4px;
+        }
+        .legend {
+            display: flex;
+            gap: 24px;
+            margin: 16px 0 24px;
+            font-size: 13px;
+            color: #666;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 2px;
+            border: 1px solid rgba(0,0,0,0.15);
+        }
+        .map-container {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+        }
+        svg {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+        .room-label {
+            font-size: 13px;
+            font-weight: 600;
+            fill: #fff;
+            pointer-events: none;
+        }
+        .room-label-dark {
+            font-size: 13px;
+            font-weight: 600;
+            fill: #2c3e50;
+            pointer-events: none;
+        }
+        .entrance-label {
+            font-size: 11px;
+            fill: #555;
+            font-weight: 500;
+        }
+        .icon-text {
+            font-size: 9px;
+            fill: #444;
+            text-anchor: middle;
+        }
+        .facility-icon {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .facility-icon:hover {
+            transform: scale(1.2);
+        }
+        .tooltip {
+            position: fixed;
+            background: #2c3e50;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <h1>博物馆平面导览图</h1>
+    <div class="legend">
+        <div class="legend-item"><div class="legend-color" style="background:#6b7f5e"></div>展厅</div>
+        <div class="legend-item"><div class="legend-color" style="background:#b8b4a8"></div>大厅及服务</div>
+        <div class="legend-item"><div class="legend-color" style="background:#d4a04a"></div>文创商店</div>
+        <div class="legend-item"><div class="legend-color" style="background:#e8e0d0"></div>公共通道</div>
+    </div>
+    <div class="map-container">
+        <svg width="820" height="620" viewBox="0 0 820 620" xmlns="http://www.w3.org/2000/svg">
+            <!-- 外墙轮廓 -->
+            <path d="M 60,80 L 400,40 L 760,90 L 780,320 L 720,540 L 100,560 L 40,320 Z" 
+                  fill="#f0ebe0" stroke="#4a4a3e" stroke-width="2.5"/>
+
+            <!-- 大厅 (中央) -->
+            <rect x="220" y="200" width="380" height="220" rx="8" fill="#b8b4a8" stroke="#8a8578" stroke-width="1.5"/>
+            <!-- 大厅内部纹理 -->
+            <rect x="240" y="220" width="340" height="180" rx="4" fill="#c8c4b8" stroke="none"/>
+            <text x="410" y="315" text-anchor="middle" class="room-label-dark" font-size="20" font-weight="bold">大厅</text>
+
+            <!-- 北入口 -->
+            <rect x="360" y="40" width="100" height="40" rx="4" fill="#e8dcc8" stroke="#6b6b5e" stroke-width="1.5"/>
+            <text x="410" y="65" text-anchor="middle" class="entrance-label">北入口 ↑</text>
+
+            <!-- 青铜馆 (左侧) -->
+            <rect x="60" y="120" width="200" height="180" rx="6" fill="#6b7f5e" stroke="#4a5a40" stroke-width="1.5"/>
+            <text x="160" y="200" text-anchor="middle" class="room-label" font-size="18">青铜馆</text>
+            <!-- 展柜示意 -->
+            <rect x="80" y="230" width="40" height="25" rx="2" fill="#5a6e4d" stroke="#3a4a30" stroke-width="1"/>
+            <rect x="130" y="230" width="40" height="25" rx="2" fill="#5a6e4d" stroke="#3a4a30" stroke-width="1"/>
+            <rect x="180" y="230" width="40" height="25" rx="2" fill="#5a6e4d" stroke="#3a4a30" stroke-width="1"/>
+            <rect x="100" y="130" width="60" height="20" rx="2" fill="#5a6e4d" stroke="#3a4a30" stroke-width="1"/>
+
+            <!-- 第一特展厅 (右上) -->
+            <rect x="500" y="100" width="200" height="160" rx="6" fill="#6b7f5e" stroke="#4a5a40" stroke-width="1.5"/>
+            <text x="600" y="170" text-anchor="middle" class="room-label" font-size="16">第一特展厅</text>
+            <!-- 展柜示意 -->
+            <rect x="520" y="190" width="50" height="25" rx="2" fill="#5a6e4d" stroke="#3a4a30" stroke-width="1"/>
+            <rect x="580" y="190" width="50" height="25" rx="2" fill="#5a6e4d" stroke="#3a4a30" stroke-width="1"/>
+            <rect x="640" y="190" width="50" height="25" rx="2" fill="#5a6e4d" stroke="#3a4a30" stroke-width="1"/>
+
+            <!-- 雕塑馆 (右下) -->
+            <rect x="500" y="310" width="220" height="170" rx="6" fill="#6b7f5e" stroke="#4a5a40" stroke-width="1.5"/>
+            <text x="610" y="380" text-anchor="middle" class="room-label" font-size="16">雕塑馆</text>
+            <!-- 雕塑台示意 -->
+            <ellipse cx="550" cy="430" rx="25" ry="18" fill="#8a9e7e" stroke="#5a6e4d" stroke-width="1"/>
+            <ellipse cx="630" cy="440" rx="22" ry="16" fill="#8a9e7e" stroke="#5a6e4d" stroke-width="1"/>
+
+            <!-- 上博文创 (右上角) -->
+            <rect x="540" y="40" width="140" height="50" rx="6" fill="#d4a04a" stroke="#b08838" stroke-width="1.5"/>
+            <text x="610" y="70" text-anchor="middle" class="room-label-dark" font-size="14">上博文创</text>
+
+            <!-- 东南出口 -->
+            <rect x="440" y="540" width="120" height="35" rx="4" fill="#e8dcc8" stroke="#6b6b5e" stroke-width="1.5"/>
+            <text x="500" y="562" text-anchor="middle" class="entrance-label">东南出口 ↓</text>
+
+            <!-- 参观动线 (虚线) -->
+            <path d="M 410,80 L 410,180 L 410,180 L 410,420 L 410,460 L 500,460 L 500,540" 
+                  fill="none" stroke="#8a8578" stroke-width="2" stroke-dasharray="8,5" opacity="0.7"/>
+            <!-- 动线分支 -->
+            <path d="M 410,280 L 260,280 L 260,210" 
+                  fill="none" stroke="#8a8578" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.6"/>
+            <path d="M 410,280 L 600,280 L 600,160" 
+                  fill="none" stroke="#8a8578" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.6"/>
+            <path d="M 600,280 L 600,310" 
+                  fill="none" stroke="#8a8578" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.6"/>
+
+            <!-- 公共服务设施图标 -->
+
+            <!-- 无障碍设施 ♿ -->
+            <g class="facility-icon" data-tip="无障碍设施">
+                <rect x="260" y="380" width="28" height="28" rx="4" fill="white" stroke="#888" stroke-width="1"/>
+                <text x="274" y="400" text-anchor="middle" font-size="16">♿</text>
+            </g>
+
+            <!-- 母婴室 -->
+            <g class="facility-icon" data-tip="母婴室">
+                <rect x="300" y="380" width="28" height="28" rx="4" fill="white" stroke="#888" stroke-width="1"/>
+                <text x="314" y="400" text-anchor="middle" font-size="14">👶</text>
+            </g>
+
+            <!-- 卫生间 🚻 -->
+            <g class="facility-icon" data-tip="卫生间">
+                <rect x="340" y="380" width="28" height="28" rx="4" fill="white" stroke="#888" stroke-width="1"/>
+                <text x="354" y="400" text-anchor="middle" font-size="14">🚻</text>
+            </g>
+
+            <!-- 电梯 🛗 -->
+            <g class="facility-icon" data-tip="电梯">
+                <rect x="380" y="380" width="28" height="28" rx="4" fill="white" stroke="#888" stroke-width="1"/>
+                <text x="394" y="400" text-anchor="middle" font-size="14">🛗</text>
+            </g>
+
+            <!-- 楼梯 -->
+            <g class="facility-icon" data-tip="楼梯">
+                <rect x="420" y="380" width="28" height="28" rx="4" fill="white" stroke="#888" stroke-width="1"/>
+                <text x="434" y="400" text-anchor="middle" font-size="14">🪜</text>
+            </g>
+
+            <!-- 寄存 -->
+            <g class="facility-icon" data-tip="寄存处">
+                <rect x="460" y="380" width="28" height="28" rx="4" fill="white" stroke="#888" stroke-width="1"/>
+                <text x="474" y="400" text-anchor="middle" font-size="14">🛅</text>
+            </g>
+
+            <!-- 语音导览 🎧 -->
+            <g class="facility-icon" data-tip="语音导览器">
+                <rect x="500" y="380" width="28" height="28" rx="4" fill="white" stroke="#888" stroke-width="1"/>
+                <text x="514" y="400" text-anchor="middle" font-size="14">🎧</text>
+            </g>
+
+            <!-- 青铜馆内设施 -->
+            <g class="facility-icon" data-tip="信息台">
+                <rect x="90" y="180" width="24" height="24" rx="3" fill="white" stroke="#888" stroke-width="1"/>
+                <text x="102" y="197" text-anchor="middle" font-size="12">ℹ️</text>
+            </g>
+
+            <!-- 第一特展厅内设施 -->
+            <g class="facility-icon" data-tip="售票处/咨询">
+                <rect x="540" y="130" width="24" height="24" rx="3" fill="white" stroke="#888" stroke-width="1"/>
+                <text x="552" y="147" text-anchor="middle" font-size="12">🎫</text>
+            </g>
+
+            <!-- 雕塑馆内休息区 -->
+            <g class="facility-icon" data-tip="休息区">
+                <rect x="540" y="450" width="24" height="24" rx="3" fill="white" stroke="#888" stroke-width="1"/>
+                <text x="552" y="467" text-anchor="middle" font-size="12">🪑</text>
+            </g>
+
+            <!-- 大厅内导览台 -->
+            <rect x="350" y="250" width="120" height="40" rx="6" fill="#a8a498" stroke="#888" stroke-width="1"/>
+            <text x="410" y="275" text-anchor="middle" class="room-label-dark" font-size="12">问讯导览台</text>
+
+            <!-- 方向指示箭头 -->
+            <g opacity="0.5">
+                <path d="M 410,100 L 410,160 M 402,152 L 410,165 L 418,152" fill="none" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+                <text x="410" y="445" text-anchor="middle" class="entrance-label" font-size="11">参观方向</text>
+            </g>
+
+            <!-- 比例尺 -->
+            <line x1="80" y1="585" x2="230" y2="585" stroke="#666" stroke-width="1.5"/>
+            <text x="155" y="600" text-anchor="middle" font-size="11" fill="#666">比例尺 1:200</text>
+        </svg>
+    </div>
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        const tooltip = document.getElementById('tooltip');
+        document.querySelectorAll('.facility-icon').forEach(el => {
+            el.addEventListener('mouseenter', (e) => {
+                tooltip.textContent = el.dataset.tip;
+                tooltip.style.opacity = '1';
+            });
+            el.addEventListener('mousemove', (e) => {
+                tooltip.style.left = e.clientX + 12 + 'px';
+                tooltip.style.top = e.clientY - 24 + 'px';
+            });
+            el.addEventListener('mouseleave', () => {
+                tooltip.style.opacity = '0';
+            });
+        });
+    </script>
+</body>
+</html>
