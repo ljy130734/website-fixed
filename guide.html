@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shanghai Museum · Floor Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root { --bg:#ffffff; --fg:#111111; --fg-secondary:#666666; --fg-tertiary:#999999; --accent:#111111; --hairline:1px solid #ededed; --hairline-dark:1px solid #e0e0e0; --panel:#fafafa; --panel-hover:#f5f5f5; --font-display:'Space Grotesk',system-ui,-apple-system,sans-serif; --font-body:'Space Grotesk',system-ui,-apple-system,sans-serif; --font-mono:'Space Mono',monospace; }
+  html,body{height:100%;}
+  body{ font-family:var(--font-body); background:var(--bg); color:var(--fg); display:flex; flex-direction:column; min-height:100vh; -webkit-font-smoothing:antialiased; }
+  body{ opacity:0; animation:pageIn .6s ease forwards; }
+  @keyframes pageIn { to { opacity:1; } }
+
+  /* ---- Topbar ---- */
+  .topbar{ z-index:5; display:flex; align-items:center; justify-content:space-between; padding:1.4rem 2.2rem; border-bottom:var(--hairline-dark); background:var(--bg); }
+  .topbar .back-btn{ display:flex; align-items:center; gap:0.35rem; color:var(--fg-secondary); font-family:var(--font-mono); font-size:0.72rem; letter-spacing:0.06em; cursor:pointer; background:none; border:none; padding:0.4rem 0; transition:color .15s; text-transform:uppercase; text-decoration:none; }
+  .topbar .back-btn:hover{ color:var(--accent); }
+  .topbar .back-btn svg{ width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .brand{ font-family:var(--font-display); font-size:1.25rem; font-weight:500; letter-spacing:-0.01em; color:var(--accent); text-align:center; flex:1; }
+  .brand small{ display:block; font-family:var(--font-mono); font-size:0.6rem; font-weight:400; letter-spacing:0.22em; color:var(--fg-tertiary); margin-top:1px; text-transform:uppercase; }
+  .lang-switch{ display:flex; align-items:center; gap:0; font-family:var(--font-mono); font-size:0.72rem; letter-spacing:0.1em; border:1px solid var(--hairline-dark); border-radius:2px; overflow:hidden; flex-shrink:0; }
+  .lang-switch button{ background:var(--bg); color:var(--fg-tertiary); border:none; padding:0.5rem 0.8rem; cursor:pointer; font-family:inherit; font-size:inherit; letter-spacing:inherit; transition:0.15s; }
+  .lang-switch button.on{ background:var(--accent); color:var(--bg); }
+  .lang-switch button:not(.on):hover{ color:var(--fg); background:var(--panel-hover); }
+  .lang-sep{ color:var(--hairline-dark); font-size:0.8rem; }
+
+  /* ---- Floor Nav ---- */
+  .floor-nav{ display:flex; padding:0 2.2rem; border-bottom:var(--hairline-dark); background:var(--bg); overflow-x:auto; }
+  .floor-tab{ cursor:pointer; font-family:var(--font-mono); font-size:0.72rem; letter-spacing:0.06em; padding:0.75rem 1.4rem 0.65rem; color:var(--fg-tertiary); border-bottom:2px solid transparent; transition:0.15s; text-transform:uppercase; white-space:nowrap; }
+  .floor-tab:hover{ color:var(--fg); }
+  .floor-tab.on{ color:var(--accent); border-bottom-color:var(--accent); }
+
+  /* ---- Main View ---- */
+  .view{ flex:1; overflow-y:auto; padding:0; background:var(--bg); }
+  .pane{ display:none; animation:fadeIn .5s ease; }
+  .pane.on{ display:block; }
+  @keyframes fadeIn{ from{opacity:0;transform:translateY(4px);} to{opacity:1;transform:translateY(0);} }
+
+  /* ---- Stats Bar ---- */
+  .stats-bar{ display:flex; border-bottom:var(--hairline-dark); background:var(--bg); }
+  .stat{ flex:1; text-align:center; padding:0.9rem 0.4rem; border-right:var(--hairline); }
+  .stat:last-child{ border-right:none; }
+  .stat .n{ font-family:var(--font-display); font-size:1.8rem; font-weight:200; color:var(--accent); letter-spacing:-0.01em; }
+  .stat .l{ font-family:var(--font-mono); font-size:0.62rem; color:var(--fg-tertiary); letter-spacing:0.1em; text-transform:uppercase; margin-top:2px; }
+
+  /* ---- Map Section ---- */
+  .map-section{ padding:1.5rem 1.6rem; border-bottom:var(--hairline-dark); }
+  .map-section .section-label{ font-family:var(--font-mono); font-weight:400; font-size:0.72rem; letter-spacing:0.18em; color:var(--fg-tertiary); text-transform:uppercase; margin-bottom:0.9rem; }
+  .map-frame{ background:var(--panel); border:var(--hairline-dark); border-radius:2px; overflow:hidden; }
+  .map-frame img{ width:100%; height:auto; display:block; }
+  .map-legend{ margin-top:0.7rem; display:flex; gap:1.4rem; font-family:var(--font-mono); font-size:0.65rem; color:var(--fg-tertiary); letter-spacing:0.06em; }
+  .legend-dot{ display:inline-block; width:8px; height:8px; margin-right:6px; vertical-align:middle; border-radius:50%; background:var(--accent); }
+
+  /* ---- Hall Cards Grid ---- */
+  .halls-section{ padding:1.5rem 1.6rem; border-bottom:var(--hairline-dark); }
+  .halls-section .section-label{ font-family:var(--font-mono); font-weight:400; font-size:0.72rem; letter-spacing:0.18em; color:var(--fg-tertiary); text-transform:uppercase; margin-bottom:0.9rem; }
+  .halls-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1rem; }
+
+  .card{ background:var(--bg); border:var(--hairline-dark); border-left:3px solid var(--accent); border-radius:2px; padding:1.1rem 1.1rem; position:relative; transition:0.15s; }
+  .card:hover{ border-color:#bbb; }
+  .card .cn{ font-size:1rem; font-weight:500; padding-right:1rem; }
+  .card .ch{ font-family:var(--font-mono); font-size:0.68rem; color:var(--fg-tertiary); margin:0.25rem 0 0.55rem; letter-spacing:0.04em; }
+  .card .ctags{ display:flex; flex-wrap:wrap; gap:0.3rem; margin-bottom:0.55rem; }
+  .card .ctag{ font-family:var(--font-mono); font-size:0.62rem; padding:0.18rem 0.5rem; border-radius:2px; background:#f0f0f0; color:var(--fg-secondary); letter-spacing:0.04em; }
+  .card .cblurb{ font-size:0.82rem; line-height:1.65; color:var(--fg-secondary); font-weight:300; }
+  .card .cmeta{ display:flex; gap:0.9rem; font-family:var(--font-mono); font-size:0.68rem; color:var(--fg-tertiary); margin-top:0.65rem; }
+
+  /* ---- Tabs inside pane ---- */
+  .inner-tabs{ display:flex; gap:1.6rem; padding:0.65rem 1.5rem 0; border-bottom:var(--hairline-dark); background:var(--bg); }
+  .inner-tab{ cursor:pointer; font-family:var(--font-mono); font-size:0.72rem; letter-spacing:0.06em; padding-bottom:0.55rem; color:var(--fg-tertiary); border-bottom:2px solid transparent; transition:0.15s; text-transform:uppercase; }
+  .inner-tab.on{ color:var(--accent); border-bottom-color:var(--accent); }
+  .inner-pane{ display:none; padding:1.5rem 1.6rem; }
+  .inner-pane.on{ display:block; }
+
+  /* ---- Timeline ---- */
+  .timeline{ position:relative; padding-left:1.4rem; }
+  .timeline::before{ content:''; position:absolute; left:6px; top:4px; bottom:4px; width:1px; background:#e0e0e0; }
+  .tl-item{ position:relative; margin-bottom:1.1rem; }
+  .tl-dot{ position:absolute; left:-1.4rem; top:4px; width:13px; height:13px; border-radius:50%; background:var(--accent); border:2px solid var(--bg); }
+  .tl-time{ font-family:var(--font-mono); color:var(--accent); font-size:0.82rem; font-weight:400; }
+  .tl-name{ font-size:0.95rem; font-weight:500; margin:0.1rem 0; }
+  .tl-sub{ font-family:var(--font-mono); font-size:0.7rem; color:var(--fg-tertiary); font-weight:400; }
+  .floor-tag{ display:inline-block; font-family:var(--font-mono); font-size:0.62rem; padding:0.12rem 0.4rem; border-radius:2px; background:#f0f0f0; color:var(--fg-secondary); margin-left:0.35rem; letter-spacing:0.06em; }
+
+  /* ---- Empty ---- */
+  .empty{ text-align:center; color:var(--fg-tertiary); padding:2.5rem 1rem; font-size:0.88rem; line-height:1.8; font-family:var(--font-body); }
+
+  /* ---- Actions ---- */
+  .actions{ display:flex; gap:0.7rem; padding:0.9rem 1.5rem; border-top:var(--hairline-dark); background:var(--bg); }
+  .act-btn{ cursor:pointer; font-family:var(--font-mono); font-size:0.7rem; letter-spacing:0.08em; padding:0.55rem 1rem; border-radius:2px; border:var(--hairline-dark); background:var(--bg); color:var(--fg-secondary); transition:0.15s; text-transform:uppercase; }
+  .act-btn:hover{ border-color:var(--accent); color:var(--accent); }
+
+  /* Responsive */
+  @media(max-width:768px){
+    .topbar{ padding:1rem 1.2rem; }
+    .floor-nav{ padding:0 1.2rem; }
+    .floor-tab{ padding:0.55rem 1rem 0.5rem; }
+    .halls-grid{ grid-template-columns:1fr; }
+    .stats-bar{ flex-wrap:wrap; }
+    .stat{ min-width:33%; }
+  }
+</style>
+</head>
+<body data-lang="en">
+
+<div class="topbar">
+  <a class="back-btn" href="../planner.html?lang=en&skip=1" id="backLink">
+    <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    <span id="backLabel">Back to Planner</span>
+  </a>
+  <div class="brand">Shanghai Museum<small>FLOOR GUIDE · EAST PUDONG</small></div>
+  <div class="lang-switch">
+    <button data-lang="en" class="on">EN</button>
+    <span class="lang-sep">|</span>
+    <button data-lang="cn">中</button>
+  </div>
+</div>
+
+<div class="floor-nav">
+  <div class="floor-tab on" data-floor="f1">1F · Bronze & Sculpture</div>
+  <div class="floor-tab" data-floor="f2">2F · Jade & Painting</div>
+  <div class="floor-tab" data-floor="f3">3F · Ceramics</div>
+  <div class="floor-tab" data-floor="f4">4F · Jiangnan</div>
+  <div class="floor-tab" data-floor="all">All Floors</div>
+</div>
+
+<div class="view">
+
+  <!-- ========== 1F ========== -->
+  <div class="pane on" data-pane="f1">
+    <div class="stats-bar">
+      <div class="stat"><div class="n">4</div><div class="l">Halls</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">Key Artifacts</div></div>
+      <div class="stat"><div class="n">~90</div><div class="l">Min Suggested</div></div>
+      <div class="stat"><div class="n">1</div><div class="l">Entrance</div></div>
+    </div>
+    <div class="map-section">
+      <div class="section-label">Floor Plan</div>
+      <div class="map-frame"><img src="maps/1.png" alt="1F Floor Plan"></div>
+      <div class="map-legend">
+        <span><i class="legend-dot" style="background:#4a6c6f"></i>Permanent Galleries</span>
+        <span><i class="legend-dot" style="background:#111"></i>Special Exhibitions</span>
+      </div>
+    </div>
+    <div class="inner-tabs" data-pane-group="f1">
+      <div class="inner-tab on" data-sub="halls">Galleries</div>
+      <div class="inner-tab" data-sub="timeline">Timeline</div>
+      <div class="inner-tab" data-sub="stops">Stop Details</div>
+    </div>
+    <div class="inner-pane on" data-sub-pane="f1-halls">
+      <div class="halls-grid" id="f1-cards"></div>
+    </div>
+    <div class="inner-pane" data-sub-pane="f1-timeline">
+      <div class="timeline" id="f1-timeline"></div>
+    </div>
+    <div class="inner-pane" data-sub-pane="f1-stops">
+      <div class="halls-grid" id="f1-stops"></div>
+    </div>
+  </div>
+
+  <!-- ========== 2F ========== -->
+  <div class="pane" data-pane="f2">
+    <div class="stats-bar">
+      <div class="stat"><div class="n">7</div><div class="l">Halls</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">Key Artifacts</div></div>
+      <div class="stat"><div class="n">~120</div><div class="l">Min Suggested</div></div>
+    </div>
+    <div class="map-section">
+      <div class="section-label">Floor Plan</div>
+      <div class="map-frame"><img src="maps/2.png" alt="2F Floor Plan"></div>
+      <div class="map-legend">
+        <span><i class="legend-dot" style="background:#6b4a5a"></i>Scholar Arts</span>
+        <span><i class="legend-dot" style="background:#111"></i>Special / Digital</span>
+      </div>
+    </div>
+    <div class="inner-tabs" data-pane-group="f2">
+      <div class="inner-tab on" data-sub="halls">Galleries</div>
+      <div class="inner-tab" data-sub="timeline">Timeline</div>
+      <div class="inner-tab" data-sub="stops">Stop Details</div>
+    </div>
+    <div class="inner-pane on" data-sub-pane="f2-halls">
+      <div class="halls-grid" id="f2-cards"></div>
+    </div>
+    <div class="inner-pane" data-sub-pane="f2-timeline">
+      <div class="timeline" id="f2-timeline"></div>
+    </div>
+    <div class="inner-pane" data-sub-pane="f2-stops">
+      <div class="halls-grid" id="f2-stops"></div>
+    </div>
+  </div>
+
+  <!-- ========== 3F ========== -->
+  <div class="pane" data-pane="f3">
+    <div class="stats-bar">
+      <div class="stat"><div class="n">5</div><div class="l">Halls</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">Key Artifacts</div></div>
+      <div class="stat"><div class="n">~90</div><div class="l">Min Suggested</div></div>
+    </div>
+    <div class="map-section">
+      <div class="section-label">Floor Plan</div>
+      <div class="map-frame"><img src="maps/3.png" alt="3F Floor Plan"></div>
+      <div class="map-legend">
+        <span><i class="legend-dot" style="background:#4a6c6f"></i>Permanent Galleries</span>
+        <span><i class="legend-dot" style="background:#111"></i>Special / Experience</span>
+      </div>
+    </div>
+    <div class="inner-tabs" data-pane-group="f3">
+      <div class="inner-tab on" data-sub="halls">Galleries</div>
+      <div class="inner-tab" data-sub="timeline">Timeline</div>
+      <div class="inner-tab" data-sub="stops">Stop Details</div>
+    </div>
+    <div class="inner-pane on" data-sub-pane="f3-halls">
+      <div class="halls-grid" id="f3-cards"></div>
+    </div>
+    <div class="inner-pane" data-sub-pane="f3-timeline">
+      <div class="timeline" id="f3-timeline"></div>
+    </div>
+    <div class="inner-pane" data-sub-pane="f3-stops">
+      <div class="halls-grid" id="f3-stops"></div>
+    </div>
+  </div>
+
+  <!-- ========== 4F ========== -->
+  <div class="pane" data-pane="f4">
+    <div class="stats-bar">
+      <div class="stat"><div class="n">7</div><div class="l">Halls</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">Key Artifacts</div></div>
+      <div class="stat"><div class="n">~90</div><div class="l">Min Suggested</div></div>
+    </div>
+    <div class="map-section">
+      <div class="section-label">Floor Plan</div>
+      <div class="map-frame"><img src="maps/4.png" alt="4F Floor Plan"></div>
+      <div class="map-legend">
+        <span><i class="legend-dot" style="background:#7a8266"></i>Permanent Galleries</span>
+        <span><i class="legend-dot" style="background:#111"></i>Workshop / Outdoor</span>
+      </div>
+    </div>
+    <div class="inner-tabs" data-pane-group="f4">
+      <div class="inner-tab on" data-sub="halls">Galleries</div>
+      <div class="inner-tab" data-sub="timeline">Timeline</div>
+      <div class="inner-tab" data-sub="stops">Stop Details</div>
+    </div>
+    <div class="inner-pane on" data-sub-pane="f4-halls">
+      <div class="halls-grid" id="f4-cards"></div>
+    </div>
+    <div class="inner-pane" data-sub-pane="f4-timeline">
+      <div class="timeline" id="f4-timeline"></div>
+    </div>
+    <div class="inner-pane" data-sub-pane="f4-stops">
+      <div class="halls-grid" id="f4-stops"></div>
+    </div>
+  </div>
+
+  <!-- ========== ALL ========== -->
+  <div class="pane" data-pane="all">
+    <div class="stats-bar">
+      <div class="stat"><div class="n">23</div><div class="l">Total Halls</div></div>
+      <div class="stat"><div class="n">4</div><div class="l">Floors</div></div>
+      <div class="stat"><div class="n">~390</div><div class="l">Min Full Tour</div></div>
+      <div class="stat"><div class="n">9</div><div class="l">Key Artifacts</div></div>
+    </div>
+    <div class="inner-tabs" data-pane-group="all" style="border-bottom:var(--hairline-dark)">
+      <div class="inner-tab on" data-sub="halls">By Floor</div>
+      <div class="inner-tab" data-sub="timeline">Suggested Route</div>
+    </div>
+    <div class="inner-pane on" data-sub-pane="all-halls">
+      <div class="halls-grid" id="all-cards"></div>
+    </div>
+    <div class="inner-pane" data-sub-pane="all-timeline">
+      <div class="timeline" id="all-timeline"></div>
+    </div>
+  </div>
+</div>
+
+<div class="actions">
+  <button class="act-btn" id="printBtn">Print / Save PDF</button>
+  <button class="act-btn" id="scrollTopBtn">↑ Back to Top</button>
+</div>
+
+<script>
+/* ---- Data ---- */
+const FLOORS = {
+  f1: {
+    num:1, label:'Bronze & Sculpture', cnLabel:'青铜与雕塑',
+    descEN:'The ground floor anchors the museum with monumental <strong>Ancient Bronzes</strong> and <strong>Sculpture</strong>, flanked by the First Special Exhibition Hall and the Museum Shop.',
+    descCN:'一楼以<strong>古代青铜器</strong>与<strong>古代雕塑</strong>两大重器展厅为核心，两侧设有第一特展厅与文创商店。',
+    halls:[
+      {id:'f1a',name:'Ancient Bronzes',cn:'古代青铜器',en:'Gallery of Chinese Bronzes',floor:1,tags:['Bronze Age','National Treasures','Must-See'],blurbEN:'A monumental Western Zhou ritual vessel — the Da Ke Ding — anchors this gallery. From Shang to Han, the evolution of bronze casting unfolds with over 400 pieces including the Shang Yang Fang Sheng and Zi Zhong Jiang Pan.',blurbCN:'西周重器大克鼎为镇馆之宝。从商至汉，400余件青铜器讲述中国青铜文明的演进——包括商鞅方升与子仲姜盘。'},
+      {id:'f1b',name:'Sculpture',cn:'古代雕塑',en:'Gallery of Chinese Sculpture',floor:1,tags:['Sculpture','Buddhist Art'],blurbEN:'Stone reliefs, pottery figurines, and Buddhist statuary from the Warring States through the Ming dynasty. The Northern Wei stone Buddha is a highlight — serene, sinicized robes flowing.',blurbCN:'从战国到明代的石雕、陶俑与佛教造像。北魏石佛是亮点——宁静祥和，汉化褒衣博带风格。'},
+      {id:'f1c',name:'First Special Exhibition Hall',cn:'第一特展厅',en:'Special Exhibition Hall I',floor:1,tags:['Special Exhibition'],blurbEN:'Rotating international exhibitions. Past highlights include Egyptian artifacts, Impressionist masterpieces, and contemporary installations. Check current listings.',blurbCN:'轮换式国际特展。过往亮点包括埃及文物、印象派杰作与当代装置。请查看当期展览。'},
+      {id:'f1d',name:'Museum Shop',cn:'上博文创',en:'Shanghai Museum Cultural & Creative',floor:1,tags:['Experience'],blurbEN:'Gifts, books, reproductions, and creative merchandise inspired by the museum collection. Located near the south exit — a natural endpoint for your visit.',blurbCN:'衍生文创、图书、复仿制品与创意商品。位于南出口附近——参观的天然终点。'},
+    ],
+    timeline:[
+      {name:'Start · Main Hall',cn:'起点 · 大厅',sub:'North Entrance → Information Desk · 北入口 → 服务总台',time:'10:00'},
+      {name:'Ancient Bronzes',cn:'古代青铜器',sub:'Da Ke Ding · Shang Yang Fang Sheng · Zi Zhong Jiang Pan',time:'10:05'},
+      {name:'Sculpture',cn:'古代雕塑',sub:'Northern Wei Buddha · Pottery Figurines',time:'10:40'},
+      {name:'First Special Exhibition Hall',cn:'第一特展厅',sub:'Rotating exhibition · 临展',time:'11:10'},
+      {name:'Museum Shop',cn:'上博文创',sub:'Browse · South Exit · 南出口',time:'11:30'},
+    ],
+    stops:[
+      {id:'s1a',name:'Da Ke Ding 大克鼎',hall:'Ancient Bronzes',floor:1,blurbEN:'Western Zhou ritual vessel. 290-character inscription records the lineage of noble Ke. A designated national treasure and the museums crown jewel.',blurbCN:'西周重器。290字铭文记述贵族"克"的世系与封赏。国家宝藏，镇馆之宝。'},
+      {id:'s1b',name:'Shang Yang Fang Sheng 商鞅方升',hall:'Ancient Bronzes',floor:1,blurbEN:'Standard measuring vessel commissioned by Shang Yang, 344 BCE. Bears Qin Shi Huangs edict standardizing measures across the empire.',blurbCN:'商鞅督造标准量器，公元前344年。器侧刻有秦始皇统一度量衡诏书。'},
+      {id:'s1c',name:'Northern Wei Buddha 北魏石佛',hall:'Sculpture',floor:1,blurbEN:'Buddhist stone statue from the Northern Wei dynasty with sinicized broad-sleeved robes and a tranquil expression.',blurbCN:'北魏佛教石造像，汉化褒衣博带风格，表情宁静祥和。'},
+    ]
+  },
+  f2: {
+    num:2, label:'Jade & Painting', cnLabel:'玉器与书画',
+    descEN:'The scholar floor: <strong>Jade, Seals & Engravings, Calligraphy, and Painting</strong> form the core of Chinese literati art. The Shanghai School Painting Hall and Digital Gallery add local and contemporary dimensions.',
+    descCN:'文人艺术层：<strong>玉器、玺印篆刻、书法、绘画</strong>构成中国文人艺术的核心。海上书画馆与数字馆注入本地与当代维度。',
+    halls:[
+      {id:'f2a',name:'Jade',cn:'玉器馆',en:'Gallery of Chinese Jade',floor:2,tags:['Jade Art','Ancient Civilization','Must-See'],blurbEN:'From Neolithic Liangzhu cong to Qing court pendants. The 5,000-year-old Liangzhu jade cong with divine-humanoid motifs is the pinnacle of Neolithic carving.',blurbCN:'从新石器时代良渚玉琮到清代宫廷佩饰。5000年前的良渚玉琮刻有神人兽面纹，为新时期时代玉雕巅峰。'},
+      {id:'f2b',name:'Seals & Engravings',cn:'玺印篆刻馆',en:'Gallery of Seals & Engraving',floor:2,tags:['Calligraphy','Masterworks'],blurbEN:'Imperial seals, literati chops, and the six-sided Mao Bijiang seal by Dai Benxiao. The Jin-dynasty "Gui Yi Shi Wang" official seal is a highlight.',blurbCN:'官印、文人印、戴本孝刻冒辟疆六面印。晋"归义氏王印"为亮点。'},
+      {id:'f2c',name:'Calligraphy',cn:'书法馆',en:'Gallery of Chinese Calligraphy',floor:2,tags:['Calligraphy','Historical Figures','Must-See'],blurbEN:'Huaisu\'s wild-cursive "Bitter Bamboo Shoots Note" and the Tang tracing of Wang Xizhi\'s "Shangyu Letter" — two of the greatest calligraphic works in existence.',blurbCN:'怀素狂草《苦笋帖》与唐摹本王羲之《上虞帖》——存世最伟大的两件书法作品。'},
+      {id:'f2d',name:'Painting',cn:'绘画馆',en:'Gallery of Chinese Painting',floor:2,tags:['Chinese Painting','Historical Figures','Must-See'],blurbEN:'Tang Yin\'s landscape "Sunset & Solitary Duck" and Bada Shanren\'s scroll with eye-rolling fish — spanning the full emotional range of Chinese painting.',blurbCN:'唐寅山水《落霞孤鹜图》与八大山人白眼向天的鱼鸭图卷——尽显中国画的情感幅度。'},
+      {id:'f2e',name:'Shanghai School Painting',cn:'海上书画馆',en:'Shanghai School Paintings',floor:2,tags:['Chinese Painting'],blurbEN:'Late Qing and Republican-era Shanghai painters who blended literati tradition with Western influence in the treaty-port metropolis.',blurbCN:'晚清民国海上画派作品——在条约口岸都市中融合文人传统与西方影响。'},
+      {id:'f2f',name:'Digital Gallery',cn:'数字馆',en:'Digital Exhibition Hall',floor:2,tags:['Experience'],blurbEN:'Immersive projection mapping and interactive digital installations that bring artifacts to life through technology.',blurbCN:'沉浸式投影映射与互动数字装置，通过技术让文物"活"起来。'},
+      {id:'f2g',name:'Second Special Exhibition Hall',cn:'第二特展厅',en:'Special Exhibition Hall II',floor:2,tags:['Special Exhibition'],blurbEN:'Rotating exhibitions — often focused on painting, calligraphy, or international collaborations.',blurbCN:'轮换特展——常聚焦于绘画、书法或国际合作展览。'},
+    ],
+    timeline:[
+      {name:'Jade 玉器',cn:'玉器馆',sub:'Liangzhu Cong · Neolithic to Qing',time:'10:00'},
+      {name:'Seals & Engravings 玺印篆刻',cn:'玺印篆刻馆',sub:'Jin official seal · Literati chops',time:'10:30'},
+      {name:'Calligraphy 书法',cn:'书法馆',sub:'Huaisu · Wang Xizhi',time:'10:55'},
+      {name:'Painting 绘画',cn:'绘画馆',sub:'Tang Yin · Bada Shanren',time:'11:25'},
+      {name:'Shanghai School 海上书画',cn:'海上书画馆',sub:'Late Qing · Republican era',time:'12:00'},
+      {name:'Digital Gallery 数字馆',cn:'数字馆',sub:'Immersive experience',time:'12:25'},
+      {name:'Second Special Exhibition 第二特展',cn:'第二特展厅',sub:'Rotating exhibition',time:'12:40'},
+    ],
+    stops:[
+      {id:'s2a',name:'Liangzhu Jade Cong 良渚玉琮',hall:'Jade',floor:2,blurbEN:'~5,000 years old, carved with divine-humanoid and animal-mask motifs. Peak of Neolithic jade craftsmanship.',blurbCN:'距今约5000年，刻神人兽面纹。新石器时代玉雕巅峰。'},
+      {id:'s2b',name:'Huaisu · Bitter Bamboo Shoots 怀素·苦笋帖',hall:'Calligraphy',floor:2,blurbEN:'Fewer than 20 characters of wild-cursive script by the Tang monk Huaisu, rushing across the paper like a storm.',blurbCN:'唐代僧侣怀素的狂草，不足二十字却如疾风骤雨般驰骋纸上。'},
+      {id:'s2c',name:'Tang Yin · Sunset & Solitary Duck 唐寅·落霞孤鹜图',hall:'Painting',floor:2,blurbEN:'Tang Bohu\'s celebrated landscape, drawing on "a solitary duck flies with the setting clouds." Elegant literati brushwork.',blurbCN:'唐伯虎名作，取意"落霞与孤鹜齐飞"。笔法秀丽，文人气息浓厚。'},
+    ]
+  },
+  f3: {
+    num:3, label:'Ceramics', cnLabel:'陶瓷与货币',
+    descEN:'The <strong>Ceramics</strong> gallery spans from Neolithic pottery to Qing famille-rose, with all Five Great Kilns represented. The adjoining Currency Hall and Third Special Exhibition complete the floor.',
+    descCN:'<strong>陶瓷馆</strong>从新石器彩陶到清代粉彩，五大名窑齐聚。毗邻的货币馆与第三特展厅完善本层格局。',
+    halls:[
+      {id:'f3a',name:'Ceramics',cn:'陶瓷馆',en:'Gallery of Chinese Ceramics',floor:3,tags:['Ceramics','Masterworks','Must-See'],blurbEN:'A complete timeline of Chinese ceramics. All five great kilns — Ru, Guan, Ge, Jun, Ding — are represented. The Tang Yue-ware celadon bowl and Qing Yongzheng famille-rose vase are highlights.',blurbCN:'中国陶瓷史完整时间线。汝官哥钧定五大名窑齐聚。唐越窑青釉碗与清雍正粉彩蝠桃纹瓶为亮点。'},
+      {id:'f3b',name:'Ceramics Theme Gallery',cn:'陶瓷专题馆',en:'Thematic Ceramics Hall',floor:3,tags:['Ceramics'],blurbEN:'Thematic deep dives — export porcelain, kiln technology, and cross-cultural exchange along the Maritime Silk Road.',blurbCN:'专题深挖——外销瓷、窑炉技术与海上丝绸之路上的跨文化交融。'},
+      {id:'f3c',name:'Currency',cn:'货币馆',en:'Gallery of Chinese Coins',floor:3,tags:['Ancient Civilization'],blurbEN:'From cowrie shells and spade coins to round cash with square holes — the evolution of Chinese currency over 3,000 years.',blurbCN:'从贝币、布币到方孔圆钱——三千年中国货币演进史。'},
+      {id:'f3d',name:'Third Special Exhibition Hall',cn:'第三特展厅',en:'Special Exhibition Hall III',floor:3,tags:['Special Exhibition'],blurbEN:'Rotating special exhibitions. Check the current schedule at the information desk.',blurbCN:'轮换特展。请至服务台查询当期展览详情。'},
+      {id:'f3e',name:'Ancient Civilizations Exploration',cn:'古代文明探索宫',en:'Ancient Civilizations Hall',floor:3,tags:['Experience'],blurbEN:'Interactive archaeology and immersive ancient civilization experiences. Ideal for families and curious minds of all ages.',blurbCN:'互动考古与沉浸式古代文明探索体验。适合家庭及各年龄层好奇者。'},
+    ],
+    timeline:[
+      {name:'Ceramics 陶瓷',cn:'陶瓷馆',sub:'Song celadon → Yuan blue-and-white → Qing porcelain',time:'10:00'},
+      {name:'Ceramics Theme 陶瓷专题',cn:'陶瓷专题馆',sub:'Export porcelain · Kiln tech',time:'10:40'},
+      {name:'Currency 货币',cn:'货币馆',sub:'Cowrie → spade → round coin',time:'11:05'},
+      {name:'Ancient Civilizations 古代文明探索宫',cn:'古代文明探索宫',sub:'Interactive experience',time:'11:30'},
+      {name:'Third Special Exhibition 第三特展',cn:'第三特展厅',sub:'Rotating exhibition',time:'11:50'},
+    ],
+    stops:[
+      {id:'s3a',name:'Yue Ware Celadon Bowl 越窑青釉海棠式碗',hall:'Ceramics',floor:3,blurbEN:'Tang dynasty celadon with a distinctive crabapple-shaped rim. One of the finest examples of Yue-ware from the Tang golden age.',blurbCN:'唐代越窑青釉瓷碗，海棠形口沿，为唐代越窑黄金时代最佳范例之一。'},
+      {id:'s3b',name:'Famille-Rose Vase 粉彩蝠桃纹瓶',hall:'Ceramics',floor:3,blurbEN:'Qing Yongzheng period famille-rose porcelain with bat-and-peach motif — symbols of fortune and longevity.',blurbCN:'清雍正粉彩瓷，蝠（福）桃（寿）纹饰——吉祥与长寿的象征。'},
+      {id:'s3c',name:'Ancient Coins Collection 古钱币陈列',hall:'Currency',floor:3,blurbEN:'Spanning 3,000 years: cowrie shells, knife coins, spade coins, and round cash with square holes.',blurbCN:'纵贯三千年的古钱币之旅：贝币、刀币、布币到方孔圆钱。'},
+    ]
+  },
+  f4: {
+    num:4, label:'Jiangnan', cnLabel:'江南与考古',
+    descEN:'A floor of craftsmanship and discovery: <strong>Jiangnan Crafts</strong>, the transparent <strong>Conservation Studio</strong>, <strong>Archaeology Hall</strong>, and the rooftop garden offering views across Pudong. Zhao Puchu Art Gallery and the Creative Workshop round out the experience.',
+    descCN:'工艺与发现之层：<strong>江南造物</strong>、透明的<strong>文保修复馆</strong>、<strong>考古馆</strong>及可俯瞰浦东的屋顶花园。赵朴初艺术馆与创意工坊为本层画上句号。',
+    halls:[
+      {id:'f4a',name:'Jiangnan Crafts',cn:'江南造物馆',en:'Gallery of Jiangnan Crafts',floor:4,tags:['Masterworks','Must-See'],blurbEN:'Jiangnan textile weaving, embroidery, lacquerware, and furniture — the refined material culture of the Yangtze Delta.',blurbCN:'江南织造、刺绣、漆器与家具——长江三角洲精致物质文化的全景。'},
+      {id:'f4b',name:'Conservation Studio',cn:'文保修复馆',en:'Cultural Heritage Conservation',floor:4,tags:['Experience'],blurbEN:'Watch conservators at work through transparent walls. A rare behind-the-scenes look at how artifacts are preserved.',blurbCN:'透过透明墙壁观看文物修复师现场操作。难得的幕后文物保护视角。'},
+      {id:'f4c',name:'Archaeology',cn:'考古馆',en:'Gallery of Archaeology',floor:4,tags:['Archaeology','Ancient Civilization'],blurbEN:'From fieldwork to artifact — the story of Shanghai archaeology, from Songze culture to Guangfulin to the modern metropolis.',blurbCN:'从田野到器物——上海考古的故事，从崧泽文化到广富林再到现代大都市。'},
+      {id:'f4d',name:'Ancient Civilizations Exploration',cn:'古代文明探索宫',en:'Ancient Civilizations Hall',floor:4,tags:['Experience'],blurbEN:'Interactive archaeology and immersive ancient civilization experiences for all ages.',blurbCN:'沉浸式互动考古与古代文明探索体验，适合各年龄层。'},
+      {id:'f4e',name:'Zhao Puchu Art Gallery',cn:'赵朴初艺术馆',en:'Zhao Puchu Art Gallery',floor:4,tags:['Calligraphy','Historical Figures'],blurbEN:'Works and manuscripts of Zhao Puchu (1907-2000), renowned Buddhist scholar, calligrapher, and social activist.',blurbCN:'赵朴初（1907-2000）书法作品与手稿——著名佛教学者、书法家、社会活动家。'},
+      {id:'f4f',name:'Creative Workshop',cn:'创意工坊',en:'Creative Workshop',floor:4,tags:['Experience'],blurbEN:'Hands-on craft experiences and educational activities. Check the daily schedule at the information desk.',blurbCN:'手作体验与教育活动空间。每日安排请至服务台查询。'},
+      {id:'f4g',name:'Rooftop Garden',cn:'屋顶花园',en:'Rooftop Garden',floor:4,tags:['Photo Spot','Experience'],blurbEN:'An urban oasis with views across Pudong. Perfect for a reflective pause at the end of your museum journey.',blurbCN:'俯瞰浦东的城市绿洲。博物馆之旅结束之际沉思片刻的完美场所。'},
+    ],
+    timeline:[
+      {name:'Jiangnan Crafts 江南造物',cn:'江南造物馆',sub:'Textile · Lacquer · Furniture',time:'10:00'},
+      {name:'Conservation Studio 文保修复',cn:'文保修复馆',sub:'Live conservation work',time:'10:40'},
+      {name:'Archaeology 考古',cn:'考古馆',sub:'Songze → Guangfulin → Shanghai',time:'11:00'},
+      {name:'Zhao Puchu Gallery 赵朴初艺术馆',cn:'赵朴初艺术馆',sub:'Calligraphy & manuscripts',time:'11:30'},
+      {name:'Ancient Civilizations 古代文明探索宫',cn:'古代文明探索宫',sub:'Interactive experience',time:'11:50'},
+      {name:'Creative Workshop 创意工坊',cn:'创意工坊',sub:'Hands-on crafts',time:'12:10'},
+      {name:'Rooftop Garden 屋顶花园',cn:'屋顶花园',sub:'Reflect · End of tour',time:'12:25'},
+    ],
+    stops:[
+      {id:'s4a',name:'Jiangnan Textile Collection 江南织造陈列',hall:'Jiangnan Crafts',floor:4,blurbEN:'Exquisite silk brocades, embroideries, and dyed fabrics from the Jiangnan region spanning Ming to Republic eras.',blurbCN:'横跨明代至民国的江南精美织锦、刺绣与染织物。'},
+      {id:'s4b',name:'Live Conservation 现场修复展示',hall:'Conservation Studio',floor:4,blurbEN:'Observe museum conservators restoring ceramics, paintings, and textiles in real-time behind glass walls.',blurbCN:'透过玻璃墙实时观看修复师对陶瓷、书画与织物的修复过程。'},
+      {id:'s4c',name:'Zhao Puchu Calligraphy 赵朴初书法',hall:'Zhao Puchu Art Gallery',floor:4,blurbEN:'Gentle and scholarly — Zhao Puchu\'s calligraphy reflects his Buddhist humanism and lifelong commitment to social welfare.',blurbCN:'温润雅正——赵朴初的书法反映其佛教人文精神与毕生投身社会公益的情怀。'},
+    ]
+  }
+};
+
+/* ---- State ---- */
+let currentFloor = 'f1';
+let currentSub = 'halls';
+let lang = 'en';
+
+/* ---- Helpers ---- */
+function T(en,cn){ return lang==='cn'&&cn ? cn : en; }
+function getParam(name){ return new URLSearchParams(location.search).get(name); }
+
+/* ---- Render ---- */
+function renderFloor(floorId){
+  const f = FLOORS[floorId]; if(!f) return;
+  const prefix = floorId;
+
+  // Hall cards
+  const hallsEl = document.getElementById(prefix+'-cards');
+  if(hallsEl) hallsEl.innerHTML = f.halls.map(h => `
+    <div class="card">
+      <div class="cn">${T(h.name, h.cn)}</div>
+      <div class="ch">${h.en}${h.floor?'<span class="floor-tag">'+h.floor+'F</span>':''}</div>
+      <div class="ctags">${h.tags.map(t=>`<span class="ctag">${t}</span>`).join('')}</div>
+      <div class="cblurb">${T(h.blurbEN, h.blurbCN)}</div>
+    </div>
+  `).join('');
+
+  // Timeline
+  const timelineEl = document.getElementById(prefix+'-timeline');
+  if(timelineEl) timelineEl.innerHTML = f.timeline.map((t,i) => `
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">${t.time}</div>
+      <div class="tl-name">${i+1}. ${T(t.name, t.cn)}</div>
+      <div class="tl-sub">${t.sub}</div>
+    </div>
+  `).join('');
+
+  // Stops
+  const stopsEl = document.getElementById(prefix+'-stops');
+  if(stopsEl && f.stops) stopsEl.innerHTML = f.stops.map(s => `
+    <div class="card">
+      <div class="cn">${T(s.name, s.name.includes(' ')?s.name.split(' ').slice(1).join(' '):s.name)}</div>
+      <div class="ch">${s.hall}<span class="floor-tag">${s.floor}F</span></div>
+      <div class="cblurb">${T(s.blurbEN, s.blurbCN)}</div>
+    </div>
+  `).join('');
+}
+
+function renderAll(){
+  // All halls cards
+  const allHallsEl = document.getElementById('all-cards');
+  let allCards = '';
+  ['f1','f2','f3','f4'].forEach(floorId => {
+    const f = FLOORS[floorId];
+    f.halls.forEach(h => {
+      allCards += `
+        <div class="card" style="border-left-color:${floorId==='f1'?'#4a6c6f':floorId==='f2'?'#6b4a5a':floorId==='f3'?'#4a6c6f':floorId==='f4'?'#7a8266':''}">
+          <div class="cn">${T(h.name, h.cn)}</div>
+          <div class="ch">${h.en}<span class="floor-tag">${h.floor}F</span></div>
+          <div class="ctags">${h.tags.map(t=>`<span class="ctag">${t}</span>`).join('')}</div>
+          <div class="cblurb">${T(h.blurbEN, h.blurbCN)}</div>
+        </div>`;
+    });
+  });
+  if(allHallsEl) allHallsEl.innerHTML = allCards;
+
+  // Route
+  const allTimelineEl = document.getElementById('all-timeline');
+  if(allTimelineEl) allTimelineEl.innerHTML = `
+    <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">10:00</div><div class="tl-name">1F · Bronze & Sculpture 青铜与雕塑</div><div class="tl-sub">Ancient Bronzes → Sculpture → First Special Exhibition → Museum Shop ~90′</div></div>
+    <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">11:30</div><div class="tl-name">2F · Jade & Painting 玉器与书画</div><div class="tl-sub">Jade → Seals → Calligraphy → Painting → Shanghai School → Digital → Second Special Exhibition ~120′</div></div>
+    <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">13:30</div><div class="tl-name">3F · Ceramics 陶瓷与货币</div><div class="tl-sub">Ceramics → Ceramics Theme → Currency → Third Special Exhibition → Ancient Civilizations ~90′</div></div>
+    <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">15:00</div><div class="tl-name">4F · Jiangnan 江南与考古</div><div class="tl-sub">Jiangnan Crafts → Conservation Studio → Archaeology → Zhao Puchu → Ancient Civilizations → Creative Workshop → Rooftop ~90′</div></div>
+    <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">16:30</div><div class="tl-name">End of Tour</div><div class="tl-sub">TOTAL ~390 minutes · 23 halls · 4 floors</div></div>
+  `;
+}
+
+/* ---- Tab Navigation ---- */
+document.querySelectorAll('.floor-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const floor = tab.dataset.floor;
+    document.querySelectorAll('.floor-tab').forEach(t => t.classList.remove('on'));
+    tab.classList.add('on');
+    document.querySelectorAll('.pane').forEach(p => p.classList.remove('on'));
+    document.querySelector(`[data-pane="${floor}"]`).classList.add('on');
+    currentFloor = floor;
+
+    // Reset sub-tabs
+    document.querySelectorAll(`.inner-tabs[data-pane-group="${floor}"] .inner-tab`).forEach((st,i) => {
+      st.classList.toggle('on', i===0);
+    });
+    document.querySelectorAll(`[data-sub-pane^="${floor}-"]`).forEach((sp,i) => {
+      sp.classList.toggle('on', i===0);
+    });
+    currentSub = 'halls';
+
+    renderFloor(floor);
+  });
+});
+
+document.querySelectorAll('.inner-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const group = tab.closest('.inner-tabs').dataset.paneGroup;
+    const sub = tab.dataset.sub;
+    tab.closest('.inner-tabs').querySelectorAll('.inner-tab').forEach(t => t.classList.remove('on'));
+    tab.classList.add('on');
+    document.querySelectorAll(`[data-sub-pane^="${group}-"]`).forEach(p => p.classList.remove('on'));
+    document.querySelector(`[data-sub-pane="${group}-${sub}"]`).classList.add('on');
+    currentSub = sub;
+  });
+});
+
+/* ---- Language ---- */
+document.querySelectorAll('.lang-switch button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    lang = btn.dataset.lang;
+    document.querySelectorAll('.lang-switch button').forEach(b => b.classList.toggle('on', b.dataset.lang===lang));
+    document.body.setAttribute('data-lang', lang);
+    document.getElementById('backLabel').textContent = lang==='cn'?'返回路线规划' : 'Back to Planner';
+    document.querySelector('.brand small').textContent = lang==='cn'?'楼层导览 · 浦东东馆' : 'FLOOR GUIDE · EAST PUDONG';
+    document.querySelectorAll('.floor-tab').forEach(t => {
+      const fid = t.dataset.floor;
+      if(fid==='all'){ t.textContent = lang==='cn'?'全部楼层':'All Floors'; return; }
+      const f = FLOORS[fid];
+      t.textContent = f.num+'F · '+T(f.label, f.cnLabel);
+    });
+    if(currentFloor==='all') renderAll(); else renderFloor(currentFloor);
+  });
+});
+
+/* ---- Back link with lang ---- */
+document.getElementById('backLink').href = '../planner.html?lang='+lang+'&skip=1';
+
+/* ---- Actions ---- */
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+document.getElementById('scrollTopBtn').addEventListener('click', () => {
+  document.querySelector('.view').scrollTo({top:0,behavior:'smooth'});
+});
+
+/* ---- Init ---- */
+(function init(){
+  const paramLang = getParam('lang');
+  if(paramLang === 'cn'){
+    lang = 'cn';
+    document.body.setAttribute('data-lang','cn');
+    document.querySelectorAll('.lang-switch button').forEach(b => b.classList.toggle('on', b.dataset.lang==='cn'));
+    document.getElementById('backLabel').textContent = '返回路线规划';
+    document.querySelector('.brand small').textContent = '楼层导览 · 浦东东馆';
+    document.querySelectorAll('.floor-tab').forEach(t => {
+      const fid = t.dataset.floor;
+      if(fid==='all'){ t.textContent = '全部楼层'; return; }
+      const f = FLOORS[fid];
+      t.textContent = f.num+'F · '+T(f.label, f.cnLabel);
+    });
+  }
+  document.getElementById('backLink').href = '../planner.html?lang='+lang+'&skip=1';
+
+  renderFloor('f1');
+  renderAll();
+})();
+</script>
+
+</body>
+</html>
