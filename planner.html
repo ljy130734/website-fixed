@@ -153,6 +153,23 @@
   .live-badge.quiet{ background:#e8f5e9; color:#2e7d32; }
   .live-badge.closed{ background:#f5f5f5; color:#999; }
   .crowd-badge-card{ opacity:0; pointer-events:none; }
+
+  /* ── Gugong Map (embedded) ── */
+  .gm-area{ cursor:pointer; transition:opacity .18s; }
+  .gm-area:hover{ opacity:.7; }
+  .gm-lbl{ font-family:'Space Grotesk',sans-serif; font-weight:500; text-anchor:middle; pointer-events:none; }
+  .gm-lbl-sub{ font-family:'Space Grotesk',sans-serif; font-weight:400; text-anchor:middle; pointer-events:none; }
+  .gm-road{ font-family:var(--font-mono); font-size:8px; fill:#a09a94; text-anchor:middle; letter-spacing:.05em; }
+  .gm-compass{ font-family:var(--font-mono); font-size:9px; fill:#a09a94; text-anchor:middle; letter-spacing:.1em; }
+  .gm-axis{ stroke:rgba(58,54,50,.22); stroke-width:1; stroke-dasharray:3,5; opacity:.6; }
+  .gm-card{ position:fixed; z-index:1000; background:#fff; border:1px solid rgba(0,0,0,.1); padding:1rem 1.2rem; pointer-events:none; opacity:0; transition:opacity .15s ease; max-width:300px; box-shadow:0 16px 48px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.06); }
+  .gm-card.show{ opacity:1; }
+  .gm-card .gc-name{ font-family:'Boska',serif; font-weight:700; font-size:1.05rem; color:#3a3632; margin-bottom:.1rem; }
+  .gm-card .gc-en{ font-family:var(--font-mono); font-size:.58rem; letter-spacing:.08em; color:#a09a94; text-transform:uppercase; margin-bottom:.6rem; }
+  .gm-card .gc-desc{ font-family:'Boska',serif; font-size:.85rem; color:#6b6560; line-height:1.55; margin-bottom:.5rem; }
+  .gm-card .gc-meta{ display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; }
+  .gm-card .gc-tag{ font-family:var(--font-mono); font-size:.56rem; letter-spacing:.06em; text-transform:uppercase; padding:.2rem .5rem; border:1px solid rgba(58,54,50,.22); color:#6b6560; }
+  .gm-card .gc-time{ font-family:var(--font-mono); font-size:.58rem; color:#a09a94; letter-spacing:.04em; }
 </style>
 </head>
 <body>
@@ -209,7 +226,7 @@
       <div class="tab" data-pane="cards">Stop Details</div>
     </div>
     <div class="view">
-      <div class="pane on" id="pane-map"><div id="mapWrap"><div class="empty">Adjust preferences to generate your route</div></div><div class="map-tooltip" id="mapTooltip"></div></div>
+      <div class="pane on" id="pane-map"><div id="mapWrap"><div class="empty">Adjust preferences to generate your route</div></div><div class="map-tooltip" id="mapTooltip"></div><div class="gm-card" id="gmCard"></div></div>
       <div class="pane" id="pane-timeline"><div class="timeline" id="timeline"><div class="empty">—</div></div></div>
       <div class="pane" id="pane-cards"><div class="cards" id="cards"><div class="empty">—</div></div></div>
     </div>
@@ -761,17 +778,103 @@ function initMapTooltip() {
   });
 }
 
+/* Gugong exhibit positions mapped to gugong-map SVG (760x1060) */
+const GG_POS = {
+  gg1:{x:380,y:800}, gg2:{x:380,y:722}, gg3:{x:380,y:662}, gg4:{x:380,y:547},
+  gg5:{x:380,y:493}, gg6:{x:380,y:432}, gg7:{x:380,y:185}, gg8:{x:145,y:800},
+  gg9:{x:615,y:800}, gg10:{x:153,y:310}, gg11:{x:165,y:567}, gg12:{x:615,y:350},
+  gg13:{x:163,y:460}, gg14:{x:163,y:440}, gg15:{x:598,y:490}, gg16:{x:615,y:200},
+  gg17:{x:600,y:82}
+};
+const GG_ENTRANCE = {x:380, y:962};
+const GG_EXIT = {x:380, y:72};
+
+function gugongMapSvg(route){
+  const f1='#f7f5f2', f2='#edeae6', f3='#e2ded9', f4='#d5d0ca', ln='rgba(58,54,50,.10)', ld='rgba(58,54,50,.22)', fg='#3a3632', fs='#6b6560', fm='#a09a94';
+  // Route overlay
+  const pts = [GG_ENTRANCE, ...route.map(s=>GG_POS[s.id]||{x:s.x,y:s.y})];
+  const linePts = pts.map(p=>`${p.x},${p.y}`).join(' ');
+  const stops = route.map(s=>{ const p=GG_POS[s.id]||{x:s.x,y:s.y}; return `<circle class="stop-circle" cx="${p.x}" cy="${p.y}" r="14"><title>${__T(s.name,CN_MAP[s.name]||s.name)}</title></circle><text class="stop-num" x="${p.x}" y="${p.y}">${s.order}</text>`; }).join('');
+  return `<svg viewBox="0 0 760 1060" role="img">
+  <rect x="20" y="20" width="720" height="1020" rx="3" fill="${f1}" stroke="${ld}" stroke-width="1"/>
+  <rect x="40" y="40" width="680" height="980" rx="2" fill="#fff" stroke="${fm}" stroke-width="1.5"/>
+  <rect x="50" y="50" width="660" height="960" fill="${f1}"/>
+  <line x1="380" y1="60" x2="380" y2="1000" class="gm-axis"/>
+  <g class="gm-area" data-name="午门" data-en="Meridian Gate" data-desc="故宫正门，唯一入口。大型特展举办地。" data-tag="入口"><rect x="290" y="940" width="180" height="45" rx="2" fill="${f4}" stroke="${ld}" stroke-width="1"/><text x="380" y="967" class="gm-lbl" font-size="12" fill="${fg}">午门 · 入口</text></g>
+  <g class="gm-area" data-name="神武门" data-en="Gate of Divine Prowess" data-desc="故宫北门，主要出口。" data-tag="出口"><rect x="310" y="55" width="140" height="35" rx="2" fill="${f4}" stroke="${ld}" stroke-width="1"/><text x="380" y="77" class="gm-lbl" font-size="11" fill="${fg}">神武门 · 出口</text></g>
+  <g class="gm-area" data-name="东华门" data-en="East Glorious Gate" data-desc="故宫东门，可由此出。" data-tag="出口"><rect x="692" y="565" width="22" height="70" rx="2" fill="${f3}" stroke="${ld}" stroke-width="1"/><text x="703" y="605" class="gm-lbl" font-size="8" fill="${fs}" writing-mode="tb">东华门</text></g>
+  <g class="gm-area" data-name="西华门" data-en="West Glorious Gate" data-desc="故宫西门（不对外开放）。" data-tag="不开放"><rect x="46" y="565" width="22" height="70" rx="2" fill="${f2}" stroke="${ln}" stroke-width="1"/><text x="57" y="605" class="gm-lbl" font-size="8" fill="${fm}" writing-mode="tb">西华门</text></g>
+  <rect x="215" y="878" width="330" height="45" fill="none" stroke="${ld}" stroke-width="1" stroke-dasharray="3,3"/><text x="380" y="905" class="gm-road">太和门广场 · 金水桥</text>
+  <g class="gm-area" data-name="太和殿" data-en="Hall of Supreme Harmony" data-desc="紫禁城最大宫殿，明清皇帝举行大典之所。中国现存最大木结构古建筑。" data-tag="必游 · 原状陈列" data-time="15 min"><rect x="260" y="755" width="240" height="90" rx="2" fill="${f3}" stroke="${ld}" stroke-width="1.5"/><text x="380" y="795" class="gm-lbl" font-size="15" fill="${fg}" style="font-family:Boska,serif;font-weight:700">太和殿</text><text x="380" y="815" class="gm-lbl-sub" font-size="8" fill="${fm}">Hall of Supreme Harmony</text></g>
+  <g class="gm-area" data-name="中和殿" data-en="Hall of Central Harmony" data-desc="皇帝大典前休息之所，方形攒尖顶。" data-tag="原状陈列" data-time="5 min"><rect x="330" y="705" width="100" height="35" rx="2" fill="${f2}" stroke="${ld}" stroke-width="1"/><text x="380" y="727" class="gm-lbl" font-size="10" fill="${fs}">中和殿</text></g>
+  <g class="gm-area" data-name="保和殿" data-en="Hall of Preserving Harmony" data-desc="清代殿试场所，殿后有最大石雕云龙陛石。" data-tag="必游 · 原状陈列" data-time="10 min"><rect x="280" y="635" width="200" height="55" rx="2" fill="${f3}" stroke="${ld}" stroke-width="1.5"/><text x="380" y="663" class="gm-lbl" font-size="13" fill="${fg}" style="font-family:Boska,serif;font-weight:700">保和殿</text><text x="380" y="680" class="gm-lbl-sub" font-size="8" fill="${fm}">云龙陛石</text></g>
+  <rect x="315" y="602" width="130" height="20" fill="none" stroke="${ld}" stroke-width="1" stroke-dasharray="3,3"/><text x="380" y="616" class="gm-road">乾清门</text>
+  <g class="gm-area" data-name="乾清宫" data-en="Palace of Heavenly Purity" data-desc="明代至清初皇帝寝宫，正大光明匾额，秘密立储之处。" data-tag="必游 · 原状陈列" data-time="15 min"><rect x="290" y="515" width="180" height="65" rx="2" fill="${f3}" stroke="${ld}" stroke-width="1.5"/><text x="380" y="548" class="gm-lbl" font-size="13" fill="${fg}" style="font-family:Boska,serif;font-weight:700">乾清宫</text><text x="380" y="566" class="gm-lbl-sub" font-size="8" fill="${fm}">正大光明匾</text></g>
+  <g class="gm-area" data-name="交泰殿" data-en="Hall of Union" data-desc="存放皇帝二十五宝玺之处。" data-tag="原状陈列" data-time="3 min"><rect x="340" y="480" width="80" height="26" rx="2" fill="${f2}" stroke="${ld}" stroke-width="1"/><text x="380" y="498" class="gm-lbl" font-size="9" fill="${fs}">交泰殿</text></g>
+  <g class="gm-area" data-name="坤宁宫" data-en="Palace of Earthly Tranquility" data-desc="明代皇后寝宫，清代改为萨满教祭祀场所及帝后大婚洞房。" data-tag="必游 · 原状陈列" data-time="10 min"><rect x="300" y="405" width="160" height="55" rx="2" fill="${f3}" stroke="${ld}" stroke-width="1.5"/><text x="380" y="432" class="gm-lbl" font-size="13" fill="${fg}" style="font-family:Boska,serif;font-weight:700">坤宁宫</text><text x="380" y="449" class="gm-lbl-sub" font-size="8" fill="${fm}">帝后大婚洞房</text></g>
+  <g class="gm-area" data-name="御花园" data-en="Imperial Garden" data-desc="紫禁城内唯一花园，明代始建，古柏参天，亭台楼阁，堆秀山。" data-tag="必游 · 园林" data-time="15 min"><rect x="280" y="130" width="200" height="110" rx="2" fill="${f2}" stroke="${ld}" stroke-width="1.5"/><text x="380" y="182" class="gm-lbl" font-size="14" fill="${fg}" style="font-family:Boska,serif;font-weight:700">御花园</text><text x="380" y="200" class="gm-lbl-sub" font-size="8" fill="${fm}">Imperial Garden</text><circle cx="305" cy="155" r="5" fill="none" stroke="${ld}" stroke-width="1"/><circle cx="455" cy="155" r="5" fill="none" stroke="${ld}" stroke-width="1"/></g>
+  <g class="gm-area" data-name="文华殿（书画馆）" data-en="Hall of Literary Glory" data-desc="故宫书画常设展馆，清明上河图、千里江山图曾在此展出。" data-tag="必游 · 展馆" data-time="20 min"><rect x="540" y="765" width="150" height="70" rx="2" fill="${f3}" stroke="${ld}" stroke-width="1.5"/><text x="615" y="797" class="gm-lbl" font-size="11" fill="${fg}" style="font-family:Boska,serif;font-weight:700">文华殿 · 书画</text><text x="615" y="815" class="gm-lbl-sub" font-size="8" fill="${fm}">Painting &amp; Calligraphy</text></g>
+  <g class="gm-area" data-name="东六宫" data-en="East Six Palaces" data-desc="景仁宫、承乾宫、钟粹宫等，后妃生活区。延禧宫（未完工水晶宫）。" data-tag="后宫区" data-time="15 min"><rect x="520" y="425" width="155" height="130" rx="2" fill="${f2}" stroke="${ld}" stroke-width="1"/><text x="598" y="488" class="gm-lbl" font-size="12" fill="${fs}" style="font-family:Boska,serif;font-weight:700">东六宫</text><text x="598" y="506" class="gm-lbl-sub" font-size="8" fill="${fm}">East Six Palaces</text></g>
+  <g class="gm-area" data-name="钟表馆（奉先殿）" data-en="Clock Gallery" data-desc="展出清宫收藏的中外精美钟表。" data-tag="必游 · +¥10" data-time="20 min"><rect x="540" y="315" width="150" height="70" rx="2" fill="${f3}" stroke="${ld}" stroke-width="1.5"/><text x="615" y="347" class="gm-lbl" font-size="11" fill="${fg}" style="font-family:Boska,serif;font-weight:700">钟表馆</text><text x="615" y="365" class="gm-lbl-sub" font-size="8" fill="${fm}">Clock Gallery · +¥10</text></g>
+  <g class="gm-area" data-name="宁寿宫区（珍宝馆）" data-en="Ningshou Palace / Treasure Gallery" data-desc="乾隆太上皇宫殿区：皇极殿、珍妃井、九龙壁。展出清代宫廷珍宝。" data-tag="必游 · +¥10" data-time="30 min"><rect x="540" y="130" width="150" height="150" rx="2" fill="${f3}" stroke="${ld}" stroke-width="1.5"/><text x="615" y="195" class="gm-lbl" font-size="12" fill="${fg}" style="font-family:Boska,serif;font-weight:700">宁寿宫区</text><text x="615" y="215" class="gm-lbl-sub" font-size="9" fill="${fs}">珍宝馆 · 九龙壁</text><text x="615" y="232" class="gm-lbl-sub" font-size="8" fill="${fm}">+¥10</text></g>
+  <g class="gm-area" data-name="武备馆（箭亭）" data-en="Arms Gallery" data-desc="展示清代武备：弓箭、刀剑、甲胄。" data-tag="展馆" data-time="10 min"><rect x="540" y="605" width="110" height="45" rx="2" fill="${f2}" stroke="${ld}" stroke-width="1"/><text x="595" y="625" class="gm-lbl" font-size="10" fill="${fs}">武备馆</text><text x="595" y="640" class="gm-lbl-sub" font-size="7" fill="${fm}">箭亭</text></g>
+  <g class="gm-area" data-name="武英殿（陶瓷馆）" data-en="Hall of Martial Valor" data-desc="故宫陶瓷常设展馆，400余件精品。" data-tag="必游 · 展馆" data-time="20 min"><rect x="70" y="765" width="150" height="70" rx="2" fill="${f3}" stroke="${ld}" stroke-width="1.5"/><text x="145" y="797" class="gm-lbl" font-size="11" fill="${fg}" style="font-family:Boska,serif;font-weight:700">武英殿 · 陶瓷</text><text x="145" y="815" class="gm-lbl-sub" font-size="8" fill="${fm}">Ceramics Gallery</text></g>
+  <g class="gm-area" data-name="养心殿" data-en="Hall of Mental Cultivation" data-desc="雍正至清末皇帝理政之所，垂帘听政发生地。" data-tag="必游 · 原状陈列" data-time="15 min"><rect x="90" y="535" width="150" height="65" rx="2" fill="${f3}" stroke="${ld}" stroke-width="1.5"/><text x="165" y="567" class="gm-lbl" font-size="12" fill="${fg}" style="font-family:Boska,serif;font-weight:700">养心殿</text><text x="165" y="585" class="gm-lbl-sub" font-size="8" fill="${fm}">垂帘听政 · 皇帝寝宫</text></g>
+  <g class="gm-area" data-name="西六宫" data-en="West Six Palaces" data-desc="储秀宫（慈禧居所）、翊坤宫、长春宫等。" data-tag="后宫区" data-time="15 min"><rect x="85" y="425" width="155" height="85" rx="2" fill="${f2}" stroke="${ld}" stroke-width="1"/><text x="163" y="465" class="gm-lbl" font-size="12" fill="${fs}" style="font-family:Boska,serif;font-weight:700">西六宫</text><text x="163" y="483" class="gm-lbl-sub" font-size="8" fill="${fm}">West Six Palaces</text></g>
+  <g class="gm-area" data-name="雕塑馆（慈宁宫）" data-en="Sculpture Gallery" data-desc="425件雕塑：陶俑、佛像。含秦始皇兵马俑。" data-tag="展馆" data-time="15 min"><rect x="75" y="275" width="155" height="70" rx="2" fill="${f2}" stroke="${ld}" stroke-width="1"/><text x="153" y="308" class="gm-lbl" font-size="11" fill="${fs}" style="font-family:Boska,serif;font-weight:700">慈宁宫 · 雕塑</text><text x="153" y="325" class="gm-lbl-sub" font-size="8" fill="${fm}">Sculpture Gallery</text></g>
+  <g class="gm-area" data-name="青铜器馆" data-en="Bronze Gallery" data-desc="故宫藏15000余件青铜器精品。" data-tag="展馆" data-time="15 min"><rect x="75" y="175" width="140" height="60" rx="2" fill="${f2}" stroke="${ld}" stroke-width="1"/><text x="145" y="203" class="gm-lbl" font-size="11" fill="${fs}" style="font-family:Boska,serif;font-weight:700">青铜器馆</text><text x="145" y="220" class="gm-lbl-sub" font-size="8" fill="${fm}">Bronze Gallery</text></g>
+  <g class="gm-area" data-name="家具馆（南大库）" data-en="Furniture Gallery" data-desc="明清宫廷家具精品。" data-tag="展馆" data-time="10 min"><rect x="75" y="885" width="130" height="45" rx="2" fill="${f2}" stroke="${ld}" stroke-width="1"/><text x="140" y="905" class="gm-lbl" font-size="10" fill="${fs}">家具馆</text><text x="140" y="920" class="gm-lbl-sub" font-size="7" fill="${fm}">南大库</text></g>
+  <g class="gm-area" data-name="古建馆（角楼·城墙）" data-en="Architecture Gallery" data-desc="可登城墙俯瞰全景。" data-tag="展馆 · 登城墙" data-time="20 min"><rect x="605" y="885" width="100" height="45" rx="2" fill="${f2}" stroke="${ld}" stroke-width="1"/><text x="655" y="905" class="gm-lbl" font-size="10" fill="${fs}">古建馆</text><text x="655" y="920" class="gm-lbl-sub" font-size="7" fill="${fm}">角楼 · 城墙</text></g>
+  <g class="gm-area" data-name="戏曲馆（畅音阁）" data-en="Opera Gallery" data-desc="畅音阁大戏台，展示清代宫廷戏曲文化。" data-tag="展馆" data-time="10 min"><rect x="540" y="60" width="120" height="45" rx="2" fill="${f2}" stroke="${ld}" stroke-width="1"/><text x="600" y="80" class="gm-lbl" font-size="10" fill="${fs}">戏曲馆</text><text x="600" y="95" class="gm-lbl-sub" font-size="7" fill="${fm}">畅音阁</text></g>
+  <g class="gm-area" data-name="冰窖餐厅" data-en="Ice Cellar Restaurant" data-desc="故宫内用餐处。" data-tag="餐饮"><rect x="75" y="360" width="95" height="30" rx="2" fill="none" stroke="${ld}" stroke-width="1" stroke-dasharray="3,3"/><text x="123" y="380" class="gm-lbl" font-size="9" fill="${fm}">冰窖餐厅</text></g>
+  <text x="380" y="1045" class="gm-compass" fill="${fs}">S · 南 · 入口</text>
+  <text x="380" y="48" class="gm-compass">N · 北 · 出口</text>
+  <text x="32" y="530" class="gm-compass" transform="rotate(-90,32,530)">W · 西</text>
+  <text x="743" y="530" class="gm-compass" transform="rotate(90,743,530)">E · 东</text>
+  <polyline class="route-line" points="${linePts}"></polyline>
+  ${stops}
+  </svg>`;
+}
+
+function initGmCard(){
+  const card = document.getElementById('gmCard');
+  const wrap = document.getElementById('mapWrap');
+  if(!card||!wrap) return;
+  wrap.querySelectorAll('.gm-area').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{
+      const {name,en,desc,tag,time}=el.dataset;
+      let h=`<div class="gc-name">${name}</div>`;
+      if(en) h+=`<div class="gc-en">${en}</div>`;
+      if(desc) h+=`<div class="gc-desc">${desc}</div>`;
+      h+=`<div class="gc-meta">`;
+      if(tag) h+=`<span class="gc-tag">${tag}</span>`;
+      if(time) h+=`<span class="gc-time">${time}</span>`;
+      h+=`</div>`;
+      card.innerHTML=h; card.classList.add('show');
+    });
+    el.addEventListener('mousemove',e=>{
+      card.style.left=Math.min(e.clientX+16,window.innerWidth-320)+'px';
+      card.style.top=Math.min(e.clientY-12,window.innerHeight-200)+'px';
+    });
+    el.addEventListener('mouseleave',()=>{ card.classList.remove('show'); });
+  });
+}
+
 function renderMap(museum, route){
+  if(museum.id==='gugong'){
+    document.getElementById('mapWrap').innerHTML = gugongMapSvg(route);
+    initGmCard();
+    initMapTooltip();
+    return;
+  }
   const pts = [museum.entrance, ...route]; const linePts = pts.map(p => `${p.x},${p.y}`).join(' ');
   const halls = museum.halls.map(h => {
-    // Split long names: "F2 欧洲绘画 1250-1800" → two lines
     const name = __T(h.name, CN_MAP[h.name]||h.name);
     let tspans = '';
     const parts = name.match(/^(F\d+ )?(.+)$/);
     if (parts && parts[1]) {
       tspans = `<tspan x="${h.x+8}" dy="0">${parts[1]}</tspan><tspan x="${h.x+8}" dy="11">${parts[2].length > 22 ? parts[2].slice(0,20)+'…' : parts[2]}</tspan>`;
     } else {
-      // long plain name → wrap
       const trimmed = name.length > 24 ? name.slice(0,22)+'…' : name;
       tspans = `<tspan x="${h.x+8}" dy="0">${trimmed}</tspan>`;
     }
@@ -779,8 +882,8 @@ function renderMap(museum, route){
   }).join('');
   const stops = route.map(s => `<circle class="stop-circle" cx="${s.x}" cy="${s.y}" r="14"><title>${__T(s.name, CN_MAP[s.name]||s.name)}</title></circle><text class="stop-num" x="${s.x}" y="${s.y}">${s.order}</text>`).join('');
   const exits = (museum.exits||[]).map(e => `<rect x="${e.x-6}" y="${e.y-8}" width="12" height="16" class="entrance-marker"></rect><text class="entrance-label" x="${e.x+18}" y="${e.y+4}">${__T(e.label, CN_MAP[e.label]||e.label)}</text>`).join('');
-  const mapBox = museum.id==='gugong'?'0 0 1000 900':museum.id==='shmuseum'?'0 0 820 680':'0 0 980 680';
-  document.getElementById('mapWrap').innerHTML = `<svg viewBox="${mapBox}" role="img"><title>${__T(museum.name+" Floor Map",CN_MAP["Floor Map"]||"楼层地图")}</title>${halls}${museum.id==='gugong'?'<rect class="palace-wall" x="30" y="20" width="940" height="840" rx="4"></rect>':''}<polyline class="route-line" points="${linePts}"></polyline><text class="entrance-label" x="${museum.entrance.x+18}" y="${museum.entrance.y+4}">${__T("Entrance",CN_MAP["Entrance"]||"入口")}</text><rect x="${museum.entrance.x-8}" y="${museum.entrance.y-10}" width="16" height="20" class="entrance-marker"></rect>${exits}${stops}${museum.id==='shmuseum'?'<text class="hall-label" x="15" y="210" style="font-size:10px;fill:var(--accent)">F1 → F2 ↑</text><text class="hall-label" x="15" y="300" style="font-size:10px;fill:var(--accent)">F3 → F4 ↑</text>':''}</svg>`;
+  const mapBox = museum.id==='shmuseum'?'0 0 820 680':'0 0 980 680';
+  document.getElementById('mapWrap').innerHTML = `<svg viewBox="${mapBox}" role="img"><title>${__T(museum.name+" Floor Map",CN_MAP["Floor Map"]||"楼层地图")}</title>${halls}<polyline class="route-line" points="${linePts}"></polyline><text class="entrance-label" x="${museum.entrance.x+18}" y="${museum.entrance.y+4}">${__T("Entrance",CN_MAP["Entrance"]||"入口")}</text><rect x="${museum.entrance.x-8}" y="${museum.entrance.y-10}" width="16" height="20" class="entrance-marker"></rect>${exits}${stops}${museum.id==='shmuseum'?'<text class="hall-label" x="15" y="210" style="font-size:10px;fill:var(--accent)">F1 → F2 ↑</text><text class="hall-label" x="15" y="300" style="font-size:10px;fill:var(--accent)">F3 → F4 ↑</text>':''}</svg>`;
 }
 
 function fmtTime(min){ const h = 10 + Math.floor(min / 60); const m = min % 60; return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'); }
