@@ -152,7 +152,7 @@
   .live-badge.moderate{ background:#fff8e1; color:#f57f17; }
   .live-badge.quiet{ background:#e8f5e9; color:#2e7d32; }
   .live-badge.closed{ background:#f5f5f5; color:#999; }
-  .crowd-badge-card{ position:absolute; top:0.7rem; left:1.1rem; }
+  .crowd-badge-card{ opacity:0; pointer-events:none; }
 </style>
 </head>
 <body>
@@ -579,6 +579,50 @@ const CN_MAP = {};
     ['All','全部'],
     ['floors','层'],
     ['m','米'],
+    ['The grandest hall in the Forbidden City, where Ming and Qing emperors held their most important ceremonies. The gilded throne and coiled dragon columns are breathtaking. Allow extra time to absorb the sheer scale of imperial power.','紫禁城内最宏伟的殿堂，明清皇帝举行最重要典礼之地。鎏金龙椅与盘龙金柱令人屏息。请预留充足时间感受皇权的恢宏气度。'],
+    ['A smaller square hall where the emperor would rest and rehearse protocol before major ceremonies in the Hall of Supreme Harmony.','一座较小的方形殿堂，皇帝在此休息并排练太和殿大典的礼仪流程。'],
+    ['The site of the Qing Dynasty Palace Examination — the final and most prestigious stage of the imperial civil service exam. The marble ramp behind it, carved with cloud dragons, is the largest stone carving in the Forbidden City at 250 tons.','清代殿试之地——科举最高一级考试。殿后云龙石雕是紫禁城内最大的石雕，重达250吨。'],
+    ['The emperors private quarters until the Yongzheng reign. The plaque reading "Upright and Honorable" marks where succession edicts were hidden after Yongzheng established the secret succession system.','雍正之前皇帝的私人寝宫。"正大光明"匾额后即雍正创制密建储位制时藏放传位诏书之处。'],
+    ['Houses the twenty-five imperial seals of the Qing dynasty, symbolizing supreme authority. Features both a Western chiming clock and a traditional Chinese clepsydra water clock.','存放清代二十五方御玺，象征至高皇权。殿内同时陈设西洋报时钟和传统铜壶滴漏。'],
+    ['Originally the empresss residence, later converted for shamanistic rituals. The eastern chamber served as the imperial wedding suite, complete with red double-happiness characters and dragon-phoenix bridal bed.','原为皇后寝宫，后改为萨满祭祀场所。东暖阁为皇帝大婚洞房，仍保留双喜字与龙凤婚床。'],
+    ['The final stop on the central axis. Ancient cypress trees, sculptural rockeries, and pavilions like the Pavilion of Myriad Springs create a serene royal garden. Perfect place to slow your pace.','中轴线终点。千年古柏、叠石假山与万春亭等亭台楼阁构成一方静谧皇家园林。放慢脚步的好去处。'],
+    ['A rotating exhibition of masterpieces spanning Tang to Qing dynasties. The hall itself was once an imperial office; Regent Dorgon worked from here in the early Qing.','跨越唐至清代的轮展书画杰作。该殿曾为内阁办公之所，清初摄政王多尔衮在此处理朝政。'],
+    ['A chronological journey through Chinese ceramic history, from Neolithic painted pottery to Qing famille-rose porcelain. A complete ceramic textbook in physical form.','按时间顺序展示中国陶瓷史——从新石器时代彩陶到清代粉彩。一部立体陶瓷教科书。'],
+    ['Former residence of the empress dowager, now a sculpture gallery featuring Buddhist statuary, pottery figurines, and stone carvings. The courtyard is free to enter and often beautifully quiet.','原为太后居所，现辟为雕塑馆，展陈佛像、陶俑与石刻。院落免费进入，常静好如初。'],
+    ['From the Yongzheng reign onward, this was the emperors office and bedchamber. The famed "Studio of Three Rarities" is named for three prized calligraphy works by Wang Xizhi, Wang Xianzhi, and Wang Xun. Empress Dowager Cixi ruled from behind a screen here.','自雍正起成为皇帝办公与寝居之所。著名的"三希堂"因收藏王羲之、王献之、王珣三件稀世法帖得名。慈禧太后曾在此垂帘听政。'],
+    ['Originally the imperial ancestral temple, now housing a dazzling collection of clocks from Europe and China. Daily demonstrations at 11:00 and 14:00 bring the automata to life.','原为奉先殿，现陈列来自欧洲与中国的精美钟表。每日11:00和14:00的自动人偶演示让钟表"活"起来。'],
+    ['The residence of Empress Dowager Cixi when she entered the palace. She gave birth to the Tongzhi Emperor here. The lavish interior offers a window into late-Qing court life.','慈禧太后入宫时居于此殿，在此生下了同治皇帝。奢华的内饰是晚清宫廷生活的一面窗。'],
+    ['One of the Six Western Palaces. Its name means "assist the Empress." Home to imperial consorts including Wanlis favorite Zheng and Yongzhengs Consort Nian.','西六宫之一，意为"辅佐皇后"。曾为万历宠妃郑氏及雍正年妃居所。'],
+    ['Famous from the drama "Story of Yanxi Palace." In the late Qing, a Western-style "Crystal Palace" was planned here but construction halted when funds ran out, leaving a fascinating steel skeleton — the Forbidden Citys unfinished modern building.','因电视剧《延禧攻略》广为人知。晚清曾计划在此建造西式"水晶宫"，因筹款中断停工，留下令人惊叹的钢架——紫禁城中未完成的现代建筑。'],
+    ['Requires a separate 10 yuan ticket — absolutely worth it. Crown jewels include the Eternal Solid Gold Cup, the Jade Mountain of Yu the Great, and the Tianhuang Three-Link Seal. The Nine-Dragon glazed screen wall is a ceramic masterpiece.','需另购10元门票——绝对值得。镇馆之宝：金瓯永固杯、大禹治水图玉山、田黄三链章。九龙壁更是陶瓷工艺巅峰之作。'],
+    ['The largest imperial theater in the Forbidden City, with three stacked stages for "heaven," "earth," and "underworld" performances. Empress Dowager Cixi was a devoted opera fan.','紫禁城内最大的戏楼，三层戏台分别代表"天""地""水"三层表演空间。慈禧太后是铁杆戏迷。'],
+    ['An authentic Egyptian temple from 15 BCE, relocated in its entirety from the Upper Nile. Natural light floods the vast glass-walled gallery, reflecting off a shallow reflecting pool. The Mets most iconic space.','一座公元前15年的古埃及神庙，完整迁自尼罗河上游。自然光洒满玻璃帷幕展厅，映照浅浅的水池——大都会最具标志性的空间。'],
+    ['A soaring two-story courtyard filled with marble sculptures from the ancient Mediterranean world. The architecture of the space itself — columns, skylights, arched passageways — is as beautiful as the art within it.','高大的两层庭院，布满来自古地中海世界的大理石雕塑。空间本身的建筑——廊柱、天窗、拱廊——与其中的艺术品一样美。'],
+    ['The Met holds one of the worlds finest collections of arms and armor. Henry VIIIs elaborately engraved field armor is the star of the collection.','大都会拥有世界顶级武器与盔甲收藏。亨利八世精雕战甲是馆藏明星。'],
+    ['Emanuel Leutzes monumental 1851 canvas (3.78m x 6.48m) depicting the decisive moment of the American Revolutionary War. One of the most recognizable paintings in the United States.','伊曼纽尔·洛伊茨1851年巨幅画作（3.78m×6.48m），描绘美国独立战争的关键时刻。全美辨识度最高的画作之一。'],
+    ['One of only about 35 surviving Vermeers worldwide. Circa 1662. The quiet interior light, the subtle reflection on the pearl earring — a quintessential Vermeer study of stillness.','全球仅存约35幅维米尔真迹之一。约1662年。静谧的室内光线、珍珠耳环的微妙反光——维米尔静默之美的典范之作。'],
+    ['A late self-portrait by Rembrandt at the height of his powers. Thick, confident brushwork and a penetrating gaze. The Met holds an exceptional Rembrandt collection.','伦勃朗艺术巅峰期的晚年自画像。厚重自信的笔触、洞穿人心的目光。大都会拥有顶级的伦勃朗收藏。'],
+    ['From Monets 1899 Giverny series. The Japanese footbridge arches over a dream of water lilies and shimmering reflections. The Mets Impressionist collection is among the finest in the world.','莫奈1899年吉维尼系列作品。日式拱桥横跨睡莲梦境与水光潋滟。大都会的印象派收藏堪称世界顶级。'],
+    ['Painted in Paris, 1887. On the reverse side of the canvas is another painting, "The Potato Peeler." Van Gogh builds his own image with short, urgent brushstrokes and vibrant color.','1887年绘于巴黎。画布反面还有另一幅作品《削土豆的人》。梵高以急促短促的笔触和炽烈色彩构建自我形象。'],
+    ['The only sculpture Degas exhibited in his lifetime. Cast in bronze and dressed in an actual ballet tutu and satin hair ribbon, it broke every boundary between sculpture and reality.','德加生前唯一展出的雕塑。青铜铸造，身着真正的芭蕾舞裙与缎带发饰——打破了雕塑与现实的边界。'],
+    ['John Singer Sargent, 1883-84. Originally titled "Madame Pierre Gautreau." The slipped shoulder strap caused a scandal when first exhibited. Today, it is celebrated as an American portrait masterpiece.','约翰·辛格·萨金特，1883–84年。最初名为《皮埃尔·戈特罗夫人》。滑落的肩带在首次展出时引发轩然大波。如今被誉为美国肖像画杰作。'],
+    ['Jackson Pollocks 1950 drip-painting at its peak. Stand in front of it and feel the energy of every flung skein of paint. An abstract expressionist landmark.','杰克逊·波洛克1950年滴画巅峰之作。站在画前感受每一条抛洒颜料的能量——抽象表现主义的里程碑。'],
+    ['A Ming Dynasty-style scholar garden modeled after the Master of the Nets Garden in Suzhou, built by 26 craftsmen from China using traditional techniques. Lake Tai rocks, nanmu wood, and couplets — Jiangnan in New York.','仿苏州网师园建造的明代文人庭院，26位中国工匠用传统工艺搭建。太湖石、楠木、楹联——纽约的江南。'],
+    ['A breathtaking suite of galleries opened in 2011, spanning 1,300 years of Islamic art from Spain to South Asia, including the fully reconstructed Damascus Room.','2011年开放的惊艳展厅群，纵跨1300年伊斯兰艺术，覆盖西班牙至南亚。包括完整复原的大马士革房间。'],
+    ['Louis Comfort Tiffanys monumental glass mosaic columns and dome from his Long Island estate. The leaded glass shifts color with the natural light — an Art Nouveau tour de force.','路易斯·康福特·蒂芙尼长岛庄园的巨型玻璃马赛克柱与穹顶。铅彩玻璃随自然光变换色彩——新艺术运动的炫技之作。'],
+    ['A monumental Western Zhou ritual vessel and one of the museums crown jewels. The 290-character inscription cast inside records the lineage and enfeoffment of a noble named Ke. A national treasure.','西周重器，上海博物馆镇馆之宝之一。器内壁290字铭文记述贵族"克"的世系与封赏。国家宝藏。'],
+    ['A standard measuring vessel commissioned by the reformer Shang Yang in 344 BCE. The side bears an edict by Qin Shi Huang standardizing weights and measures across his unified empire.','商鞅于公元前344年督造的标准量器。器侧刻有秦统一度量衡的诏书。'],
+    ['An early Spring & Autumn bronze basin with three-dimensional relief animals — fish, frogs, and water birds — that rotate freely when water is poured in. Extraordinary design and craftsmanship.','春秋早期青铜盘，盘内立体浮雕的鱼、蛙、水鸟在注水后可自由旋转。令人叹服的设计与工艺。'],
+    ['A representative example of Northern Dynasty Buddhist sculpture, with the broad-sleeved Han sinicized style and a serenely tranquil expression. The museum holds an outstanding collection of Buddhist statuary.','北朝佛教造像的典范之作，呈现汉化后的褒衣博带风格，表情宁静祥和。馆藏佛教造像极为丰富。'],
+    ['A wild-cursive masterpiece by the Tang dynasty monk Huaisu. Fewer than 20 characters — "The bitter bamboo shoots and tea are exceptionally fine, please send some over" — yet they rush across the paper like a storm.','唐代僧侣怀素的狂草杰作。不到20字——"苦笋及茗异常佳，乃可径来"——却如疾风骤雨般驰骋纸上。'],
+    ['An exquisite Tang dynasty tracing copy believed to be the closest surviving version of Wang Xizhis original hand. The running-cursive script floats with effortless grace.','唐代精摹本，被认为最接近王羲之真迹。行草书体飘逸灵动、游刃有余。'],
+    ['One of Tang Bohus most celebrated landscapes, drawing on the verse "a solitary duck flies with the setting clouds." Elegant brushwork and profound literati atmosphere.','唐伯虎最负盛名的山水画之一，取意"落霞与孤鹜齐飞"。笔法秀丽，文人气息浓厚。'],
+    ['A long ink scroll by the Ming-dynasty loyalist-turned-monk Zhu Da (Bada Shanren). The fish and birds roll their eyes heavenward in quiet fury — a coded lament for the fallen dynasty.','明代遗民画僧朱耷（八大山人）的水墨长卷。鱼鸟白眼向天，满纸孤愤——对故国的无言悲悼。'],
+    ['A ritual jade cong from the Liangzhu culture, approximately 5,000 years old, carved with divine-humanoid and animal-mask motifs. The peak of Neolithic jade carving.','良渚文化玉琮，距今约5000年，雕刻神人兽面纹。新石器时代玉雕的巅峰之作。'],
+    ['A comprehensive display from Song celadon through Yuan blue-and-white to Ming and Qing imperial wares. All five great kilns — Ru, Guan, Ge, Jun, and Ding — are represented.','从宋代青瓷到元青花、明清官窑的完整陈列。汝、官、哥、钧、定五大名窑齐聚一堂。'],
+    ['Zhao Puchu (1907-2000) was a renowned Buddhist scholar, calligrapher, and social activist. The gallery holds a large collection of his calligraphic works and manuscripts — gentle and scholarly, like the man himself.','赵朴初（1907–2000），著名佛教学者、书法家、社会活动家。本馆藏有其大量书法作品与手稿——温润雅正，如人一般。'],
+    ['A systematic journey from Neolithic Shanghai through the Qing dynasty, telling the story of "where Shanghai comes from." From the Songze culture to Guangfulin to the treaty-port metropolis.','从新石器时代的上海到清代，系统讲述"上海从哪里来"的故事。从崧泽文化到广富林，再到开埠后的国际大都市。'],
+
     ['min','分钟'],
   ];
   pairs.forEach(p => { CN_MAP[p[0]] = p[1]; });
@@ -664,7 +708,7 @@ function renderMuseums(){
   const wrap = document.getElementById('museumList');
   const lang = __LANG();
   wrap.innerHTML = MUSEUMS.map(m => `<button class="museum-btn ${m.id===state.museumId?'active':''}" data-mid="${m.id}"><div class="mn">${lang==='cn'&&CN_MAP[m.name]?CN_MAP[m.name]:m.name}</div><div class="md">${lang==='cn'&&CN_MAP[m.desc]?CN_MAP[m.desc]:m.desc}</div></button>`).join('');
-  wrap.querySelectorAll('.museum-btn').forEach(b => b.onclick = () => { state.museumId = b.dataset.mid; renderMuseums(); regenerate(); });
+  wrap.querySelectorAll('.museum-btn').forEach(b => b.onclick = () => { if(b.dataset.mid==='shmuseum'){ window.location.href='guide/guide.html?lang='+__LANG(); return; } state.museumId = b.dataset.mid; renderMuseums(); regenerate(); });
 }
 function renderInterests(){
   const wrap = document.getElementById('interestChips');
@@ -794,6 +838,17 @@ const PLANNER_I18N = {
 {
   const params = new URLSearchParams(location.search);
   const lang = params.get('lang') || localStorage.getItem('cp_lang') || 'en';
+
+  // Read ?m= param FIRST — before any rendering
+  var museParam = params.get('m');
+  if (museParam === 'shmuseum') {
+    // Shanghai Museum → redirect to floor guide immediately
+    location.replace('guide/guide.html?lang=' + lang);
+  }
+  if (museParam && MUSEUMS.find(function(m){ return m.id === museParam; })) {
+    state.museumId = museParam;
+  }
+
   document.body.setAttribute('data-lang', lang);
   applyPlannerLang(lang);
 }
