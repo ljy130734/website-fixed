@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntelliRoute · Gallery of Art</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Noto+Serif+SC:wght@400;600&family=Ma+Shan+Zheng&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Telma 字体（项目名 IntelliRoute 专用 · Medium 字重） */
+        @font-face {
+            font-family: 'Telma';
+            src: url('fonts/Telma_Complete/Telma_Complete/Fonts/OTF/Telma-Medium.otf') format('opentype');
+            font-weight: 500;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --bg-deep: #0a0a0a;
+            --gold: #c9a962;
+            --gold-dim: #8a7a4a;
+            --cream: #f5f0e8;
+            --transition-main: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Noto Serif SC', 'Playfair Display', Georgia, serif;
+            background: var(--bg-deep);
+            color: var(--cream);
+            position: relative;
+        }
+
+        /* 背景纹理 */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse at 20% 50%, rgba(201, 169, 98, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(201, 169, 98, 0.02) 0%, transparent 40%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 顶部标题 - 简约风格 */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 2rem 3rem;
+            z-index: 10;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            background: linear-gradient(to bottom, rgba(10,10,10,0.8) 0%, transparent 100%);
+        }
+
+        .gallery-title {
+            font-family: 'Telma', 'Playfair Display', Georgia, serif;
+            font-size: 2rem;
+            font-weight: 500;
+            letter-spacing: 0.12em;
+            color: var(--gold);
+            opacity: 0.85;
+        }
+
+        /* 主展示区 - 全屏布局 */
+        .gallery-main {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        /* 左右点击区域 */
+        .nav-zone {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 25%;
+            cursor: pointer;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+        }
+
+        .nav-zone:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .nav-zone.prev {
+            left: 0;
+            justify-content: flex-start;
+            padding-left: 2rem;
+        }
+
+        .nav-zone.next {
+            right: 0;
+            justify-content: flex-end;
+            padding-right: 2rem;
+        }
+
+        .nav-zone svg {
+            width: 2.5rem;
+            height: 2.5rem;
+            stroke: var(--gold);
+            fill: none;
+            stroke-width: 1;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .nav-zone:hover svg {
+            opacity: 0.6;
+        }
+
+        .nav-zone.prev:hover svg {
+            transform: translateX(-5px);
+        }
+
+        .nav-zone.next:hover svg {
+            transform: translateX(5px);
+        }
+
+        /* 图片容器 - 全屏撑满 */
+        .artwork-container {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 22%;
+            transform: none;
+        }
+
+        /* 图片 - 最大化显示 */
+        .artwork-image {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            opacity: 0;
+            transition: opacity var(--transition-main);
+            box-shadow: 0 0 80px rgba(0, 0, 0, 0.5);
+        }
+
+        .artwork-image.active {
+            opacity: 1;
+        }
+
+        .artwork-image.instant {
+            transition: opacity 0.12s ease;
+        }
+
+        /* 画作信息 - 底部居中简约显示 */
+        .artwork-info {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            z-index: 10;
+        }
+
+        .artwork-info.visible {
+            opacity: 1;
+        }
+
+        .artwork-name {
+            font-family: 'Ma Shan Zheng', 'KaiTi', cursive, serif;
+            font-size: 1.5rem;
+            color: var(--cream);
+            letter-spacing: 0.2em;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+        }
+
+        /* 开场遮罩 */
+        .intro-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-deep);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1s ease;
+        }
+
+        .intro-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .intro-text {
+            font-family: 'Telma', 'Playfair Display', Georgia, serif;
+            font-size: clamp(3.5rem, 13vw, 15rem);
+            font-weight: 500;
+            color: var(--gold);
+            letter-spacing: 0.04em;
+            line-height: 1.05;
+            animation: pulse 2s ease-in-out infinite;
+            text-shadow: 0 0 80px rgba(201, 169, 98, 0.5);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .header { padding: 1.5rem; }
+            .gallery-title { font-size: 1.3rem; letter-spacing: 0.08em; }
+            .artwork-container { padding: 3rem 8%; }
+            .nav-zone { width: 18%; }
+            .nav-zone.prev { padding-left: 1rem; }
+            .nav-zone.next { padding-right: 1rem; }
+            /* 英文长词用视口单位自适应，防窄屏溢出 */
+            .intro-text {
+                font-size: clamp(2.4rem, 11vw, 4.4rem);
+                letter-spacing: 0.02em;
+                max-width: 92vw;
+                text-align: center;
+            }
+            .artwork-name { font-size: 1.05rem; }
+            .artwork-info { bottom: 1.5rem; }
+        }
+
+        @media (max-width: 480px) {
+            .intro-text { font-size: clamp(2rem, 12vw, 3.2rem); }
+            .artwork-container { padding: 2rem 6%; }
+            .nav-zone { width: 15%; }
+        }
+        /* ===== 叙事模式：照片左移 + 悬浮 + 右侧字幕卡片堆叠 ===== */
+        .gallery-main.split-mode .nav-zone { display: none; }
+
+        .gallery-main.split-mode .artwork-container {
+            /* 纯 transform 平移，避免 inset/width 的 auto 跳变卡顿 */
+            transform: translateX(-24vw) scale(0.92);
+            transform-origin: center center;
+            transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .gallery-main.split-mode .artwork-image {
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.65);
+            animation: floatY 6s ease-in-out infinite;
+            transition: opacity var(--transition-main), box-shadow 0.9s ease;
+        }
+
+        @keyframes floatY {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-14px); }
+        }
+
+        /* 悬浮照片下方的画作名 */
+        .artwork-caption {
+            position: absolute;
+            bottom: 2.5rem;
+            left: 5rem;
+            font-family: 'Ma Shan Zheng', 'KaiTi', cursive, serif;
+            font-size: 1.1rem;
+            letter-spacing: 0.2em;
+            color: var(--gold);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+            z-index: 6;
+        }
+        .artwork-caption.show { opacity: 0.85; transform: translateY(0); }
+
+        /* 右侧字幕面板 */
+        .narrative-panel {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            width: 48%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 4rem 5rem 4rem 1.5rem;
+            opacity: 0;
+            transform: translateX(40px);
+            transition: opacity 0.9s ease, transform 0.9s ease;
+            pointer-events: none;
+            z-index: 9;
+        }
+        .gallery-main.split-mode .narrative-panel {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+            transition-delay: 0.45s;
+        }
+
+        .cards-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .line-card {
+            position: relative;
+            background: rgba(18, 16, 12, 0.55);
+            border: 1px solid rgba(201, 169, 98, 0.35);
+            border-left: 3px solid var(--gold);
+            border-radius: 5px;
+            padding: 1.6rem 1.9rem;
+            color: var(--cream);
+            font-family: 'Playfair Display', Georgia, serif;
+            font-style: italic;
+            font-size: 1.5rem;
+            line-height: 1.6;
+            letter-spacing: 0.02em;
+            box-shadow: 0 12px 34px rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(2px);
+            opacity: 0;
+            transform: translateY(55px) scale(0.95);
+            transition: opacity 0.75s cubic-bezier(0.2, 0.8, 0.2, 1),
+                        transform 0.75s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .line-card.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        /* 堆叠感：每张卡片底部一道浅金线，像一叠卡片 */
+        .line-card::after {
+            content: '';
+            position: absolute;
+            left: 12px;
+            right: 12px;
+            bottom: -9px;
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(201,169,98,0.25), transparent);
+        }
+        .line-card:last-child::after { display: none; }
+
+        /* 移动端：上下分栏 */
+        @media (max-width: 768px) {
+            .gallery-main.split-mode .artwork-container {
+                transform: translateY(-32vh) scale(0.9);
+                padding: 1rem;
+            }
+            .gallery-main.split-mode .narrative-panel {
+                width: 100%;
+                top: 34%; bottom: 0; right: 0; left: 0;
+                padding: 1.2rem 1.4rem 2rem;
+                justify-content: flex-start;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .cards-stack { gap: 1.1rem; }
+            .line-card { font-size: 1.05rem; padding: 1rem 1.1rem; line-height: 1.55; }
+            .artwork-caption { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 开场遮罩 -->
+    <div class="intro-overlay" id="introOverlay">
+        <div class="intro-text">IntelliRoute</div>
+    </div>
+
+    <!-- 顶部标题 -->
+    <header class="header">
+        <div class="gallery-title">IntelliRoute</div>
+    </header>
+
+    <!-- 主展示区 -->
+    <main class="gallery-main">
+        <div class="artwork-container">
+            <img class="artwork-image" id="mainImage" src="" alt="">
+            <div class="artwork-caption" id="artworkCaption"></div>
+        </div>
+
+        <!-- 左切换区域 -->
+        <div class="nav-zone prev" id="prevZone">
+            <svg viewBox="0 0 24 24">
+                <path d="M15 18l-6-6 6-6"/>
+            </svg>
+        </div>
+
+        <!-- 右切换区域 -->
+        <div class="nav-zone next" id="nextZone">
+            <svg viewBox="0 0 24 24">
+                <path d="M9 18l6-6-6-6"/>
+            </svg>
+        </div>
+
+        <!-- 叙事模式：右侧逐张浮出的字幕卡片 -->
+        <div class="narrative-panel">
+            <div class="cards-stack">
+                <div class="line-card">So many treasures, more than eyes can hold —</div>
+                <div class="line-card">So many stories, more than can be told.</div>
+                <div class="line-card">We're here to guide you, tailor every stop,<br>The perfect path, the view that tops the top.</div>
+                <div class="line-card">Come step inside — the best is yours to see,<br>A journey made for you, completely free… wait, no — completely you.</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 画作信息 -->
+    <div class="artwork-info" id="artworkInfo">
+        <div class="artwork-name" id="artworkName"></div>
+    </div>
+
+    <script>
+        // 图片数据
+        const artworks = [
+            { src: 'images/卡里布托房间.jpg', name: '卡里布托房间' },
+            { src: 'images/欧洲版印画.jpg', name: '欧洲版印画' },
+            { src: 'images/欧洲风景画.jpg', name: '欧洲风景画' },
+            { src: 'images/欧洲画.jpg', name: '欧洲画' },
+            { src: 'images/欧洲天鹅画.jpg', name: '欧洲天鹅画' },
+            { src: 'images/中国芦苇画.jpg', name: '中国芦苇画' },
+            { src: 'images/中国鸟群画.jpg', name: '中国鸟群画' },
+            { src: 'images/中国象雕画.jpg', name: '中国象雕画' },
+            { src: 'images/中国玉器画.jpg', name: '中国玉器画' },
+            { src: 'images/玉器_01_汉代玉饰_大都会博物馆.jpg', name: '汉代玉饰 · 大都会博物馆' },
+            { src: 'images/玉器_02_清代道教人物玉杯_克利夫兰博物馆.jpg', name: '清代道教人物玉杯 · 克利夫兰博物馆' },
+            { src: 'images/玉器_03_东北坐形玉饰_克利夫兰博物馆.jpg', name: '东北坐形玉饰 · 克利夫兰博物馆' },
+            { src: 'images/玉器_04_战国祭祀玉璧_克利夫兰博物馆.jpg', name: '战国祭祀玉璧 · 克利夫兰博物馆' },
+            { src: 'images/瓷器_02_江西青瓷瓶_克利夫兰博物馆.jpg', name: '江西青瓷瓶 · 克利夫兰博物馆' },
+            { src: 'images/瓷器_05_十四世纪早期云鹤纹碗_大都会博物馆.jpg', name: '十四世纪早期云鹤纹碗 · 大都会博物馆' },
+            { src: 'images/瓷器_06_风雨山水画瓷_维基媒体.jpg', name: '风雨山水画瓷 · 维基媒体' },
+            { src: 'images/瓷器_07_上海博物馆汝窑青瓷_上海博物馆.jpg', name: '上海博物馆汝窑青瓷' },
+            { src: 'images/瓷器_09_酒壶或茶壶_大都会博物馆.jpg', name: '酒壶或茶壶 · 大都会博物馆' },
+            { src: 'images/画_01_中国南方云山图_克利夫兰博物馆.jpg', name: '中国南方云山图 · 克利夫兰博物馆' },
+            { src: 'images/画_02_Robert S Duncanson Amer_Vale of Kashmir_克利夫兰.jpg', name: 'Robert S. Duncanson · Vale of Kashmir' },
+            { src: 'images/画_02_清代郭忠恕笔意山水_克利夫兰博物馆.jpg', name: '清代郭忠恕笔意山水 · 克利夫兰博物馆' },
+            { src: 'images/画_03_William Merritt Chase Am_Portrait of Dora Wheeler_克利夫兰.jpg', name: 'William Merritt Chase · Portrait of Dora Wheeler' },
+            { src: 'images/画_03_书画小壶图_大都会博物馆.jpg', name: '书画小壶图 · 大都会博物馆' },
+            { src: 'images/画_04_茶壶形制图_大都会博物馆.jpg', name: '茶壶形制图 · 大都会博物馆' },
+            { src: 'images/画_06_John Robert Cozens Briti_Italian Landscape_克利夫兰.jpg', name: 'John Robert Cozens · Italian Landscape' },
+            { src: 'images/画_07_Le jardin de lartiste à Giverny_欧洲馆.jpg', name: "Le jardin de l'artiste à Giverny · 欧洲馆" },
+            { src: 'images/画_08_Self-portrait_欧洲馆.jpg', name: 'Self-portrait · 欧洲馆' },
+            { src: 'images/画_09_Woman with a Parasol in a Garden_欧洲馆.jpg', name: 'Woman with a Parasol in a Garden · 欧洲馆' },
+            { src: 'images/画_11_Portret van Paul Cézanne_欧洲馆.jpg', name: 'Portret van Paul Cézanne · 欧洲馆' },
+            { src: 'images/画_12_Nicolas Poussin_Blind Orion Searching for the Risi_大都会.jpg', name: 'Nicolas Poussin · Blind Orion Searching for the Rising Sun' },
+            { src: 'images/画_13_Vittore Carpaccio_The Meditation on the Passion_ca_大都会.jpg', name: 'Vittore Carpaccio · The Meditation on the Passion' },
+            { src: 'images/画_14_Edgar Degas_The Dance Class_1874_大都会.jpg', name: 'Edgar Degas · The Dance Class' },
+            { src: 'images/画_16_Bronzino Agnolo di_Portrait of a Young Man_1530s_大都会.jpg', name: 'Bronzino · Portrait of a Young Man' },
+            { src: 'images/画_17_Adélaïde Labille-Gui_Self-Portrait with Two Pupils_大都会.jpg', name: 'Adélaïde Labille-Guiard · Self-Portrait with Two Pupils' },
+            { src: 'images/画_18_Rosette Bearing the Names and Titles of_大都会.jpg', name: 'Rosette Bearing the Names and Titles' },
+            { src: 'images/雕像_05_Portrait Bust of a Girl_克利夫兰.jpg', name: 'Portrait Bust of a Girl · 克利夫兰' },
+            { src: 'images/雕像_10_Auguste Rodin_欧洲馆.jpg', name: 'Auguste Rodin · 欧洲馆' },
+            { src: 'images/雕像_19_Jean Antoine Houdon_Sabine Houdon 17871836_1788_大都会.jpg', name: 'Jean-Antoine Houdon · Sabine Houdon' },
+            { src: 'images/雕像_20_Seated Male Deity Holding Two Ritual Obj_大都会.jpg', name: 'Seated Male Deity · 大都会博物馆' },
+            { src: 'images/画_15_Edouard Manet_Boating_1874_大都会.jpg', name: 'Édouard Manet · Boating' }
+        ];
+
+        // DOM 元素
+        const mainImage = document.getElementById('mainImage');
+        const artworkInfo = document.getElementById('artworkInfo');
+        const artworkName = document.getElementById('artworkName');
+        const prevZone = document.getElementById('prevZone');
+        const nextZone = document.getElementById('nextZone');
+        const introOverlay = document.getElementById('introOverlay');
+        const galleryMain = document.querySelector('.gallery-main');
+        const artworkCaption = document.getElementById('artworkCaption');
+
+        // 状态
+        let currentIndex = 0;
+        let isSlideshowActive = true;
+        let isInitialized = false;
+        const SLIDE_INTERVAL = 500;
+
+        // 初始化
+        function init() {
+            preloadImages(() => {
+                setTimeout(() => {
+                    introOverlay.classList.add('hidden');
+                    setTimeout(() => {
+                        introOverlay.style.display = 'none';
+                        startSlideshow();
+                    }, 1000);
+                }, 1200);
+
+                isInitialized = true;
+            });
+        }
+
+        // 预加载图片
+        function preloadImages(callback) {
+            let loaded = 0;
+            artworks.forEach(artwork => {
+                const img = new Image();
+                img.onload = img.onerror = () => {
+                    loaded++;
+                    if (loaded === artworks.length) callback();
+                };
+                img.src = artwork.src;
+            });
+        }
+
+        // 快速轮播（前段 500ms，临近结尾加速到一瞬而过）
+        function startSlideshow() {
+            isSlideshowActive = true;
+            const N = artworks.length;
+            updateSlide(0, true);
+
+            let i = 1;
+            const step = () => {
+                if (!isSlideshowActive) return;
+                updateSlide(i, true);
+
+                if (i < N - 1) {
+                    i++;
+                    setTimeout(step, slideInterval(i));
+                } else {
+                    // 最后一张稍作停留，再进入字幕叙事
+                    setTimeout(() => {
+                        if (!isSlideshowActive) return;
+                        enterNarrative();
+                    }, 1500);
+                }
+            };
+
+            setTimeout(step, slideInterval(1));
+        }
+
+        // 动态间隔：第 1→7 张递增加速（最慢→最快），第 7→8 过渡即达最快并恒定到尾
+        function slideInterval(i) {
+            const SLOW = 600;   // 第 1 张最慢
+            const FAST = 80;    // 最快速度（= 上一版终点的最快值）
+            const idx = i - 1;  // 0-based 图片序号
+            if (idx >= 7) return FAST;                    // 第 8 张起恒定最快（一瞬而过）
+            const t = idx / 6;                            // 0..1 跨前 7 张
+            return Math.round(SLOW - (SLOW - FAST) * t);  // 1→7 速度递增
+        }
+
+        // 停止轮播
+        function stopSlideshow() {
+            isSlideshowActive = false;
+            artworkInfo.classList.add('visible');
+            mainImage.classList.remove('instant');
+        }
+
+        // 进入叙事模式：照片左移悬浮 + 右侧字幕卡片逐张堆叠浮出
+        function enterNarrative() {
+            isSlideshowActive = false;
+            artworkInfo.classList.remove('visible');
+            mainImage.classList.remove('instant');
+            galleryMain.classList.add('split-mode');
+            artworkCaption.textContent = artworks[currentIndex].name;
+            artworkCaption.classList.add('show');
+            const cards = document.querySelectorAll('.line-card');
+            cards.forEach((card, i) => {
+                setTimeout(() => card.classList.add('show'), 700 + i * 950);
+            });
+        }
+
+        // 更新幻灯片
+        function updateSlide(index, instant = false) {
+            if (index === currentIndex && !instant) return;
+
+            currentIndex = index;
+            const artwork = artworks[index];
+
+            mainImage.style.opacity = '0';
+            
+            setTimeout(() => {
+                mainImage.src = artwork.src;
+                mainImage.style.opacity = '1';
+            }, instant ? 40 : 120);
+
+            if (instant) {
+                mainImage.classList.add('instant');
+            } else {
+                mainImage.classList.remove('instant');
+            }
+
+            artworkName.textContent = artwork.name;
+        }
+
+        // 跳转
+        function goToSlide(index) {
+            if (index < 0) index = artworks.length - 1;
+            if (index >= artworks.length) index = 0;
+            updateSlide(index, false);
+        }
+
+        // 事件
+        prevZone.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (isSlideshowActive) stopSlideshow();
+            goToSlide(currentIndex - 1);
+        });
+
+        nextZone.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (isSlideshowActive) stopSlideshow();
+            goToSlide(currentIndex + 1);
+        });
+
+        // 键盘
+        document.addEventListener('keydown', (e) => {
+            if (!isInitialized) return;
+            
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                if (isSlideshowActive) stopSlideshow();
+                goToSlide(currentIndex - 1);
+            } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                if (isSlideshowActive) stopSlideshow();
+                goToSlide(currentIndex + 1);
+                e.preventDefault();
+            }
+        });
+
+        // 触摸滑动
+        let touchStartX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            const diff = touchStartX - e.changedTouches[0].screenX;
+            if (Math.abs(diff) > 50) {
+                if (isSlideshowActive) stopSlideshow();
+                goToSlide(currentIndex + (diff > 0 ? 1 : -1));
+            }
+        }, { passive: true });
+
+        // 启动
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
