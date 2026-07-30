@@ -1,0 +1,181 @@
+{
+  "museum": {
+    "name": "上海博物馆（东馆）",
+    "nameEN": "Shanghai Museum East",
+    "shortName": "上博东馆",
+    "location": {
+      "address": "上海市浦东新区世纪大道1952号",
+      "addressEN": "No. 1952 Century Avenue, Pudong New Area, Shanghai",
+      "coordinates": {
+        "lat": 31.2197,
+        "lng": 121.5447
+      }
+    },
+    "totalArea": "113200 sqm (120,000 sqm total floor space)",
+    "galleries": "20 exhibition halls + interactive spaces",
+    "permanentGalleries": 13,
+    "interactiveSpaces": 4,
+    "specialExhibitionHalls": 3,
+    "totalArtifacts": "15,000+ on display",
+    "annualVisitors": "7,020,000+ (2025, both branches combined)",
+    "opened": "2024-02-02 (trial), 2024-12-04 (full opening)",
+    "shortNameEN": "Shanghai Museum East"
+  },
+  "hours": {
+    "lastUpdated": "2026-07-29",
+    "source": "https://www.shanghaimuseum.net/mu/frontend/pg/m/en/service/visit-east",
+    "schedule": [
+      {
+        "day": "Monday",
+        "open": "10:00",
+        "close": "18:00",
+        "isOpen": true
+      },
+      {
+        "day": "Tuesday",
+        "open": null,
+        "close": null,
+        "isOpen": false,
+        "note": "Closed (except national holidays)"
+      },
+      {
+        "day": "Wednesday",
+        "open": "10:00",
+        "close": "18:00",
+        "isOpen": true
+      },
+      {
+        "day": "Thursday",
+        "open": "10:00",
+        "close": "18:00",
+        "isOpen": true
+      },
+      {
+        "day": "Friday",
+        "open": "10:00",
+        "close": "18:00",
+        "isOpen": true
+      },
+      {
+        "day": "Saturday",
+        "open": "10:00",
+        "close": "18:00",
+        "isOpen": true
+      },
+      {
+        "day": "Sunday",
+        "open": "10:00",
+        "close": "18:00",
+        "isOpen": true
+      }
+    ],
+    "lastEntry": "17:00",
+    "holidayNote": "Open on national holidays even if Tuesday"
+  },
+  "admission": {
+    "permanentGalleries": {
+      "price": 0,
+      "note": "Free admission"
+    },
+    "specialExhibitions": {
+      "note": "Some special exhibitions may charge; check official announcements"
+    },
+    "reservation": {
+      "individual": {
+        "required": false,
+        "note": "No reservation needed since Sep 15, 2024. Enter with valid ID."
+      },
+      "groups": {
+        "required": true,
+        "minSize": 20,
+        "advanceDays": "7-14",
+        "phone": "021-20729999 ext.134"
+      }
+    },
+    "priorityAccess": {
+      "note": "Visitors 65+ and disabled visitors get priority via North Gate (1F)"
+    },
+    "interactiveSpaces": {
+      "note": "Curio-City and Digital Gallery still require WeChat reservation"
+    }
+  },
+  "entrance": {
+    "individual": "B1 East Gate (near Dingxiang Road), security check required",
+    "groups": "North Gate (1F, near Century Avenue), reservation required",
+    "metro": [
+      {
+        "line": 2,
+        "station": "Shanghai Science and Technology Museum",
+        "exit": "Exit 8"
+      },
+      {
+        "line": 4,
+        "station": "Pudian Road",
+        "exit": "Exit 2"
+      },
+      {
+        "line": 6,
+        "station": "Pudian Road",
+        "exit": "Exit 1"
+      }
+    ]
+  },
+  "facilities": {
+    "dining": [
+      {
+        "name": "Shop & Cafe",
+        "floor": "1F",
+        "type": "Coffee & snacks"
+      },
+      {
+        "name": "Cafe Staircase",
+        "floor": "2F-3F",
+        "type": "Coffee & snacks"
+      },
+      {
+        "name": "Restaurant",
+        "floor": "4F",
+        "type": "Full dining"
+      },
+      {
+        "name": "Teahouse",
+        "floor": "4F",
+        "type": "Tea"
+      }
+    ],
+    "services": [
+      "Cloakroom (1F)",
+      "Wheelchair rental (free, ID required)",
+      "Stroller rental",
+      "Baby care room",
+      "First aid",
+      "Lost and found",
+      "Drinking water"
+    ],
+    "audioGuide": {
+      "wechat": "Free WeChat audio guide for highlights",
+      "audioDevice": {
+        "chinese": 20,
+        "english": 40,
+        "currency": "RMB"
+      },
+      "smartGuide": {
+        "price": 30,
+        "note": "RMB 30+ per set"
+      },
+      "arGuide": {
+        "price": 60,
+        "note": "AR glasses, RMB 60 per set"
+      }
+    },
+    "guidedTour": {
+      "english": true,
+      "startingPrice": 300,
+      "currency": "RMB"
+    }
+  },
+  "roofGarden": {
+    "floor": "5F",
+    "note": "Temporarily closed during bad weather; visitor traffic control may apply"
+  }
+}

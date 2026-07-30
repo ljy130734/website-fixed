@@ -1,0 +1,378 @@
+{
+  "routes": [
+    {
+      "id": "highlights_2h",
+      "name": "2小时精华速览",
+      "nameEN": "2-Hour Highlights",
+      "duration_min": 120,
+      "description": "快速打卡上博东馆最核心的展厅与镇馆之宝",
+      "stops": [
+        {
+          "order": 1,
+          "galleryId": "G_Bronze",
+          "name": "青铜馆",
+          "duration_min": 30,
+          "notes": "大克鼎、子仲姜盘等镇馆之宝",
+          "nameEN": "Bronze Gallery",
+          "notesEN": "Da Ke Ding, Zi Zhong Jiang Pan and other masterpieces"
+        },
+        {
+          "order": 2,
+          "galleryId": "G_Sculpture",
+          "name": "雕塑馆",
+          "duration_min": 15,
+          "notes": "白石供养菩萨像",
+          "nameEN": "Sculpture Gallery",
+          "notesEN": "White Stone Offering Bodhisattva"
+        },
+        {
+          "order": 3,
+          "galleryId": "G_Calligraphy",
+          "name": "书法馆",
+          "duration_min": 20,
+          "notes": "王羲之、怀素",
+          "nameEN": "Calligraphy Gallery",
+          "notesEN": "Wang Xizhi, Huaisu"
+        },
+        {
+          "order": 4,
+          "galleryId": "G_Painting",
+          "name": "绘画馆",
+          "duration_min": 20,
+          "notes": "高逸图等",
+          "nameEN": "Painting Gallery",
+          "notesEN": "'Gaoyi Tu' and more"
+        },
+        {
+          "order": 5,
+          "galleryId": "G_Special1",
+          "name": "特展厅",
+          "duration_min": 20,
+          "notes": "看当期特展",
+          "nameEN": "Special Exhibition Hall",
+          "notesEN": "See the current special exhibition"
+        }
+      ],
+      "totalWalkingTime_min": 15,
+      "floorChanges": 1,
+      "descriptionEN": "A quick tour of the Shanghai Museum East's core galleries and signature masterpieces."
+    },
+    {
+      "id": "full_day",
+      "name": "全天深度游",
+      "nameEN": "Full Day Deep Dive",
+      "duration_min": 300,
+      "description": "逐层游览全部13个常设展厅+特展+屋顶花园",
+      "stops": [
+        {
+          "order": 1,
+          "galleryId": "G_Bronze",
+          "name": "青铜馆",
+          "duration_min": 35,
+          "nameEN": "Bronze Gallery",
+          "notesEN": ""
+        },
+        {
+          "order": 2,
+          "galleryId": "G_Sculpture",
+          "name": "雕塑馆",
+          "duration_min": 20,
+          "nameEN": "Sculpture Gallery",
+          "notesEN": ""
+        },
+        {
+          "order": 3,
+          "galleryId": "G_Jade",
+          "name": "玉器馆",
+          "duration_min": 20,
+          "nameEN": "Jade Gallery",
+          "notesEN": ""
+        },
+        {
+          "order": 4,
+          "galleryId": "G_Seal",
+          "name": "玺印篆刻馆",
+          "duration_min": 15,
+          "nameEN": "Seal Gallery",
+          "notesEN": ""
+        },
+        {
+          "order": 5,
+          "galleryId": "G_Calligraphy",
+          "name": "书法馆",
+          "duration_min": 25,
+          "nameEN": "Calligraphy Gallery",
+          "notesEN": ""
+        },
+        {
+          "order": 6,
+          "galleryId": "G_Painting",
+          "name": "绘画馆",
+          "duration_min": 25,
+          "nameEN": "Painting Gallery",
+          "notesEN": ""
+        },
+        {
+          "order": 7,
+          "galleryId": "G_Shanghai_Painting",
+          "name": "上海书画馆",
+          "duration_min": 15,
+          "nameEN": "Shanghai Painting & Calligraphy Gallery",
+          "notesEN": ""
+        },
+        {
+          "order": 8,
+          "galleryId": "G_Ceramics",
+          "name": "陶瓷馆",
+          "duration_min": 25,
+          "nameEN": "Ceramics Gallery",
+          "notesEN": ""
+        },
+        {
+          "order": 9,
+          "galleryId": "G_CeraMIX",
+          "name": "CeraMIX馆",
+          "duration_min": 15,
+          "nameEN": "CeraMIX Gallery",
+          "notesEN": ""
+        },
+        {
+          "order": 10,
+          "galleryId": "G_Numismatics",
+          "name": "货币馆",
+          "duration_min": 15,
+          "nameEN": "Numismatics Gallery",
+          "notesEN": ""
+        },
+        {
+          "order": 11,
+          "galleryId": "G_Archaeology",
+          "name": "考古上海馆",
+          "duration_min": 15,
+          "nameEN": "Archaeology Gallery",
+          "notesEN": ""
+        },
+        {
+          "order": 12,
+          "galleryId": "G_Jiangnan",
+          "name": "江南文化馆",
+          "duration_min": 15,
+          "nameEN": "Jiangnan Gallery",
+          "notesEN": ""
+        },
+        {
+          "order": 13,
+          "galleryId": "G_Roof",
+          "name": "屋顶花园",
+          "duration_min": 15,
+          "nameEN": "Roof Garden",
+          "notesEN": ""
+        }
+      ],
+      "totalWalkingTime_min": 30,
+      "floorChanges": 4,
+      "descriptionEN": "A floor-by-floor visit to all 13 permanent galleries plus special exhibitions and the roof garden."
+    },
+    {
+      "id": "treasure_hunt",
+      "name": "镇馆之宝打卡线",
+      "nameEN": "Ten Treasures Hunt",
+      "duration_min": 90,
+      "description": "直奔十大镇馆之宝，适合初次来访",
+      "stops": [
+        {
+          "order": 1,
+          "galleryId": "G_Bronze",
+          "name": "青铜馆：大克鼎+子仲姜盘+商鞅方升+见日之光镜",
+          "duration_min": 30,
+          "notes": "4件镇馆之宝集中于此",
+          "nameEN": "Bronze Gallery: Da Ke Ding + Zi Zhong Jiang Pan + Shang Yang Fang Sheng + Jian Ri Zhi Guang Mirror",
+          "notesEN": "Four masterpieces gathered here"
+        },
+        {
+          "order": 2,
+          "galleryId": "G_Sculpture",
+          "name": "雕塑馆：白石供养菩萨像",
+          "duration_min": 15,
+          "notes": "唐代佛教造像巅峰",
+          "nameEN": "Sculpture Gallery: White Stone Offering Bodhisattva",
+          "notesEN": "The pinnacle of Tang Buddhist sculpture"
+        },
+        {
+          "order": 3,
+          "galleryId": "G_Calligraphy",
+          "name": "书法馆：上虞帖+鸭头丸帖+苦笋帖",
+          "duration_min": 20,
+          "notes": "3件书法国宝",
+          "nameEN": "Calligraphy Gallery: Letter to Shangyu + Duck Head Pill Letter + Bitter Bamboo Shoots Letter",
+          "notesEN": "Three national-treasure calligraphies"
+        },
+        {
+          "order": 4,
+          "galleryId": "G_Painting",
+          "name": "绘画馆：高逸图+雪竹图",
+          "duration_min": 20,
+          "notes": "注意：书画轮换展示，不一定每次都能看到",
+          "nameEN": "Painting Gallery: Gaoyi Tu + Xue Zhu Tu",
+          "notesEN": "Note: works rotate; not all may be on view each visit"
+        }
+      ],
+      "totalWalkingTime_min": 10,
+      "floorChanges": 1,
+      "descriptionEN": "Straight to the Ten Treasures - ideal for first-time visitors."
+    },
+    {
+      "id": "bronze_focus",
+      "name": "青铜器深度游",
+      "nameEN": "Bronze Deep Dive",
+      "duration_min": 60,
+      "description": "深入探索3600年中国青铜文明",
+      "stops": [
+        {
+          "order": 1,
+          "galleryId": "G_Bronze",
+          "name": "青铜馆全览",
+          "duration_min": 45,
+          "notes": "夏→商→西周→春秋→战国→秦汉→唐宋→明清，500余件",
+          "nameEN": "Full Bronze Gallery tour",
+          "notesEN": "Xia -> Shang -> Western Zhou -> Spring-Autumn -> Warring States -> Qin-Han -> Tang-Song -> Ming-Qing, over 500 objects"
+        },
+        {
+          "order": 2,
+          "galleryId": "G_Ceramics",
+          "name": "陶瓷馆（青铜器相关）",
+          "duration_min": 15,
+          "notes": "商周青铜器与早期陶器的关联",
+          "nameEN": "Ceramics Gallery (bronze-related)",
+          "notesEN": "Links between Shang-Zhou bronzes and early pottery"
+        }
+      ],
+      "totalWalkingTime_min": 5,
+      "floorChanges": 1,
+      "descriptionEN": "An in-depth exploration of 3,600 years of Chinese bronze civilization."
+    },
+    {
+      "id": "calligraphy_painting",
+      "name": "书画艺术之旅",
+      "nameEN": "Calligraphy & Painting Journey",
+      "duration_min": 90,
+      "description": "探索上博最引以为豪的书画收藏",
+      "stops": [
+        {
+          "order": 1,
+          "galleryId": "G_Calligraphy",
+          "name": "书法馆",
+          "duration_min": 25,
+          "notes": "王羲之→怀素→历代书法通史",
+          "nameEN": "Calligraphy Gallery",
+          "notesEN": "Wang Xizhi -> Huaisu -> the full history of calligraphy"
+        },
+        {
+          "order": 2,
+          "galleryId": "G_Painting",
+          "name": "绘画馆",
+          "duration_min": 25,
+          "notes": "唐代→宋元→明清绘画通史",
+          "nameEN": "Painting Gallery",
+          "notesEN": "Tang -> Song-Yuan -> Ming-Qing painting history"
+        },
+        {
+          "order": 3,
+          "galleryId": "G_Shanghai_Painting",
+          "name": "上海书画馆",
+          "duration_min": 15,
+          "notes": "海派书画",
+          "nameEN": "Shanghai Painting & Calligraphy Gallery",
+          "notesEN": "Shanghai-school painting and calligraphy"
+        },
+        {
+          "order": 4,
+          "galleryId": "G_Seal",
+          "name": "玺印篆刻馆",
+          "duration_min": 15,
+          "notes": "印章与书画的关联",
+          "nameEN": "Seal Gallery",
+          "notesEN": "The link between seals and painting/calligraphy"
+        },
+        {
+          "order": 5,
+          "galleryId": "G_ZhaoPuchu",
+          "name": "赵朴初书法馆",
+          "duration_min": 10,
+          "notes": "近现代书法",
+          "nameEN": "Calligraphy by Zhao Puchu Gallery",
+          "notesEN": "Modern calligraphy"
+        }
+      ],
+      "totalWalkingTime_min": 5,
+      "floorChanges": 1,
+      "descriptionEN": "Explore the museum's most celebrated painting and calligraphy collections."
+    },
+    {
+      "id": "family_kids",
+      "name": "亲子探索线",
+      "nameEN": "Family & Kids Explorer",
+      "duration_min": 150,
+      "description": "适合带孩子的趣味路线，注重视觉冲击和互动体验",
+      "stops": [
+        {
+          "order": 1,
+          "galleryId": "G_Bronze",
+          "name": "青铜馆",
+          "duration_min": 25,
+          "notes": "巨大的青铜鼎，孩子会觉得震撼",
+          "nameEN": "Bronze Gallery",
+          "notesEN": "Giant bronze tripods that amaze children"
+        },
+        {
+          "order": 2,
+          "galleryId": "G_Sculpture",
+          "name": "雕塑馆",
+          "duration_min": 20,
+          "notes": "各种造型的佛像和动物雕塑",
+          "nameEN": "Sculpture Gallery",
+          "notesEN": "Buddha and animal sculptures in varied forms"
+        },
+        {
+          "order": 3,
+          "galleryId": "G_Jade",
+          "name": "玉器馆",
+          "duration_min": 15,
+          "notes": "精美的玉石工艺",
+          "nameEN": "Jade Gallery",
+          "notesEN": "Exquisite jade craftsmanship"
+        },
+        {
+          "order": 4,
+          "galleryId": "G_Ceramics",
+          "name": "陶瓷馆",
+          "duration_min": 20,
+          "notes": "漂亮的瓷器",
+          "nameEN": "Ceramics Gallery",
+          "notesEN": "Beautiful porcelain"
+        },
+        {
+          "order": 5,
+          "galleryId": "G_Numismatics",
+          "name": "货币馆",
+          "duration_min": 15,
+          "notes": "各种古代钱币，孩子感兴趣",
+          "nameEN": "Numismatics Gallery",
+          "notesEN": "Ancient coins of all kinds that interest children"
+        },
+        {
+          "order": 6,
+          "galleryId": "G_Archaeology",
+          "name": "考古上海馆",
+          "duration_min": 15,
+          "notes": "上海本地的考古发现",
+          "nameEN": "Archaeology Gallery",
+          "notesEN": "Archaeological finds from Shanghai"
+        }
+      ],
+      "totalWalkingTime_min": 20,
+      "floorChanges": 3,
+      "descriptionEN": "A fun, family-friendly route with visual impact and hands-on experiences."
+    }
+  ]
+}

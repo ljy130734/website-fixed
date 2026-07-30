@@ -1,0 +1,278 @@
+{
+  "galleries": [
+    {
+      "id": "G_Bronze",
+      "name": "中国古代青铜馆",
+      "nameEN": "Ancient Chinese Bronze Gallery",
+      "floor": 1,
+      "zone": "West",
+      "area": "~1000 sqm",
+      "description": "海内外体系最完整的古代青铜器阵列，展出500余件，涵盖夏代至清代3600年青铜艺术史",
+      "highlights": [
+        "大克鼎(西周)",
+        "子仲姜盘(春秋)",
+        "商鞅方升(战国)",
+        "见日之光镜(西汉)"
+      ],
+      "walkingTime_min": 30,
+      "mustSee": true,
+      "descriptionEN": "One of the world's most complete displays of ancient Chinese bronzes, with over 500 objects spanning 3,600 years from the Xia to the Qing dynasty.",
+      "highlightsEN": [
+        "Da Ke Ding (Western Zhou)",
+        "Zi Zhong Jiang Pan (Spring and Autumn)",
+        "Shang Yang Fang Sheng (Warring States)",
+        "Jian Ri Zhi Guang Mirror (Western Han)"
+      ]
+    },
+    {
+      "id": "G_Sculpture",
+      "name": "雕塑馆",
+      "nameEN": "Sculpture Gallery",
+      "floor": 1,
+      "zone": "East",
+      "description": "289件/套骨雕、玉雕、青铜造像、木俑、陶俑，三分之一为首次公开展出",
+      "highlights": [
+        "白石供养菩萨像(唐代)",
+        "各类佛教造像"
+      ],
+      "walkingTime_min": 20,
+      "mustSee": true,
+      "descriptionEN": "289 sculptures and figurines in bone, jade, bronze, wood and pottery; a third are on public display for the first time.",
+      "highlightsEN": [
+        "White Stone Offering Bodhisattva (Tang)",
+        "Buddhist images of various periods"
+      ]
+    },
+    {
+      "id": "G_Special1",
+      "name": "第一特展厅（光明乳业）",
+      "nameEN": "Special Exhibition Hall 1",
+      "floor": 1,
+      "zone": "North",
+      "description": "大型特展空间，举办'何以中国'系列等重磅特展",
+      "walkingTime_min": 20,
+      "mustSee": false,
+      "descriptionEN": "Major special-exhibition hall hosting landmark shows such as the 'China: The Birth of a Civilization' series.",
+      "highlightsEN": []
+    },
+    {
+      "id": "G_Jade",
+      "name": "中国古代玉器馆",
+      "nameEN": "Jade Gallery",
+      "floor": 2,
+      "zone": "West",
+      "description": "近350件/组玉器，从新石器时代至清代，六个单元呈现中国万年玉文化",
+      "highlights": [
+        "红山文化玉器",
+        "良渚文化玉器"
+      ],
+      "walkingTime_min": 20,
+      "mustSee": true,
+      "descriptionEN": "Nearly 350 jades from the Neolithic to the Qing dynasty, presented across six sections tracing ten millennia of Chinese jade culture.",
+      "highlightsEN": [
+        "Hongshan-culture jades",
+        "Liangzhu-culture jades"
+      ]
+    },
+    {
+      "id": "G_Seal",
+      "name": "玺印篆刻馆",
+      "nameEN": "Seal Gallery",
+      "floor": 2,
+      "zone": "Center-West",
+      "area": "~600 sqm",
+      "description": "568件印章，海内外首个中国印章专题陈列馆，展示印章史与全球古代文明的关系",
+      "walkingTime_min": 15,
+      "mustSee": false,
+      "descriptionEN": "568 seals - the world's first dedicated gallery on Chinese seals - exploring the history of seal art and its links to ancient civilizations worldwide.",
+      "highlightsEN": []
+    },
+    {
+      "id": "G_Calligraphy",
+      "name": "中国历代书法馆",
+      "nameEN": "Calligraphy Gallery",
+      "floor": 2,
+      "zone": "Center-East",
+      "description": "海内外唯一的常设通史书法陈列，展出多件国宝级书法名迹",
+      "highlights": [
+        "王羲之草书《上虞帖》",
+        "王献之《鸭头丸帖》",
+        "怀素草书《苦笋帖》"
+      ],
+      "walkingTime_min": 25,
+      "mustSee": true,
+      "descriptionEN": "The only permanent, comprehensive survey of Chinese calligraphy in the world, featuring several national-treasure masterworks.",
+      "highlightsEN": [
+        "Wang Xizhi, Cursive 'Letter to Shangyu'",
+        "Wang Xianzhi, 'Duck Head Pill Letter'",
+        "Huaisu, Cursive 'Bitter Bamboo Shoots Letter'"
+      ]
+    },
+    {
+      "id": "G_Painting",
+      "name": "中国历代绘画馆",
+      "nameEN": "Painting Gallery",
+      "floor": 2,
+      "zone": "East",
+      "description": "海内外唯一的常设通史绘画陈列，展出多年未公开展示的国宝级书画",
+      "highlights": [
+        "《高逸图》卷(唐·孙位)",
+        "《雪竹图》轴",
+        "Lady with a Mirror"
+      ],
+      "walkingTime_min": 25,
+      "mustSee": true,
+      "descriptionEN": "The only permanent, comprehensive survey of Chinese painting in the world, presenting national-treasure works long absent from public view.",
+      "highlightsEN": [
+        "'Gaoyi Tu' (Reclining Scholars), Tang, by Sun Wei",
+        "'Xue Zhu Tu' (Bamboo in Snow)",
+        "Lady with a Mirror"
+      ]
+    },
+    {
+      "id": "G_Special2",
+      "name": "第二特展厅（中国东方航空）",
+      "nameEN": "Special Exhibition Hall 2",
+      "floor": 2,
+      "zone": "North",
+      "description": "大型特展空间，举办国际交流大展",
+      "walkingTime_min": 20,
+      "mustSee": false,
+      "descriptionEN": "Major special-exhibition hall for international exchange exhibitions.",
+      "highlightsEN": []
+    },
+    {
+      "id": "G_Shanghai_Painting",
+      "name": "上海书画馆",
+      "nameEN": "Shanghai Painting and Calligraphy Gallery",
+      "floor": 2,
+      "zone": "South",
+      "description": "探索江南文化、海派文化与红色文化，通过书画呈现上海文化脉络",
+      "walkingTime_min": 15,
+      "mustSee": false,
+      "descriptionEN": "Exploring Jiangnan, Shanghai-school and revolutionary culture through painting and calligraphy, presenting the cultural lineage of Shanghai.",
+      "highlightsEN": []
+    },
+    {
+      "id": "G_Ceramics",
+      "name": "中国古代陶瓷展",
+      "nameEN": "Ceramics Gallery",
+      "floor": 3,
+      "zone": "West",
+      "area": "~1800 sqm",
+      "description": "中国陶瓷通史陈列，从新石器至明清，体系最完整的通史陈列之一",
+      "highlights": [
+        "绿釉鹦鹉形杯",
+        "各类名窑瓷器"
+      ],
+      "walkingTime_min": 25,
+      "mustSee": true,
+      "descriptionEN": "A comprehensive history of Chinese ceramics from the Neolithic to the Ming-Qing, among the most complete surveys of its kind.",
+      "highlightsEN": [
+        "Green-glazed parrot-shaped cup",
+        "Ceramics from renowned kilns"
+      ]
+    },
+    {
+      "id": "G_CeraMIX",
+      "name": "CeraMIX 陶瓷与中外交流馆",
+      "nameEN": "CeraMIX Gallery",
+      "floor": 3,
+      "zone": "Center",
+      "description": "全新常设展，通过陶瓷贸易讲述隋唐至明清中国与世界的经济文化交流",
+      "walkingTime_min": 15,
+      "mustSee": false,
+      "descriptionEN": "A new permanent gallery tracing economic and cultural exchange between China and the world from the Sui-Tang to the Ming-Qing through ceramic trade.",
+      "highlightsEN": []
+    },
+    {
+      "id": "G_Numismatics",
+      "name": "中国历代货币馆",
+      "nameEN": "Numismatics Gallery",
+      "floor": 3,
+      "zone": "East",
+      "description": "展出6000余枚钱币，规模翻倍，全面回顾中国货币金融发展史",
+      "walkingTime_min": 15,
+      "mustSee": false,
+      "descriptionEN": "Over 6,000 coins - double the previous scale - offering a full survey of China's monetary and financial history.",
+      "highlightsEN": []
+    },
+    {
+      "id": "G_ZhaoPuchu",
+      "name": "赵朴初书法馆",
+      "nameEN": "Calligraphy by Zhao Puchu Gallery",
+      "floor": 3,
+      "zone": "Center-East",
+      "description": "纪念赵朴初(1907-2000)先生的书法艺术专题馆",
+      "walkingTime_min": 10,
+      "mustSee": false,
+      "descriptionEN": "A gallery dedicated to the calligraphic art of Mr. Zhao Puchu (1907-2000).",
+      "highlightsEN": []
+    },
+    {
+      "id": "G_Archaeology",
+      "name": "考古上海馆",
+      "nameEN": "Archaeology Gallery",
+      "floor": 4,
+      "zone": "West",
+      "description": "2000余件考古文物，追溯上海6000年城市演变史",
+      "walkingTime_min": 15,
+      "mustSee": false,
+      "descriptionEN": "Over 2,000 archaeological artifacts tracing 6,000 years of Shanghai's urban evolution.",
+      "highlightsEN": []
+    },
+    {
+      "id": "G_Jiangnan",
+      "name": "江南文化馆",
+      "nameEN": "Jiangnan Gallery",
+      "floor": 4,
+      "zone": "East",
+      "description": "现代极简风格融合江南文化元素，自然光与户外景观中品味文物",
+      "walkingTime_min": 15,
+      "mustSee": false,
+      "descriptionEN": "A modern minimalist space blending Jiangnan cultural motifs, where artifacts are appreciated in natural light and garden views.",
+      "highlightsEN": []
+    },
+    {
+      "id": "G_Special3",
+      "name": "第三特展厅",
+      "nameEN": "Special Exhibition Hall 3",
+      "floor": 3,
+      "zone": "North",
+      "description": "国际交流特展空间",
+      "walkingTime_min": 20,
+      "mustSee": false,
+      "descriptionEN": "Special-exhibition hall for international exchange shows.",
+      "highlightsEN": []
+    },
+    {
+      "id": "G_Roof",
+      "name": "屋顶花园",
+      "nameEN": "Roof Garden",
+      "floor": 5,
+      "description": "5楼屋顶花园，天气不好时临时关闭",
+      "walkingTime_min": 15,
+      "mustSee": true,
+      "seasonal": true,
+      "note": "Weather dependent",
+      "descriptionEN": "5F rooftop garden; temporarily closed in bad weather.",
+      "highlightsEN": []
+    }
+  ],
+  "floorSummary": {
+    "1F": "青铜馆、雕塑馆、第一特展厅、服务中心、商店咖啡",
+    "2F": "玉器馆、玺印篆刻馆、书法馆、绘画馆、上海书画馆、第二特展厅、咖啡阶梯",
+    "3F": "陶瓷馆、CeraMIX馆、货币馆、赵朴初书法馆、第三特展厅、餐厅",
+    "4F": "考古馆、江南文化馆、茶室",
+    "5F": "屋顶花园（天气依赖）",
+    "B1": "东入口（丁香路方向）、存包处"
+  },
+  "floorSummaryEN": {
+    "1F": "Bronze, Sculpture, Special Exhibition Hall 1, service center, shop and cafe",
+    "2F": "Jade, Seal, Calligraphy, Painting, Shanghai Painting & Calligraphy, Special Exhibition Hall 2",
+    "3F": "Ceramics, CeraMIX, Numismatics, Calligraphy by Zhao Puchu, Special Exhibition Hall 3, restaurant",
+    "4F": "Archaeology, Jiangnan culture, teahouse",
+    "5F": "Roof Garden (weather dependent)",
+    "B1": "East Entrance (Dingxiang Road side), cloakroom"
+  }
+}

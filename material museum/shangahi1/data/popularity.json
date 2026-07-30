@@ -1,0 +1,144 @@
+{
+  "popularityEstimates": {
+    "description": "估算值(0-1)，综合参考知乎、Trip.com、小红书、TripAdvisor、上博官方数据等",
+    "lastUpdated": "2026-07-29",
+    "items": [
+      {
+        "id": "bronze_gallery",
+        "name": "青铜馆",
+        "score": 1.0,
+        "tier": 1,
+        "notes": "上博最核心展厅，大克鼎等镇馆之宝集中于此；几乎所有攻略首推",
+        "nameEN": "Bronze Gallery",
+        "notesEN": "The museum's core gallery; Da Ke Ding and other masterpieces; top of nearly every guide."
+      },
+      {
+        "id": "calligraphy_gallery",
+        "name": "书法馆",
+        "score": 0.9,
+        "tier": 1,
+        "notes": "王羲之、王献之、怀素三大国宝级书法；海内外唯一通史书法陈列",
+        "nameEN": "Calligraphy Gallery",
+        "notesEN": "Wang Xizhi, Wang Xianzhi, Huaisu - three national-treasure calligraphies; the world's only comprehensive calligraphy survey."
+      },
+      {
+        "id": "painting_gallery",
+        "name": "绘画馆",
+        "score": 0.85,
+        "tier": 1,
+        "notes": "高逸图等国宝级书画；但书画类展品轮换展示，不一定每次都能看到全部",
+        "nameEN": "Painting Gallery",
+        "notesEN": "National-treasure works such as Gaoyi Tu; works rotate, so not all may be on view."
+      },
+      {
+        "id": "sculpture_gallery",
+        "name": "雕塑馆",
+        "score": 0.8,
+        "tier": 2,
+        "notes": "白石供养菩萨像等；1/3首次展出；视觉冲击力强",
+        "nameEN": "Sculpture Gallery",
+        "notesEN": "White Stone Offering Bodhisattva and more; a third shown publicly for the first time; strong visual impact."
+      },
+      {
+        "id": "special_exhibition",
+        "name": "特展（如莎士比亚展、三星堆展）",
+        "score": 0.85,
+        "tier": 1,
+        "notes": "上博特展现象级，'金字塔之巅'曾引发排队数小时；2026年美洲文明大展预期极高",
+        "nameEN": "Special Exhibition (e.g. Shakespeare, Sanxingdui)",
+        "notesEN": "Shanghai Museum's special exhibitions are phenomenal; 'Pyramid's Top' once drew hours-long queues; the 2026 Americas exhibition is highly anticipated."
+      },
+      {
+        "id": "jade_gallery",
+        "name": "玉器馆",
+        "score": 0.7,
+        "tier": 2,
+        "notes": "良渚文化玉器等；对中国玉文化感兴趣的游客评价高",
+        "nameEN": "Jade Gallery",
+        "notesEN": "Liangzhu-culture jades and more; praised by visitors interested in Chinese jade culture."
+      },
+      {
+        "id": "ceramics_gallery",
+        "name": "陶瓷馆",
+        "score": 0.7,
+        "tier": 2,
+        "notes": "体系最完整的陶瓷通史；瓷器爱好者必到",
+        "nameEN": "Ceramics Gallery",
+        "notesEN": "The most complete ceramic survey; a must for porcelain lovers."
+      },
+      {
+        "id": "roof_garden",
+        "name": "屋顶花园",
+        "score": 0.65,
+        "tier": 2,
+        "notes": "天气好时景色佳；但受天气影响大",
+        "nameEN": "Roof Garden",
+        "notesEN": "Great views in good weather, but highly weather-dependent."
+      },
+      {
+        "id": "seal_gallery",
+        "name": "玺印篆刻馆",
+        "score": 0.55,
+        "tier": 3,
+        "notes": "海内外首个印章专题展；小众但专业",
+        "nameEN": "Seal Gallery",
+        "notesEN": "The world's first dedicated seal exhibition; niche but professional."
+      },
+      {
+        "id": "jiangnan_gallery",
+        "name": "江南文化馆",
+        "score": 0.55,
+        "tier": 3,
+        "notes": "空间设计出色；展品相对轻松",
+        "nameEN": "Jiangnan Gallery",
+        "notesEN": "Excellent spatial design; lighter exhibits."
+      },
+      {
+        "id": "numismatics",
+        "name": "货币馆",
+        "score": 0.5,
+        "tier": 3,
+        "notes": "6000+钱币；金融历史爱好者偏爱",
+        "nameEN": "Numismatics Gallery",
+        "notesEN": "6,000+ coins; favored by financial-history enthusiasts."
+      },
+      {
+        "id": "archaeology",
+        "name": "考古上海馆",
+        "score": 0.5,
+        "tier": 3,
+        "notes": "上海本地历史；外地游客可能兴趣一般",
+        "nameEN": "Archaeology Gallery",
+        "notesEN": "Shanghai's local history; may interest out-of-town visitors less."
+      },
+      {
+        "id": "ceramix",
+        "name": "CeraMIX馆",
+        "score": 0.5,
+        "tier": 3,
+        "notes": "全新常设展；中外交流视角独特",
+        "nameEN": "CeraMIX Gallery",
+        "notesEN": "A brand-new permanent gallery; a unique China-and-world exchange perspective."
+      },
+      {
+        "id": "shanghai_painting",
+        "name": "上海书画馆",
+        "score": 0.45,
+        "tier": 3,
+        "notes": "海派文化专题；本地游客更感兴趣",
+        "nameEN": "Shanghai Painting & Calligraphy Gallery",
+        "notesEN": "A Shanghai-school culture feature; of more interest to local visitors."
+      },
+      {
+        "id": "zhao_puchu",
+        "name": "赵朴初书法馆",
+        "score": 0.4,
+        "tier": 3,
+        "notes": "专题馆；受众较窄",
+        "nameEN": "Calligraphy by Zhao Puchu Gallery",
+        "notesEN": "A dedicated gallery; narrower audience."
+      }
+    ],
+    "descriptionEN": "Estimated values (0-1), synthesizing Zhihu, Trip.com, Xiaohongshu, TripAdvisor and official Shanghai Museum data."
+  }
+}
