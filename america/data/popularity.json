@@ -1,0 +1,27 @@
+{
+  "popularityEstimates": {
+    "description": "Estimated popularity scores (0-1) based on TripAdvisor must-see reviews, Google Maps mentions, travel blog rankings, and Met official highlights. These are ESTIMATES, not precise statistics.",
+    "lastUpdated": "2026-07-29",
+    "methodology": "Aggregated from: TripAdvisor top reviews, Google Maps popular times/photos, multiple 'top things to do at the Met' blog lists (nyctourism.com, sandinmysuitcase.com, viator.com, Reddit r/AskNYC), Met official Highlights page",
+    "items": [
+      { "id": "temple_dendur", "name": "Temple of Dendur", "score": 1.0, "tier": 1, "notes": "Nearly #1 on every must-see list; most photographed; Met Highlights top pick" },
+      { "id": "van_gogh", "name": "Van Gogh (Self-Portrait, Sunflowers, Wheat Field)", "score": 0.95, "tier": 1, "notes": "Van Gogh is The Met's most sought-after painter; Galleries 822/825 always crowded" },
+      { "id": "monet_waterlilies", "name": "Monet Water Lilies Bridge", "score": 0.90, "tier": 1, "notes": "Iconic Impressionist work; Gallery 819" },
+      { "id": "european_paintings", "name": "European Paintings (overall)", "score": 0.90, "tier": 1, "notes": "Core attraction; 2500+ paintings" },
+      { "id": "roof_garden", "name": "Roof Garden", "score": 0.85, "tier": 2, "notes": "Seasonal but extremely popular; Instagram hotspot; free with admission" },
+      { "id": "greek_roman", "name": "Greek & Roman Sculpture Court", "score": 0.80, "tier": 2, "notes": "Architectural space itself is a photo hotspot; skylights + marble" },
+      { "id": "egyptian_art", "name": "Egyptian Art (overall)", "score": 0.80, "tier": 2, "notes": "39 rooms震撼; Temple of Dendur drives traffic" },
+      { "id": "degas_dance", "name": "Degas - The Dance Class / Little Dancer", "score": 0.75, "tier": 2, "notes": "Highly recognizable; Gallery 815" },
+      { "id": "arms_armor", "name": "Arms and Armor", "score": 0.75, "tier": 2, "notes": "Especially popular with male visitors and families; Henry VIII armor" },
+      { "id": "washington_crossing", "name": "Washington Crossing the Delaware", "score": 0.70, "tier": 2, "notes": "Iconic American history painting; school groups" },
+      { "id": "astor_court", "name": "Astor Court (Chinese Garden)", "score": 0.70, "tier": 2, "notes": "Especially popular with Asian visitors; unique spatial experience" },
+      { "id": "lamassu", "name": "Assyrian Lamassu", "score": 0.65, "tier": 3, "notes": "Impressive monumental sculpture; history enthusiasts" },
+      { "id": "vermeer", "name": "Vermeer - Study of a Young Woman", "score": 0.65, "tier": 3, "notes": "Rarity (~35 works total); Dutch Golden Age light" },
+      { "id": "rembrandt", "name": "Rembrandt - Aristotle with a Bust of Homer", "score": 0.60, "tier": 3, "notes": "Major art history significance" },
+      { "id": "madame_x", "name": "Madame X (Sargent)", "score": 0.60, "tier": 3, "notes": "Most talked-about painting in American Wing" },
+      { "id": "islamic_art", "name": "Islamic Art", "score": 0.55, "tier": 3, "notes": "Excellent after renovation; lower overall traffic" },
+      { "id": "pollock", "name": "Autumn Rhythm (Pollock)", "score": 0.50, "tier": 3, "notes": "Modern art enthusiasts; 5m+ long drip painting" },
+      { "id": "hatshepsut", "name": "Hatshepsut Seated", "score": 0.50, "tier": 3, "notes": "Egyptian section star; women's history" }
+    ]
+  }
+}

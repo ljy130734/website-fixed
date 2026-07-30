@@ -1,0 +1,117 @@
+{
+  "routes": [
+    {
+      "id": "highlights_2h",
+      "name": "2-Hour Highlights",
+      "nameCN": "2小时精华速览",
+      "duration_min": 120,
+      "description": "See The Met's absolute must-sees in 2 hours",
+      "descriptionCN": "2 小时看完大都会镇馆必看",
+      "stops": [
+        { "order": 1, "galleryId": "G131", "name": "Temple of Dendur", "nameCN": "丹铎神庙", "duration_min": 20, "notes": "Start here - most iconic", "notesCN": "从这里开始——全馆最具标志性" },
+        { "order": 2, "galleryId": "G_GreekRoman", "name": "Greek & Roman Sculpture Court", "nameCN": "希腊与罗马雕塑厅", "duration_min": 15, "notes": "Walk through Great Hall, head to F2", "notesCN": "穿过大厅即可到达" },
+        { "order": 3, "galleryId": "G_AstorCourt", "name": "Astor Court", "nameCN": "阿斯特中国庭院", "duration_min": 10, "notes": "Peaceful Chinese garden", "notesCN": "静谧的中国园林" },
+        { "order": 4, "galleryId": "G_Impressionist", "name": "Impressionist Galleries (815-825)", "nameCN": "印象派展厅（815-825）", "duration_min": 30, "notes": "Van Gogh, Monet, Degas", "notesCN": "梵高、莫奈、德加" },
+        { "order": 5, "galleryId": "G_Dutch", "name": "Dutch Golden Age (614-616)", "nameCN": "荷兰黄金时代（614-616）", "duration_min": 15, "notes": "Vermeer, Rembrandt", "notesCN": "维米尔、伦勃朗" },
+        { "order": 6, "galleryId": "G_Roof", "name": "Roof Garden (if open)", "nameCN": "屋顶花园（若开放）", "duration_min": 15, "notes": "Seasonal; skip if closed", "notesCN": "季节性开放；关闭可跳过" }
+      ],
+      "totalWalkingTime_min": 15,
+      "floorChanges": 1
+    },
+    {
+      "id": "impressionist_focus",
+      "name": "Impressionist Journey",
+      "nameCN": "印象派之旅",
+      "duration_min": 90,
+      "description": "Deep dive into Monet, Van Gogh, Degas, and French masters",
+      "descriptionCN": "深度游览莫奈、梵高、德加与法国大师",
+      "stops": [
+        { "order": 1, "galleryId": "G_Impressionist", "name": "Gallery 815 - Degas", "nameCN": "815 厅 · 德加", "duration_min": 15, "notes": "The Dance Class, Little Dancer", "notesCN": "《舞蹈课》《小舞者》" },
+        { "order": 2, "galleryId": "G_Impressionist", "name": "Gallery 818 - Monet", "nameCN": "818 厅 · 莫奈", "duration_min": 10, "notes": "Garden at Sainte-Adresse", "notesCN": "《圣阿德雷斯的花园》" },
+        { "order": 3, "galleryId": "G_Impressionist", "name": "Gallery 819 - Monet Water Lilies", "nameCN": "819 厅 · 莫奈睡莲", "duration_min": 10, "notes": "Bridge over a Pond of Water Lilies", "notesCN": "《睡莲池上的桥》" },
+        { "order": 4, "galleryId": "G_Impressionist", "name": "Gallery 822 - Van Gogh", "nameCN": "822 厅 · 梵高", "duration_min": 10, "notes": "Wheat Field with Cypresses", "notesCN": "《麦田与柏树》" },
+        { "order": 5, "galleryId": "G_Impressionist", "name": "Gallery 825 - Van Gogh", "nameCN": "825 厅 · 梵高", "duration_min": 15, "notes": "Self-Portrait, Sunflowers, Irises", "notesCN": "《自画像》《向日葵》《鸢尾花》" },
+        { "order": 6, "galleryId": "G_Modern", "name": "Modern Art - Pollock", "nameCN": "现代馆 · 波洛克", "duration_min": 10, "notes": "Autumn Rhythm", "notesCN": "《秋之韵》" }
+      ],
+      "totalWalkingTime_min": 10,
+      "floorChanges": 0
+    },
+    {
+      "id": "ancient_civilizations",
+      "name": "Ancient Civilizations",
+      "nameCN": "古文明巡礼",
+      "duration_min": 120,
+      "description": "Egypt, Assyria, Greece & Rome - journey through ancient worlds",
+      "descriptionCN": "埃及、亚述、希腊与罗马——穿越古代文明",
+      "stops": [
+        { "order": 1, "galleryId": "G_Egyptian_General", "name": "Egyptian Art Galleries", "nameCN": "埃及艺术馆", "duration_min": 25, "notes": "Hatshepsut, mummies, sarcophagi", "notesCN": "哈特谢普苏特、木乃伊、石棺" },
+        { "order": 2, "galleryId": "G131", "name": "Temple of Dendur", "nameCN": "丹铎神庙", "duration_min": 20, "notes": "The crown jewel", "notesCN": "镇馆之冠" },
+        { "order": 3, "galleryId": "G_Assyrian", "name": "Assyrian Sculpture Court", "nameCN": "亚述雕塑厅", "duration_min": 15, "notes": "Lamassu, palace reliefs", "notesCN": "拉玛苏巨兽、宫殿浮雕" },
+        { "order": 4, "galleryId": "G_GreekRoman", "name": "Greek & Roman Sculpture Court", "nameCN": "希腊与罗马雕塑厅", "duration_min": 20, "notes": "Marble statues, Three Graces", "notesCN": "大理石雕像、《美惠三女神》" },
+        { "order": 5, "galleryId": "G_Islamic", "name": "Islamic Art", "nameCN": "伊斯兰艺术馆", "duration_min": 15, "notes": "Geometric beauty", "notesCN": "几何之美" }
+      ],
+      "totalWalkingTime_min": 15,
+      "floorChanges": 1
+    },
+    {
+      "id": "instagram_spots",
+      "name": "Instagram Photo Spots",
+      "nameCN": "Instagram 打卡线",
+      "duration_min": 90,
+      "description": "Most photogenic spots in The Met",
+      "descriptionCN": "大都会最出片的机位",
+      "stops": [
+        { "order": 1, "galleryId": "G131", "name": "Temple of Dendur", "nameCN": "丹铎神庙", "duration_min": 15, "notes": "Iconic backdrop with Central Park view", "notesCN": "中央公园背景的标志性机位" },
+        { "order": 2, "galleryId": "G_GreekRoman", "name": "Greek & Roman Sculpture Court", "nameCN": "希腊与罗马雕塑厅", "duration_min": 15, "notes": "Stunning architecture and light", "notesCN": "建筑与光影绝美" },
+        { "order": 3, "galleryId": "G_AstorCourt", "name": "Astor Court", "nameCN": "阿斯特中国庭院", "duration_min": 10, "notes": "Serene Chinese garden", "notesCN": "宁静的中国园林" },
+        { "order": 4, "galleryId": "G_ArmsArmor", "name": "Arms and Armor", "nameCN": "武器与盔甲馆", "duration_min": 10, "notes": "Dramatic armor displays", "notesCN": "盔甲阵列极富戏剧性" },
+        { "order": 5, "galleryId": "G_Roof", "name": "Roof Garden", "nameCN": "屋顶花园", "duration_min": 20, "notes": "Best views in the museum", "notesCN": "全馆最佳景观位" }
+      ],
+      "totalWalkingTime_min": 15,
+      "floorChanges": 2
+    },
+    {
+      "id": "family_kids",
+      "name": "Family & Kids Explorer",
+      "nameCN": "亲子探索线",
+      "duration_min": 150,
+      "description": "Engaging exhibits for families with children",
+      "descriptionCN": "适合带孩子的家庭互动看点",
+      "stops": [
+        { "order": 1, "galleryId": "G131", "name": "Temple of Dendur", "nameCN": "丹铎神庙", "duration_min": 20, "notes": "Kids love the giant temple!", "notesCN": "孩子们超爱这座巨型神庙！" },
+        { "order": 2, "galleryId": "G_Assyrian", "name": "Assyrian Lamassu", "nameCN": "亚述拉玛苏", "duration_min": 15, "notes": "Giant winged lion - wow factor", "notesCN": "巨型翼狮——震撼十足" },
+        { "order": 3, "galleryId": "G_ArmsArmor", "name": "Arms and Armor", "nameCN": "武器与盔甲馆", "duration_min": 20, "notes": "Knights, swords, samurai!", "notesCN": "骑士、刀剑、武士！" },
+        { "order": 4, "galleryId": "G_Egyptian_General", "name": "Egyptian Mummies", "nameCN": "埃及木乃伊", "duration_min": 20, "notes": "Mummies always fascinate kids", "notesCN": "木乃伊总能吸引孩子" },
+        { "order": 5, "galleryId": "G_GreekRoman", "name": "Greek & Roman Court", "nameCN": "希腊与罗马雕塑厅", "duration_min": 15, "notes": "Giant statues, open space to move", "notesCN": "巨型雕像，空间开阔" },
+        { "order": 6, "galleryId": "G_Impressionist", "name": "Impressionist Gallery", "nameCN": "印象派展厅", "duration_min": 15, "notes": "Colorful, recognizable paintings", "notesCN": "色彩明快、耳熟能详的名画" }
+      ],
+      "totalWalkingTime_min": 20,
+      "floorChanges": 1
+    },
+    {
+      "id": "full_day",
+      "name": "Full Day Deep Dive",
+      "nameCN": "全天深度游",
+      "duration_min": 300,
+      "description": "Comprehensive tour covering all major departments",
+      "descriptionCN": "覆盖所有主要展馆的全景深度之旅",
+      "stops": [
+        { "order": 1, "galleryId": "G131", "name": "Temple of Dendur", "nameCN": "丹铎神庙", "duration_min": 25 },
+        { "order": 2, "galleryId": "G_Egyptian_General", "name": "Egyptian Art", "nameCN": "埃及艺术馆", "duration_min": 30 },
+        { "order": 3, "galleryId": "G_Assyrian", "name": "Assyrian Court", "nameCN": "亚述雕塑厅", "duration_min": 15 },
+        { "order": 4, "galleryId": "G_Islamic", "name": "Islamic Art", "nameCN": "伊斯兰艺术馆", "duration_min": 15 },
+        { "order": 5, "galleryId": "G_ArmsArmor", "name": "Arms and Armor", "nameCN": "武器与盔甲馆", "duration_min": 20 },
+        { "order": 6, "galleryId": "G_GreekRoman", "name": "Greek & Roman Court", "nameCN": "希腊与罗马雕塑厅", "duration_min": 20 },
+        { "order": 7, "galleryId": "G_AstorCourt", "name": "Astor Court", "nameCN": "阿斯特中国庭院", "duration_min": 15 },
+        { "order": 8, "galleryId": "G_Chinese", "name": "Chinese Art", "nameCN": "中国艺术馆", "duration_min": 15 },
+        { "order": 9, "galleryId": "G_American", "name": "American Wing", "nameCN": "美国馆", "duration_min": 25 },
+        { "order": 10, "galleryId": "G_Dutch", "name": "Dutch Golden Age", "nameCN": "荷兰黄金时代", "duration_min": 15 },
+        { "order": 11, "galleryId": "G_Impressionist", "name": "Impressionist Galleries", "nameCN": "印象派展厅", "duration_min": 30 },
+        { "order": 12, "galleryId": "G_Modern", "name": "Modern Art", "nameCN": "现当代艺术馆", "duration_min": 15 },
+        { "order": 13, "galleryId": "G_Roof", "name": "Roof Garden", "nameCN": "屋顶花园", "duration_min": 20 }
+      ],
+      "totalWalkingTime_min": 30,
+      "floorChanges": 3
+    }
+  ]
+}

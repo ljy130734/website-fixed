@@ -1,0 +1,70 @@
+{
+  "museum": {
+    "name": "The Metropolitan Museum of Art",
+    "shortName": "The Met",
+    "location": {
+      "address": "1000 Fifth Avenue",
+      "city": "New York",
+      "state": "NY",
+      "zip": "10028",
+      "country": "USA",
+      "coordinates": { "lat": 40.7794, "lng": -73.9632 }
+    },
+    "branches": [
+      { "name": "The Met Fifth Avenue (Main)", "address": "1000 Fifth Avenue, New York, NY 10028", "isMain": true },
+      { "name": "The Met Cloisters", "address": "99 Margaret Corbin Drive, Fort Tryon Park, New York, NY 10040", "isMain": false, "note": "Medieval European art" }
+    ]
+  },
+  "hours": {
+    "lastUpdated": "2026-07-29",
+    "source": "https://www.metmuseum.org/plan-your-visit",
+    "schedule": [
+      { "day": "Sunday", "open": "10:00", "close": "17:00", "isOpen": true },
+      { "day": "Monday", "open": "10:00", "close": "17:00", "isOpen": true },
+      { "day": "Tuesday", "open": "10:00", "close": "17:00", "isOpen": true },
+      { "day": "Wednesday", "open": null, "close": null, "isOpen": false, "note": "Closed every Wednesday" },
+      { "day": "Thursday", "open": "10:00", "close": "17:00", "isOpen": true },
+      { "day": "Friday", "open": "10:00", "close": "21:00", "isOpen": true, "note": "Extended hours" },
+      { "day": "Saturday", "open": "10:00", "close": "21:00", "isOpen": true, "note": "Extended hours" }
+    ],
+    "holidayClosures": [
+      { "date": "Thanksgiving Day", "note": "Fourth Thursday of November" },
+      { "date": "December 25", "note": "Christmas Day" },
+      { "date": "Every Wednesday", "note": "Weekly closure" }
+    ]
+  },
+  "admission": {
+    "source": "https://engage.metmuseum.org/admission",
+    "nyStateResidents": { "type": "pay-what-you-wish", "note": "Must pay something. Must show NY state ID. NY/NJ/CT students also eligible." },
+    "nonNyResidents": { "adult": 30, "senior": 22, "student": 22, "childUnder12": 0, "currency": "USD" },
+    "onlinePurchase": { "available": true, "url": "https://engage.metmuseum.org/admission", "note": "Direct entry without queuing" }
+  },
+  "reservations": {
+    "general": { "required": false, "recommended": true },
+    "groups": { "required": true, "minSize": 10 },
+    "specialExhibitions": { "mayRequire": true }
+  },
+  "roofGarden": {
+    "status": "seasonal",
+    "2025Season": { "open": "2025-04-15", "close": "2025-10-19", "commission": "Jennie C. Jones - Ensemble", "admission": "Included with museum admission" },
+    "futureNote": "Roof Garden will close after 2025 season for major renovation, expected closed until ~2030"
+  },
+  "currentExhibitions": [
+    { "name": "Superfine: Tailoring Black Style", "dates": "2025-05-10 to 2025-10-26", "includedWithAdmission": true },
+    { "name": "Roof Garden Commission: Jennie C. Jones, Ensemble", "dates": "2025-04-15 to 2025-10-19", "includedWithAdmission": true },
+    { "name": "Costume Art", "dates": "2025/2026", "includedWithAdmission": true }
+  ],
+  "upcomingExhibitions": [
+    { "name": "Rediscovering Della Robbia at The Met", "dates": "2026-08-10 to 2028-01-17" },
+    { "name": "A King's Carpet: Louis XIV and the Savonnerie", "dates": "2026-09-08 to 2027-03-05" }
+  ],
+  "facilities": {
+    "dining": [
+      { "name": "The Dining Room", "floor": "F1", "type": "Casual" },
+      { "name": "The Petrie Court Cafe", "floor": "F1", "type": "Cafe" },
+      { "name": "The Roof Garden Bar", "floor": "Rooftop", "type": "Bar", "seasonal": true }
+    ],
+    "coatCheck": { "available": true, "floor": "F1" },
+    "accessibility": { "wheelchairAccessible": true }
+  }
+}
