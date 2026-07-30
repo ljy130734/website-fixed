@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CuratorPath · 故宫博物院路线规划 | The Palace Museum</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  @font-face { font-family:'Telma'; src:url('fonts/Telma-Medium.otf') format('opentype'); font-weight:500; font-style:normal; font-display:swap; }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --bg:#ffffff; --ink:#111111; --ink-60:rgba(17,17,17,.6); --ink-40:rgba(17,17,17,.4);
+    --line:1px solid #111111; --line-soft:1px solid rgba(17,17,17,.14); --panel:#fafafa;
+    --red:#C41E3A; --red-soft:rgba(196,30,58,.12);
+    --font-ui:'Space Grotesk',system-ui,-apple-system,sans-serif;
+    --font-mono:'Space Mono',monospace;
+    --font-brand:'Telma','Space Grotesk',serif;
+    /* 底图调色板（沿用 gugong-map.html 几何，替换为极简黑白） */
+    --fill-1:#fafafa; --fill-2:#f3f3f3; --fill-3:#ececec; --fill-4:#e2e2e2;
+    --fg:#111111; --fg-soft:#555555; --fg-muted:#999999;
+    --line-dark:rgba(17,17,17,.25); --mapline:rgba(17,17,17,.10);
+  }
+  html,body { height:100%; }
+  body { font-family:var(--font-ui); background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased; overflow:hidden; }
+  button { font-family:inherit; cursor:pointer; }
+  ::selection { background:var(--red); color:#fff; }
+
+  .btn-solid { background:var(--ink); color:var(--bg); border:var(--line); padding:.85rem 2rem;
+    font-family:var(--font-mono); font-size:.78rem; letter-spacing:.14em; text-transform:uppercase; transition:opacity .15s; }
+  .btn-solid:hover { opacity:.82; }
+  .btn-ghost { background:var(--bg); color:var(--ink); border:var(--line); padding:.85rem 2rem;
+    font-family:var(--font-mono); font-size:.78rem; letter-spacing:.14em; text-transform:uppercase; transition:.15s; }
+  .btn-ghost:hover { background:var(--ink); color:var(--bg); }
+
+  /* ── 语言切换（右上角固定）── */
+  #langSwitch { position:fixed; top:1.1rem; right:1.4rem; z-index:600; display:flex; border:var(--line); background:var(--bg); }
+  #langSwitch button { border:none; background:var(--bg); color:var(--ink-40); padding:.45rem .8rem;
+    font-family:var(--font-mono); font-size:.68rem; letter-spacing:.1em; transition:.13s; }
+  #langSwitch button.on { background:var(--ink); color:var(--bg); }
+  #langSwitch button:not(.on):hover { color:var(--ink); background:var(--panel); }
+  #langSwitch .sep { width:1px; background:rgba(17,17,17,.2); }
+
+  /* ═══ PHASE 0 · 品牌闪现 ═══ */
+  #flash { position:fixed; inset:0; z-index:400; background:var(--bg);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem;
+    opacity:0; transition:opacity .25s ease; }
+  #flash.show { opacity:1; }
+  #flash.hide { opacity:0; pointer-events:none; }
+  #flash .fb { font-family:var(--font-brand); font-size:clamp(3rem,9vw,6.5rem); letter-spacing:.03em; }
+  #flash .fs { font-family:var(--font-mono); font-size:.68rem; letter-spacing:.34em; color:var(--ink-60); text-transform:uppercase; }
+
+  /* ═══ PHASE 1 · 问卷 ═══ */
+  #quiz { position:fixed; inset:0; z-index:300; background:var(--bg); overflow-y:auto; display:none; }
+  #quiz.on { display:block; animation:fadeUp .45s ease; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+  .quiz-inner { max-width:760px; margin:0 auto; padding:3.2rem 2rem 7rem; }
+  .quiz-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:2.8rem; padding-right:6.5rem; }
+  .quiz-brand { font-family:var(--font-brand); font-size:1.3rem; letter-spacing:.05em; }
+  .quiz-museum { font-family:var(--font-mono); font-size:.68rem; letter-spacing:.16em; color:var(--ink-60); text-transform:uppercase; }
+  .quiz-title { font-size:clamp(1.9rem,4.5vw,2.7rem); font-weight:700; letter-spacing:-.02em; line-height:1.18; }
+  .quiz-sub { margin-top:.7rem; color:var(--ink-60); font-size:.95rem; font-weight:300; }
+  .q-block { margin-top:2.4rem; }
+  .q-head { display:flex; align-items:baseline; gap:.8rem; margin-bottom:1rem; }
+  .q-num { font-family:var(--font-mono); font-size:.72rem; color:var(--red); letter-spacing:.1em; }
+  .q-label { font-size:1.05rem; font-weight:500; }
+  .q-hint { font-family:var(--font-mono); font-size:.64rem; color:var(--ink-40); letter-spacing:.08em; margin-left:auto; text-transform:uppercase; }
+  .opt-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:.6rem; }
+  .opt { border:var(--line); background:var(--bg); padding:.9rem .9rem .8rem; text-align:left; transition:.13s; display:flex; flex-direction:column; gap:.25rem; }
+  .opt:hover { background:var(--panel); }
+  .opt.on { background:var(--ink); color:var(--bg); }
+  .opt .ol { font-size:.92rem; font-weight:500; }
+  .opt .od { font-family:var(--font-mono); font-size:.62rem; letter-spacing:.05em; opacity:.55; }
+  .chips { display:flex; flex-wrap:wrap; gap:.5rem; }
+  .chip { border:var(--line); background:var(--bg); padding:.5rem 1rem; font-size:.84rem; font-weight:300; transition:.13s; }
+  .chip:hover { background:var(--panel); }
+  .chip.on { background:var(--ink); color:var(--bg); }
+  .quiz-actions { margin-top:3rem; display:flex; gap:.8rem; align-items:center; }
+  #btnSkip { position:fixed; right:2rem; bottom:2rem; z-index:310; background:var(--bg); color:var(--ink-60);
+    border:var(--line); padding:.8rem 1.5rem; font-family:var(--font-mono); font-size:.7rem;
+    letter-spacing:.12em; text-transform:uppercase; transition:.15s; box-shadow:4px 4px 0 rgba(17,17,17,.12); }
+  #btnSkip:hover { color:var(--bg); background:var(--ink); }
+
+  /* ═══ PHASE 1.5 · AI 加载 ═══ */
+  #loading { position:fixed; inset:0; z-index:350; background:var(--bg);
+    display:none; flex-direction:column; align-items:center; justify-content:center; gap:1.6rem; }
+  #loading.on { display:flex; animation:fadeUp .3s ease; }
+  #loading .lt { font-size:1.6rem; font-weight:700; letter-spacing:-.01em; }
+  #loading .lbar { width:220px; height:1px; background:rgba(17,17,17,.15); position:relative; overflow:hidden; }
+  #loading .lbar i { position:absolute; left:0; top:0; bottom:0; width:0; background:var(--red); transition:width .4s ease; }
+  #loading .lstep { font-family:var(--font-mono); font-size:.68rem; letter-spacing:.16em; color:var(--ink-60); text-transform:uppercase; min-height:1em; }
+
+  /* ═══ PHASE 2 · 地图页 ═══ */
+  #mapPage { display:none; height:100vh; grid-template-columns:330px 1fr; }
+  #mapPage.on { display:grid; animation:fadeUp .45s ease; }
+  @media(max-width:900px){ #mapPage.on { grid-template-columns:1fr; grid-template-rows:auto 1fr; } }
+
+  #sidebar { border-right:var(--line); display:flex; flex-direction:column; min-height:0; background:var(--bg); }
+  @media(max-width:900px){ #sidebar{ border-right:none; border-bottom:var(--line); } }
+  .sb-head { padding:1.3rem 1.4rem 1.1rem; border-bottom:var(--line-soft); padding-right:1.4rem; }
+  .sb-brand-row { display:flex; align-items:baseline; justify-content:space-between; }
+  .sb-brand { font-family:var(--font-brand); font-size:1.15rem; letter-spacing:.05em; }
+  .sb-home { font-family:var(--font-mono); font-size:.62rem; letter-spacing:.12em; color:var(--ink-60); text-decoration:none; text-transform:uppercase; }
+  .sb-home:hover { color:var(--ink); text-decoration:underline; }
+  .sb-museum { margin-top:.5rem; font-size:1.02rem; font-weight:700; letter-spacing:-.01em; }
+  .sb-museum-sub { font-family:var(--font-mono); font-size:.6rem; letter-spacing:.12em; color:var(--ink-40); margin-top:.2rem; text-transform:uppercase; }
+  .sb-tabs { display:flex; border-bottom:var(--line-soft); }
+  .sb-tab { flex:1; background:none; border:none; padding:.75rem 0 .65rem;
+    font-family:var(--font-mono); font-size:.68rem; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--ink-40); border-bottom:2px solid transparent; margin-bottom:-1px; transition:.15s; }
+  .sb-tab.on { color:var(--ink); border-bottom-color:var(--red); }
+  .sb-body { flex:1; overflow-y:auto; padding:1.1rem 1.2rem; min-height:0; }
+  @media(max-width:900px){ .sb-body{ max-height:34vh; } }
+  .sb-pane { display:none; } .sb-pane.on { display:block; }
+
+  .route-item { border:var(--line-soft); padding:.85rem .95rem; margin-bottom:.55rem; cursor:pointer; background:var(--bg); transition:.13s; }
+  .route-item:hover { border-color:var(--ink); }
+  .route-item.on { border:var(--line); box-shadow:inset 3px 0 0 var(--red); }
+  .route-item .rn { font-size:.92rem; font-weight:500; display:flex; align-items:center; gap:.5rem; }
+  .route-item .rm { font-family:var(--font-mono); font-size:.62rem; color:var(--ink-60); margin-top:.35rem; letter-spacing:.04em; }
+  .route-item .rd { font-size:.76rem; color:var(--ink-60); font-weight:300; margin-top:.3rem; line-height:1.5; }
+  .route-item .ai-tag { font-family:var(--font-mono); font-size:.56rem; letter-spacing:.14em; border:1px solid var(--red); color:var(--red); padding:.12rem .4rem; text-transform:uppercase; }
+  .route-item.custom { border:1px dashed var(--red); }
+
+  .recustom-blurb { font-size:.86rem; color:var(--ink-60); font-weight:300; line-height:1.7; margin-bottom:1.2rem; }
+  .pref-summary { border:var(--line-soft); padding:.9rem 1rem; margin-bottom:1.2rem; }
+  .pref-summary .ps-row { display:flex; justify-content:space-between; gap:1rem; font-size:.78rem; padding:.28rem 0; }
+  .pref-summary .ps-row span:first-child { color:var(--ink-60); font-weight:300; flex:0 0 auto; }
+  .pref-summary .ps-row span:last-child { font-family:var(--font-mono); font-size:.68rem; text-align:right; }
+
+  .sb-foot { border-top:var(--line-soft); padding:.9rem 1.2rem; }
+  .sb-cur { font-family:var(--font-mono); font-size:.62rem; color:var(--ink-40); letter-spacing:.14em; text-transform:uppercase; margin-bottom:.4rem; }
+  .sb-cur-route { font-size:.92rem; font-weight:500; }
+  .sb-cur-meta { font-family:var(--font-mono); font-size:.64rem; color:var(--ink-60); margin-top:.25rem; }
+
+  #main { display:flex; flex-direction:column; min-height:0; position:relative; background:var(--bg); }
+  .route-head { padding:1.2rem 1.8rem 1rem; border-bottom:var(--line-soft); padding-right:7rem; }
+  .route-head h1 { font-size:1.45rem; font-weight:700; letter-spacing:-.02em; }
+  .route-meta { font-family:var(--font-mono); font-size:.68rem; color:var(--ink-60); margin-top:.45rem; letter-spacing:.05em; }
+  .reason-chips { display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.6rem; }
+  .reason-chip { font-family:var(--font-mono); font-size:.6rem; letter-spacing:.06em; border:var(--line-soft); padding:.22rem .55rem; color:var(--ink-60); }
+  .reason-chip b { color:var(--red); font-weight:700; }
+
+  .region-bar { display:flex; align-items:stretch; border-bottom:var(--line); overflow-x:auto; background:var(--bg); }
+  .region-btn { background:none; border:none; border-right:var(--line-soft); padding:.7rem 1.2rem .6rem;
+    font-family:var(--font-ui); font-size:.86rem; font-weight:500; letter-spacing:.04em; color:var(--ink-40);
+    transition:.13s; white-space:nowrap; }
+  .region-btn small { display:block; font-family:var(--font-mono); font-size:.52rem; font-weight:400; letter-spacing:.1em; margin-top:.12rem; text-transform:uppercase; opacity:.75; }
+  .region-btn:hover { color:var(--ink); background:var(--panel); }
+  .region-btn.on { background:var(--red); color:#fff; }
+  .region-btn.dim { opacity:.35; }
+  .region-btn.dim.on { opacity:1; }
+  .region-progress { margin-left:auto; align-self:center; padding:0 1.2rem; font-family:var(--font-mono);
+    font-size:.62rem; color:var(--ink-40); letter-spacing:.12em; white-space:nowrap; text-transform:uppercase; }
+
+  .region-view { flex:1; overflow-y:auto; padding:1.5rem 1.8rem 6.5rem; min-height:0; }
+  .region-grid { display:grid; grid-template-columns:minmax(300px,420px) 1fr; gap:1.6rem; align-items:start; max-width:1240px; }
+  @media(max-width:760px){ .region-grid{ grid-template-columns:1fr; } }
+  .map-col { position:sticky; top:0; }
+  @media(max-width:760px){ .map-col{ position:static; } }
+
+  .region-title-row { display:flex; align-items:baseline; gap:1rem; margin-bottom:1.1rem; flex-wrap:wrap; }
+  .region-title { font-size:1.3rem; font-weight:700; letter-spacing:-.01em; }
+  .region-title .rt-en { font-family:var(--font-mono); font-size:.62rem; color:var(--ink-40); letter-spacing:.14em; text-transform:uppercase; margin-left:.6rem; }
+  .region-sub { font-size:.8rem; color:var(--ink-60); font-weight:300; }
+
+  /* ── 故宫底图 ── */
+  .fmap-wrap { border:var(--line); background:#fff; }
+  .fmap { width:100%; height:auto; display:block; }
+  .fmap text { user-select:none; font-family:'Space Grotesk',sans-serif !important; }
+  .fmap .area-block { cursor:pointer; transition:opacity .18s; }
+  .fmap .area-block.rg-dim { opacity:.16; }
+  .fmap .area-block .hl-rect { transition:.15s; }
+  .fmap .area-block.on-route .hl-rect { stroke:var(--red); stroke-width:2; }
+  .fmap .area-block:hover .hl-rect { fill:var(--red-soft); }
+  .fmap .lbl { font-weight:500; text-anchor:middle; pointer-events:none; }
+  .fmap .lbl-sub { font-weight:400; text-anchor:middle; pointer-events:none; }
+  .fmap .road-lbl { font-family:'Space Mono',monospace !important; font-size:8px; fill:var(--fg-muted); text-anchor:middle; letter-spacing:.05em; }
+  .fmap .compass { font-family:'Space Mono',monospace !important; font-size:9px; fill:var(--fg-muted); text-anchor:middle; letter-spacing:.1em; }
+  .fmap .axis-line { stroke:var(--line-dark); stroke-width:1; stroke-dasharray:3,5; opacity:.6; }
+  .fmap .rp-dim { stroke:var(--red); stroke-width:2; fill:none; opacity:.22; stroke-linejoin:round; }
+  .fmap .rp-hot { stroke:var(--red); stroke-width:2.5; fill:none; stroke-dasharray:7 6; stroke-linejoin:round; animation:dashmove 1.2s linear infinite; }
+  @keyframes dashmove { to { stroke-dashoffset:-26; } }
+  .fmap .marker { fill:var(--red); stroke:#fff; stroke-width:1.5; }
+  .fmap .marker-num { font-family:'Space Mono',monospace !important; font-size:11px; font-weight:700; fill:#fff; text-anchor:middle; dominant-baseline:central; }
+  .map-legend { display:flex; gap:1.2rem; margin-top:.6rem; font-family:var(--font-mono); font-size:.6rem; color:var(--ink-60); letter-spacing:.08em; flex-wrap:wrap; }
+  .map-legend i { display:inline-block; width:10px; height:10px; margin-right:.35rem; vertical-align:-1px; }
+  .map-legend .lg-r { background:var(--red); }
+  .map-legend .lg-g { background:#e2e2e2; border:1px solid rgba(17,17,17,.25); }
+  .map-note { font-family:var(--font-mono); font-size:.6rem; color:var(--ink-40); letter-spacing:.1em; margin-top:.5rem; text-transform:uppercase; }
+
+  /* ── 站点卡 ── */
+  .stops { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:.7rem; }
+  .stop-card { border:var(--line); background:var(--bg); padding:.9rem 1rem; cursor:pointer; transition:.13s; position:relative; }
+  .stop-card:hover { background:var(--panel); box-shadow:4px 4px 0 rgba(196,30,58,.85); transform:translate(-2px,-2px); }
+  .stop-ord { position:absolute; top:.8rem; right:.9rem; font-family:var(--font-mono); font-size:.78rem; font-weight:700; color:var(--red); }
+  .stop-name { font-size:.98rem; font-weight:700; letter-spacing:-.01em; padding-right:2.2rem; }
+  .stop-dur { font-family:var(--font-mono); font-size:.64rem; color:var(--ink-60); letter-spacing:.05em; margin-top:.3rem; }
+  .stop-tags { display:flex; gap:.35rem; margin-top:.5rem; flex-wrap:wrap; }
+  .stag { font-family:var(--font-mono); font-size:.54rem; letter-spacing:.1em; padding:.16rem .45rem; border:var(--line); text-transform:uppercase; }
+  .stag.red { background:var(--red); border-color:var(--red); color:#fff; }
+  .stag.soft { border-color:rgba(17,17,17,.25); color:var(--ink-60); }
+  .stop-notes { margin-top:.5rem; font-size:.8rem; color:var(--ink-60); font-weight:300; line-height:1.55; }
+
+  .region-empty { max-width:640px; border:1px dashed rgba(17,17,17,.35); padding:2rem; margin-top:1rem; }
+  .region-empty h3 { font-size:1.05rem; font-weight:700; margin-bottom:.5rem; }
+  .region-empty p { font-size:.86rem; color:var(--ink-60); font-weight:300; line-height:1.7; }
+  .region-empty .fe-list { font-family:var(--font-mono); font-size:.7rem; color:var(--ink-60); margin-top:1rem; line-height:2; }
+
+  #nextRegionBtn { position:absolute; right:1.6rem; bottom:1.6rem; z-index:20;
+    background:var(--red); color:#fff; border:1px solid var(--red);
+    font-family:var(--font-mono); font-size:.74rem; letter-spacing:.12em; text-transform:uppercase;
+    padding:.95rem 1.6rem; box-shadow:5px 5px 0 rgba(196,30,58,.2); transition:.15s; }
+  #nextRegionBtn:hover { transform:translate(-2px,-2px); box-shadow:7px 7px 0 rgba(196,30,58,.2); }
+
+  /* ── 总结卡 ── */
+  .sum-card { border:var(--line); max-width:860px; }
+  .sum-hero { padding:1.7rem 1.8rem 1.3rem; border-bottom:var(--line-soft); }
+  .sum-hero .st { font-family:var(--font-mono); font-size:.62rem; letter-spacing:.22em; color:var(--ink-40); text-transform:uppercase; }
+  .sum-hero h2 { font-size:1.65rem; font-weight:700; letter-spacing:-.02em; margin-top:.5rem; }
+  .sum-stats { display:grid; grid-template-columns:repeat(4,1fr); border-bottom:var(--line-soft); }
+  @media(max-width:640px){ .sum-stats{ grid-template-columns:repeat(2,1fr); } }
+  .sum-stat { padding:1.1rem 1rem; border-right:var(--line-soft); text-align:center; }
+  .sum-stat:last-child { border-right:none; }
+  .sum-stat .n { font-size:1.9rem; font-weight:700; letter-spacing:-.02em; color:var(--red); }
+  .sum-stat .l { font-family:var(--font-mono); font-size:.56rem; letter-spacing:.16em; color:var(--ink-40); margin-top:.3rem; text-transform:uppercase; }
+  .sum-sec { padding:1.2rem 1.8rem; border-bottom:var(--line-soft); }
+  .sum-sec h4 { font-family:var(--font-mono); font-size:.62rem; letter-spacing:.2em; color:var(--ink-40); text-transform:uppercase; margin-bottom:.7rem; }
+  .sum-sec p, .sum-sec li { font-size:.85rem; color:var(--ink-60); font-weight:300; line-height:1.8; }
+  .sum-sec ul { list-style:none; }
+  .sum-sec li b { color:var(--ink); font-weight:500; }
+  .sum-actions { display:flex; gap:.7rem; padding:1.2rem 1.8rem; flex-wrap:wrap; }
+
+  /* ── 展点信息卡 ── */
+  #stopModal { position:fixed; inset:0; z-index:500; background:rgba(255,255,255,.88); backdrop-filter:blur(4px);
+    display:none; align-items:center; justify-content:center; padding:1.5rem; }
+  #stopModal.on { display:flex; animation:fadeUp .25s ease; }
+  .sm-box { background:var(--bg); border:var(--line); max-width:540px; width:100%; max-height:88vh; overflow-y:auto; box-shadow:8px 8px 0 rgba(17,17,17,.14); }
+  /* 故宫无本地图片：统一灰底占位符 */
+  .sm-media { position:relative; width:100%; aspect-ratio:16/8; border-bottom:var(--line); background:#eee; overflow:hidden; }
+  .sm-media .sm-ph { position:absolute; inset:0; border-bottom:none; aspect-ratio:auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.7rem; background:#eeeeee; }
+  .sm-media .sm-photo { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; z-index:2; }
+  .sm-ph .ico { width:52px; height:52px; border:1px solid rgba(17,17,17,.3); display:flex; align-items:center; justify-content:center; }
+  .sm-ph .ico svg { width:26px; height:26px; stroke:rgba(17,17,17,.55); fill:none; stroke-width:1.3; }
+  .sm-ph .ch { font-family:var(--font-brand); font-size:2.6rem; color:rgba(17,17,17,.7); }
+  .sm-ph .cp { font-family:var(--font-mono); font-size:.56rem; letter-spacing:.26em; color:var(--ink-40); text-transform:uppercase; }
+  .sm-body { padding:1.3rem 1.5rem 1.5rem; }
+  .sm-top { display:flex; align-items:flex-start; gap:1rem; }
+  .sm-name { font-size:1.3rem; font-weight:700; letter-spacing:-.01em; }
+  .sm-en { font-family:var(--font-mono); font-size:.6rem; color:var(--ink-40); letter-spacing:.08em; margin-top:.25rem; text-transform:uppercase; }
+  .sm-close { margin-left:auto; background:none; border:var(--line); width:34px; height:34px; font-size:1rem; line-height:1; transition:.13s; flex:0 0 auto; }
+  .sm-close:hover { background:var(--ink); color:var(--bg); }
+  .sm-meta { display:flex; flex-wrap:wrap; gap:.4rem; margin:.85rem 0 .95rem; }
+  .sm-meta .stag { font-size:.58rem; padding:.26rem .55rem; }
+  .sm-desc { font-size:.86rem; color:var(--ink-60); font-weight:300; line-height:1.75; }
+  .sm-sec { margin-top:1.05rem; }
+  .sm-sec h5 { font-family:var(--font-mono); font-size:.58rem; letter-spacing:.2em; color:var(--ink-40); text-transform:uppercase; margin-bottom:.5rem; }
+  .sm-treasure { font-size:.84rem; font-weight:300; padding:.32rem 0; border-bottom:var(--line-soft); display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+  .sm-treasure:last-child { border-bottom:none; }
+  .sm-treasure .tn { width:48px; height:36px; object-fit:cover; border:var(--line-soft); flex:0 0 auto; background:#eee; }
+  .sm-treasure .tn-ph { width:48px; height:36px; flex:0 0 auto; background:repeating-linear-gradient(45deg,#eee,#eee 6px,#e4e4e4 6px,#e4e4e4 12px); }
+  .sm-treasure .tp { font-family:var(--font-mono); font-size:.6rem; color:var(--ink-40); white-space:nowrap; }
+  .sm-pop { height:3px; background:rgba(17,17,17,.12); margin-top:.4rem; }
+  .sm-pop i { display:block; height:100%; background:var(--red); }
+</style>
+</head>
+<body>
+
+<!-- 语言切换（右上角固定） -->
+<div id="langSwitch">
+  <button data-lang="cn" class="on">中</button>
+  <span class="sep"></span>
+  <button data-lang="en">EN</button>
+</div>
+
+<!-- PHASE 0 · 品牌闪现 -->
+<div id="flash">
+  <div class="fb">CuratorPath</div>
+  <div class="fs" id="flashSub">AI Museum Route Planner</div>
+</div>
+
+<!-- PHASE 1 · 偏好问卷 -->
+<div id="quiz">
+  <div class="quiz-inner">
+    <div class="quiz-top">
+      <span class="quiz-brand">CuratorPath</span>
+      <span class="quiz-museum" data-t="quizMuseum">故宫博物院</span>
+    </div>
+    <h1 class="quiz-title" data-t="quizTitle">告诉我们你的偏好，<br>剩下的交给 AI。</h1>
+    <p class="quiz-sub" data-t="quizSub">4 个小问题，生成一条只属于你的故宫路线。也可以直接跳过，走经典中轴。</p>
+
+    <div class="q-block">
+      <div class="q-head"><span class="q-num">01</span><span class="q-label" data-t="q1">你打算停留多久？</span></div>
+      <div class="opt-grid" id="qTime"></div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-head"><span class="q-num">02</span><span class="q-label" data-t="q2">对哪些领域感兴趣？</span><span class="q-hint" data-t="q2hint">可多选</span></div>
+      <div class="chips" id="qInterests"></div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-head"><span class="q-num">03</span><span class="q-label" data-t="q3">想要什么游览节奏？</span></div>
+      <div class="opt-grid" id="qPace"></div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-head"><span class="q-num">04</span><span class="q-label" data-t="q4">愿意另购票进珍宝馆 / 钟表馆吗？（各 ¥10）</span></div>
+      <div class="opt-grid" id="qTicket"></div>
+    </div>
+
+    <div class="quiz-actions">
+      <button class="btn-solid" id="btnGenerate" data-t="btnGenerate">生成我的路线 →</button>
+    </div>
+  </div>
+  <button id="btnSkip" data-t="btnSkip">跳过 · 中轴精华 →</button>
+</div>
+
+<!-- PHASE 1.5 · AI 加载 -->
+<div id="loading">
+  <div class="lt" data-t="loadingTitle">AI 正在规划…</div>
+  <div class="lbar"><i id="lbarFill"></i></div>
+  <div class="lstep" id="lstep"></div>
+</div>
+
+<!-- PHASE 2 · 地图页 -->
+<div id="mapPage">
+  <aside id="sidebar">
+    <div class="sb-head">
+      <div class="sb-brand-row">
+        <span class="sb-brand">CuratorPath</span>
+        <a class="sb-home" href="index.html?skip=1" data-t="home">← 首页</a>
+      </div>
+      <div class="sb-museum" data-t="museumName">故宫博物院</div>
+      <div class="sb-museum-sub" data-t="museumSub">The Palace Museum · 景山前街 4 号</div>
+    </div>
+    <div class="sb-tabs">
+      <button class="sb-tab on" id="tabA" data-t="tabA">经典路线库</button>
+      <button class="sb-tab" id="tabB" data-t="tabB">重新定制</button>
+    </div>
+    <div class="sb-body">
+      <div class="sb-pane on" id="paneA"></div>
+      <div class="sb-pane" id="paneB">
+        <p class="recustom-blurb" data-t="recustomBlurb">偏好变了？重新填写问卷，AI 会基于你的最新选择重新匹配路线。</p>
+        <div class="pref-summary" id="prefSummary"></div>
+        <button class="btn-solid" id="btnRecustom" style="width:100%;" data-t="btnRecustom">重新打开问卷</button>
+      </div>
+    </div>
+    <div class="sb-foot">
+      <div class="sb-cur" data-t="curRoute">当前路线</div>
+      <div class="sb-cur-route" id="curRouteName">—</div>
+      <div class="sb-cur-meta" id="curRouteMeta">—</div>
+    </div>
+  </aside>
+
+  <main id="main">
+    <div class="route-head">
+      <h1 id="routeTitle">—</h1>
+      <div class="route-meta" id="routeMeta"></div>
+      <div class="reason-chips" id="reasonChips"></div>
+    </div>
+    <div class="region-bar" id="regionBar"></div>
+    <div class="region-view" id="regionView"></div>
+    <button id="nextRegionBtn">▸</button>
+  </main>
+</div>
+
+<!-- 展点信息卡 -->
+<div id="stopModal"><div class="sm-box" id="smBox"></div></div>
+
+<script>
+'use strict';
+/* ════════════════════════════════════════════════
+   CuratorPath · 故宫博物院专属路线规划
+   品牌闪现 → 问卷(可跳过) → AI 规划 → 区域地图
+   南→北单向 · 故宫红 #C41E3A · 中英双语
+   ════════════════════════════════════════════════ */
+
+const DATA_BASE = 'gugong/data/';
+const IMG_BASE = 'gugong/img/';
+const GALLERY_IMG = {
+  G_MeridianGate:'G_MeridianGate.jpg', G_Taihe:'G_Taihe.jpg', G_Zhonghe:'G_Zhonghe.jpg', G_Baohe:'G_Baohe.jpg',
+  G_Qianqing:'G_Qianqing.jpg', G_Jiaotai:'G_Jiaotai.jpg', G_Kunning:'G_Kunning.jpg', G_ImperialGarden:'G_ImperialGarden.jpg',
+  G_Wenhua:'G_Wenhua.jpg', G_EastSix:'G_EastSix.jpg', G_Clock:'G_Clock.jpg', G_Ningshou:'G_Ningshou.jpg',
+  G_Arms:'G_Arms.jpg', G_Wuying:'G_Wuying.jpg', G_Yangxin:'G_Yangxin.jpg', G_WestSix:'G_WestSix.jpg',
+  G_Sculpture:'G_Sculpture.jpg', G_Bronze:'G_Bronze.jpg', G_Furniture:'G_Furniture.jpg', G_Architecture:'G_Architecture.jpg',
+  G_Opera:'G_Opera.jpg'
+};
+
+/* ── 区域（南→北顺序）── */
+const REGION_ORDER = ['South', 'Front', 'Back', 'West', 'East', 'Northeast', 'North'];
+
+/* ── 兴趣标签 → 展厅映射 ── */
+const INTERESTS = [
+  { id:'architecture', label:'古建筑', en:'Architecture', galleries:['G_Taihe','G_Zhonghe','G_Baohe'] },
+  { id:'painting',     label:'绘画',   en:'Painting',     galleries:['G_Wenhua'] },
+  { id:'calligraphy',  label:'书法',   en:'Calligraphy',  galleries:['G_Wenhua'] },
+  { id:'relics',       label:'国宝文物', en:'National Treasures', galleries:['G_Taihe','G_Treasure'] },
+  { id:'treasure',     label:'珍宝',   en:'Treasures',    galleries:['G_Treasure'] },
+  { id:'clock',        label:'钟表',   en:'Clocks',       galleries:['G_Clock'] },
+  { id:'ceramics',     label:'陶瓷',   en:'Ceramics',     galleries:['G_Wuying'] },
+  { id:'sculpture',    label:'雕塑',   en:'Sculpture',    galleries:['G_Sculpture'] }
+];
+
+const TIME_OPTIONS = [
+  { id:'t2',    label:'2 小时以内',      en:'Under 2 hours',  min:120, desc:'中轴速览',  descEN:'Axis sprint' },
+  { id:'thalf', label:'半天 · 2–4 小时', en:'Half day · 2–4h', min:240, desc:'经典节奏',  descEN:'Classic pace' },
+  { id:'tfull', label:'一整天 · 4–7 小时', en:'Full day · 4–7h', min:420, desc:'全部看遍', descEN:'See it all' }
+];
+const PACE_OPTIONS = [
+  { id:'highlights', label:'精选必看', en:'Highlights',  desc:'只看核心，节奏紧凑',   descEN:'Core only, tight pace' },
+  { id:'deep',       label:'深度慢逛', en:'Deep dive',   desc:'看全看细，不赶时间',   descEN:'Slow & thorough' },
+  { id:'photo',      label:'摄影打卡', en:'Photography', desc:'各点预留拍照时间',     descEN:'Extra photo time' },
+  { id:'wander',     label:'随性漫步', en:'Wander',      desc:'有主线，也留空白',     descEN:'Loose & flexible' }
+];
+const TICKET_OPTIONS = [
+  { id:'willing', label:'愿意',       en:'Yes, happy to',   desc:'珍宝馆 + 钟表馆都进', descEN:'Include both paid halls' },
+  { id:'free',    label:'只看免费',   en:'Free areas only', desc:'跳过另购票展馆',     descEN:'Skip paid halls' },
+  { id:'later',   label:'到现场再说', en:'Decide on site',  desc:'标注为可选 +¥10',    descEN:'Mark as optional +¥10' }
+];
+
+/* ── 底图坐标（展厅中心点，对齐 gugong-map.html 几何）── */
+const GID_POS = {
+  G_MeridianGate:{x:380,y:962}, G_Taihe:{x:380,y:800}, G_Zhonghe:{x:380,y:722}, G_Baohe:{x:380,y:662},
+  G_Qianqing:{x:380,y:547}, G_Jiaotai:{x:380,y:493}, G_Kunning:{x:380,y:432}, G_ImperialGarden:{x:380,y:185},
+  G_Wenhua:{x:615,y:800}, G_EastSix:{x:597,y:490}, G_Clock:{x:615,y:350}, G_Ningshou:{x:615,y:205},
+  G_Arms:{x:595,y:627}, G_Wuying:{x:145,y:800}, G_Yangxin:{x:165,y:567}, G_WestSix:{x:162,y:467},
+  G_Sculpture:{x:152,y:310}, G_Bronze:{x:145,y:205}, G_Furniture:{x:140,y:907}, G_Architecture:{x:655,y:907},
+  G_Opera:{x:600,y:82}, EXIT:{x:380,y:72}
+};
+/* 珍宝馆与宁寿宫区共用底图区块 */
+const MAP_BLOCK_OF = gid => (gid === 'G_Treasure' ? 'G_Ningshou' : gid);
+
+/* ═══ 数据（fetch 优先，内嵌副本兜底 file://）═══ */
+let GALLERIES = [], ROUTES = [], ARTWORKS = [], POPULARITY = [], PRACTICAL = null;
+
+async function loadData() {
+  try {
+    const [g, r, a, p, info] = await Promise.all([
+      fetch(DATA_BASE + 'galleries.json').then(x => { if (!x.ok) throw 0; return x.json(); }),
+      fetch(DATA_BASE + 'routes.json').then(x => { if (!x.ok) throw 0; return x.json(); }),
+      fetch(DATA_BASE + 'artworks.json').then(x => { if (!x.ok) throw 0; return x.json(); }),
+      fetch(DATA_BASE + 'popularity.json').then(x => { if (!x.ok) throw 0; return x.json(); }),
+      fetch(DATA_BASE + 'practical-info.json').then(x => { if (!x.ok) throw 0; return x.json(); })
+    ]);
+    GALLERIES = g.galleries; ROUTES = r.routes; ARTWORKS = a.artworks;
+    POPULARITY = p.popularityEstimates.items; PRACTICAL = info;
+  } catch (e) {
+    GALLERIES = EMBEDDED.galleries; ROUTES = EMBEDDED.routes; ARTWORKS = EMBEDDED.artworks;
+    POPULARITY = EMBEDDED.popularity; PRACTICAL = EMBEDDED.practical;
+  }
+}
+
+const EMBEDDED = {
+  galleries: [
+    { id:'G_MeridianGate', name:'午门展厅', nameEN:'Meridian Gate Gallery', region:'South', description:'故宫正门，大型特展举办地。百年守护大展、萨迦寺展等均在此', walkingTime_min:0, mustSee:true, ticketExtra:false },
+    { id:'G_Taihe', name:'太和殿（金銮殿）', nameEN:'Hall of Supreme Harmony', region:'Front', description:'紫禁城最大宫殿，明清皇帝举行大典之所。中国现存最大木结构古建筑', walkingTime_min:10, mustSee:true, type:'原状陈列' },
+    { id:'G_Zhonghe', name:'中和殿', nameEN:'Hall of Central Harmony', region:'Front', description:'皇帝大典前休息之所，方形攒尖顶', walkingTime_min:2, mustSee:false, type:'原状陈列' },
+    { id:'G_Baohe', name:'保和殿', nameEN:'Hall of Preserving Harmony', region:'Front', description:'清代殿试场所，殿后有最大石雕云龙陛石', walkingTime_min:5, mustSee:true, type:'原状陈列' },
+    { id:'G_Qianqing', name:'乾清宫', nameEN:'Palace of Heavenly Purity', region:'Back', description:"明代至清初皇帝寝宫，'正大光明'匾额，秘密立储之处", walkingTime_min:15, mustSee:true, type:'原状陈列' },
+    { id:'G_Jiaotai', name:'交泰殿', nameEN:'Hall of Union', region:'Back', description:'存放皇帝二十五宝玺之处', walkingTime_min:3, mustSee:false, type:'原状陈列' },
+    { id:'G_Kunning', name:'坤宁宫', nameEN:'Palace of Earthly Tranquility', region:'Back', description:'明代皇后寝宫，清代改为萨满教祭祀场所及帝后大婚洞房', walkingTime_min:10, mustSee:true, type:'原状陈列' },
+    { id:'G_Yangxin', name:'养心殿', nameEN:'Hall of Mental Cultivation', region:'West', description:'雍正至清末皇帝实际居住和理政之所，垂帘听政发生地', walkingTime_min:10, mustSee:true, type:'原状陈列' },
+    { id:'G_Wenhua', name:'文华殿（书画馆）', nameEN:'Hall of Literary Glory (Painting & Calligraphy)', region:'East', description:'故宫书画常设展馆，分批展出历代书画精品。清明上河图、千里江山图曾在此展出', walkingTime_min:20, mustSee:true, ticketExtra:false },
+    { id:'G_Wuying', name:'武英殿（陶瓷馆）', nameEN:'Hall of Martial Valor (Ceramics Gallery)', region:'West', description:'故宫陶瓷常设展馆，400余件精品，从新石器至明清', walkingTime_min:20, mustSee:true, ticketExtra:false },
+    { id:'G_Treasure', name:'珍宝馆', nameEN:'Treasure Gallery', region:'Northeast', description:'宁寿宫区内，展出清代宫廷珍宝：金银器、玉器、宝石、珐琅等。含九龙壁', walkingTime_min:25, mustSee:true, ticketExtra:true, extraPrice:10 },
+    { id:'G_Clock', name:'钟表馆', nameEN:'Clock Gallery', region:'East', description:'奉先殿内，展出清宫收藏的中外精美钟表，英国、法国、瑞士及广州、苏州制造', walkingTime_min:20, mustSee:true, ticketExtra:true, extraPrice:10 },
+    { id:'G_Sculpture', name:'雕塑馆', nameEN:'Sculpture Gallery', region:'West', description:'慈宁宫内，425件雕塑：陶俑、画像砖石、佛像。含秦始皇兵马俑', walkingTime_min:15, mustSee:false, ticketExtra:false },
+    { id:'G_Bronze', name:'青铜器馆', nameEN:'Bronze Gallery', region:'West', description:'展出故宫藏15000余件青铜器中的精品，先秦有铭文青铜器近1600件', walkingTime_min:15, mustSee:false, ticketExtra:false },
+    { id:'G_Architecture', name:'古建馆', nameEN:'Architecture Gallery', region:'North', description:'东华门城楼、东南角楼、城墙段。展出古建构件、样式雷烫样，可登城墙', walkingTime_min:20, mustSee:false, ticketExtra:false },
+    { id:'G_Opera', name:'戏曲馆', nameEN:'Opera Gallery', region:'Northeast', description:'畅音阁大戏台及阅是楼，展示清代宫廷戏曲文化', walkingTime_min:10, mustSee:false, ticketExtra:false },
+    { id:'G_Furniture', name:'家具馆', nameEN:'Furniture Gallery', region:'South', description:'南大库，展出明清宫廷家具6000余件中的精品', walkingTime_min:10, mustSee:false, ticketExtra:false },
+    { id:'G_Arms', name:'武备馆', nameEN:'Arms Gallery', region:'East', description:'箭亭内，展示清代武备：弓箭、刀剑、甲胄', walkingTime_min:10, mustSee:false, ticketExtra:false },
+    { id:'G_ImperialGarden', name:'御花园', nameEN:'Imperial Garden', region:'North', description:'紫禁城内唯一花园，明代始建，古柏参天，亭台楼阁，堆秀山', walkingTime_min:15, mustSee:true, ticketExtra:false },
+    { id:'G_Ningshou', name:'宁寿宫区（含珍宝馆）', nameEN:'Ningshou Palace Area', region:'Northeast', description:'乾隆太上皇宫殿区：皇极殿、养性殿、乐寿堂、颐和轩、珍妃井、九龙壁', walkingTime_min:30, mustSee:true, ticketExtra:true, extraPrice:10 },
+    { id:'G_WestSix', name:'西六宫', nameEN:'West Six Palaces', region:'West', description:'储秀宫(慈禧居所)、翊坤宫、长春宫等，后妃生活区', walkingTime_min:15, mustSee:false, ticketExtra:false },
+    { id:'G_EastSix', name:'东六宫', nameEN:'East Six Palaces', region:'East', description:'景仁宫、承乾宫、钟粹宫等，后妃生活区。延禧宫(未完工水晶宫)', walkingTime_min:15, mustSee:false, ticketExtra:false }
+  ],
+  routes: [
+    { id:'highlights_2h', name:'2小时中轴精华', nameEN:'2-Hour Central Axis Highlights', duration_min:120, description:'沿中轴线快速打卡故宫最核心宫殿', totalWalkingTime_min:20,
+      stops:[ {order:1,galleryId:'G_MeridianGate',name:'午门',duration_min:10,notes:'入口，看当期特展'}, {order:2,galleryId:'G_Taihe',name:'太和殿',duration_min:15,notes:'金銮殿，故宫核心'}, {order:3,galleryId:'G_Zhonghe',name:'中和殿',duration_min:5}, {order:4,galleryId:'G_Baohe',name:'保和殿',duration_min:10,notes:'看云龙陛石'}, {order:5,galleryId:'G_Qianqing',name:'乾清宫',duration_min:15,notes:'正大光明匾'}, {order:6,galleryId:'G_Kunning',name:'坤宁宫',duration_min:10}, {order:7,galleryId:'G_ImperialGarden',name:'御花园',duration_min:15}, {order:8,galleryId:'G_MeridianGate',name:'神武门出',duration_min:0} ] },
+    { id:'half_day', name:'半日经典游', nameEN:'Half-Day Classic Tour', duration_min:240, description:'中轴线+珍宝馆+钟表馆+御花园，故宫最经典路线', totalWalkingTime_min:30,
+      stops:[ {order:1,galleryId:'G_MeridianGate',name:'午门（含特展）',duration_min:20}, {order:2,galleryId:'G_Taihe',name:'太和殿',duration_min:15}, {order:3,galleryId:'G_Baohe',name:'保和殿',duration_min:10}, {order:4,galleryId:'G_Qianqing',name:'乾清宫',duration_min:15}, {order:5,galleryId:'G_Kunning',name:'坤宁宫',duration_min:10}, {order:6,galleryId:'G_Clock',name:'钟表馆',duration_min:20,notes:'额外购票10元'}, {order:7,galleryId:'G_Treasure',name:'珍宝馆+九龙壁',duration_min:25,notes:'额外购票10元'}, {order:8,galleryId:'G_Ningshou',name:'宁寿宫区',duration_min:15}, {order:9,galleryId:'G_ImperialGarden',name:'御花园',duration_min:15}, {order:10,galleryId:'G_MeridianGate',name:'神武门出',duration_min:0} ] },
+    { id:'full_day', name:'全天深度游', nameEN:'Full Day Deep Dive', duration_min:420, description:'全面覆盖故宫所有开放区域和展馆', totalWalkingTime_min:45,
+      stops:[ {order:1,galleryId:'G_MeridianGate',name:'午门特展',duration_min:30}, {order:2,galleryId:'G_Wuying',name:'武英殿（陶瓷馆）',duration_min:25}, {order:3,galleryId:'G_Taihe',name:'太和殿',duration_min:15}, {order:4,galleryId:'G_Baohe',name:'保和殿',duration_min:10}, {order:5,galleryId:'G_Wenhua',name:'文华殿（书画馆）',duration_min:25}, {order:6,galleryId:'G_Qianqing',name:'乾清宫',duration_min:15}, {order:7,galleryId:'G_Yangxin',name:'养心殿',duration_min:15}, {order:8,galleryId:'G_WestSix',name:'西六宫',duration_min:20}, {order:9,galleryId:'G_Kunning',name:'坤宁宫',duration_min:10}, {order:10,galleryId:'G_Clock',name:'钟表馆',duration_min:20}, {order:11,galleryId:'G_EastSix',name:'东六宫',duration_min:15}, {order:12,galleryId:'G_Treasure',name:'珍宝馆+九龙壁',duration_min:25}, {order:13,galleryId:'G_Ningshou',name:'宁寿宫区',duration_min:20}, {order:14,galleryId:'G_Sculpture',name:'雕塑馆',duration_min:15}, {order:15,galleryId:'G_ImperialGarden',name:'御花园',duration_min:15} ] },
+    { id:'photo_spots', name:'摄影打卡线', nameEN:'Photography Highlights', duration_min:180, description:'故宫最出片的拍照点', totalWalkingTime_min:25,
+      stops:[ {order:1,galleryId:'G_MeridianGate',name:'午门',duration_min:10,notes:'宏伟城门'}, {order:2,galleryId:'G_Taihe',name:'太和殿广场',duration_min:15,notes:'最开阔的宫殿广场'}, {order:3,galleryId:'G_Baohe',name:'保和殿后云龙陛石',duration_min:10}, {order:4,galleryId:'G_Qianqing',name:'乾清宫',duration_min:10}, {order:5,galleryId:'G_Treasure',name:'九龙壁',duration_min:10}, {order:6,galleryId:'G_ImperialGarden',name:'御花园',duration_min:15,notes:'古柏+亭台'}, {order:7,galleryId:'G_Architecture',name:'角楼/城墙',duration_min:20,notes:'最佳全景视角'} ] },
+    { id:'family_kids', name:'亲子探索线', nameEN:'Family & Kids Explorer', duration_min:240, description:'适合带孩子的趣味路线', totalWalkingTime_min:25,
+      stops:[ {order:1,galleryId:'G_MeridianGate',name:'午门',duration_min:10,notes:'巨大的城门，孩子会震撼'}, {order:2,galleryId:'G_Taihe',name:'太和殿',duration_min:15,notes:'龙椅！'}, {order:3,galleryId:'G_Qianqing',name:'乾清宫',duration_min:10}, {order:4,galleryId:'G_Clock',name:'钟表馆',duration_min:20,notes:'会动的机械人偶，孩子最爱'}, {order:5,galleryId:'G_Treasure',name:'珍宝馆',duration_min:20,notes:'闪闪发光的珍宝'}, {order:6,galleryId:'G_Ningshou',name:'九龙壁',duration_min:10,notes:'数龙！'}, {order:7,galleryId:'G_ImperialGarden',name:'御花园',duration_min:15,notes:'可以跑跑'} ] }
+  ],
+  artworks: [
+    { id:'qingming_shanghe', name:'清明上河图', nameEN:'Along the River During the Qingming Festival', period:'北宋', gallery:'G_Wenhua', category:'绘画', description:'中国十大传世名画之一，极少展出', isNationalTreasure:true },
+    { id:'qianli_jiangshan', name:'千里江山图', nameEN:'A Thousand Li of Rivers and Mountains', period:'北宋', gallery:'G_Wenhua', category:'绘画', description:'18岁天才少年唯一传世之作，青绿山水巅峰', isNationalTreasure:true },
+    { id:'wuniu_tu', name:'五牛图', nameEN:'Five Oxen', period:'唐代', gallery:'G_Wenhua', category:'绘画', description:'现存最古老的纸本中国画', isNationalTreasure:true },
+    { id:'boyuan_tie', name:'伯远帖', nameEN:'Bo Yuan Tie', period:'东晋', gallery:'G_Wenhua', category:'书法', description:"东晋王氏家族唯一传世真迹，'三希'之一", isNationalTreasure:true },
+    { id:'taihe_dian', name:'太和殿（金銮殿）', nameEN:'Hall of Supreme Harmony', period:'明永乐十八年始建', gallery:'G_Taihe', category:'建筑', description:'中国现存最大木结构古建筑，皇帝登基、大婚、册封大典之所', isNationalTreasure:true },
+    { id:'jiulong_bi', name:'九龙壁', nameEN:'Nine Dragon Screen', period:'清乾隆', gallery:'G_Ningshou', category:'建筑/琉璃', description:'长29.4米，九条蟠龙栩栩如生，中国三大九龙壁之一', isNationalTreasure:true },
+    { id:'zhengda_guangming', name:'正大光明匾', nameEN:'Zhengda Guangming Plaque', period:'清顺治帝御笔', gallery:'G_Qianqing', category:'宫廷文物', description:'清代秘密立储制度核心——储君诏书藏于匾后', isNationalTreasure:false },
+    { id:'treasure_collection', name:'珍宝馆藏品（金瓯永固杯等）', nameEN:'Treasure Gallery Collection', period:'清代', gallery:'G_Treasure', category:'珍宝', description:'清宫造办处制作的金银器、玉器、宝石、珐琅', isNationalTreasure:false },
+    { id:'clock_collection', name:'钟表馆藏品（机械钟表）', nameEN:'Clock Gallery Collection', period:'18-19世纪', gallery:'G_Clock', category:'钟表', description:'清宫收藏的中外机械钟表，带自动人偶表演', isNationalTreasure:false },
+    { id:'qin_shi_huang_yong', name:'秦始皇兵马俑（故宫藏）', nameEN:'Terracotta Warriors', period:'秦代', gallery:'G_Sculpture', category:'雕塑', description:'慈宁宫雕塑馆藏有秦始皇兵马俑', isNationalTreasure:false }
+  ],
+  popularity: [
+    { id:'G_Taihe', score:1.0, tier:1 }, { id:'G_MeridianGate', score:0.95, tier:1 }, { id:'G_Treasure', score:0.90, tier:1 },
+    { id:'G_Clock', score:0.85, tier:1 }, { id:'G_Qianqing', score:0.85, tier:1 }, { id:'G_Kunning', score:0.80, tier:2 },
+    { id:'G_ImperialGarden', score:0.80, tier:2 }, { id:'G_Yangxin', score:0.75, tier:2 }, { id:'G_Wenhua', score:0.75, tier:2 },
+    { id:'G_Wuying', score:0.70, tier:2 }, { id:'G_Ningshou', score:0.70, tier:2 }, { id:'G_WestSix', score:0.60, tier:3 },
+    { id:'G_Sculpture', score:0.55, tier:3 }, { id:'G_Bronze', score:0.50, tier:3 }, { id:'G_Architecture', score:0.55, tier:3 }, { id:'G_EastSix', score:0.50, tier:3 }
+  ],
+  practical: {
+    hours: { peakSeason:{ period:'4月1日–10月31日', open:'08:30', lastEntry:'16:00', close:'17:00' },
+             offSeason:{ period:'11月1日–3月31日', open:'08:30', lastEntry:'15:30', close:'16:30' },
+             closedDay:'周一闭馆（法定节假日除外）', direction:'南向北单向：午门进，神武门/东华门出' },
+    admission: { peakSeason:{ adult:60 }, offSeason:{ adult:40 }, treasureGallery:{ price:10 }, clockGallery:{ price:10 },
+      reservation:{ required:true, note:'需提前网上预约，无当日票，约满即止' } },
+    specialNotes: { wheelchair:'午门服务中心免费租借轮椅', securityCheck:'午门安检入内' },
+    facilities: { dining:[ {name:'冰窖餐厅',location:'慈宁宫西侧'}, {name:'角楼咖啡',location:'神武门外'} ] }
+  }
+};
+
+/* ═══ i18n ═══ */
+const STR = {
+  quizMuseum:  { cn:'故宫博物院', en:'The Palace Museum' },
+  quizTitle:   { cn:'告诉我们你的偏好，<br>剩下的交给 AI。', en:'Tell us your preferences,<br>AI does the rest.' },
+  quizSub:     { cn:'4 个小问题，生成一条只属于你的故宫路线。也可以直接跳过，走经典中轴。', en:'4 questions for a route made just for you — or skip and take the classic central axis.' },
+  q1:          { cn:'你打算停留多久？', en:'How long will you stay?' },
+  q2:          { cn:'对哪些领域感兴趣？', en:'What are you into?' },
+  q2hint:      { cn:'可多选', en:'Multi-select' },
+  q3:          { cn:'想要什么游览节奏？', en:'Preferred pace?' },
+  q4:          { cn:'愿意另购票进珍宝馆 / 钟表馆吗？（各 ¥10）', en:'Paid halls (Treasure / Clock, ¥10 each)?' },
+  btnGenerate: { cn:'生成我的路线 →', en:'Generate my route →' },
+  btnSkip:     { cn:'跳过 · 中轴精华 →', en:'Skip · Axis highlights →' },
+  loadingTitle:{ cn:'AI 正在规划…', en:'AI is planning…' },
+  loadingSteps:{ cn:['正在分析你的偏好…', '正在匹配宫殿与路线…', '正在优化南北动线…'], en:['Analyzing your preferences…', 'Matching halls & routes…', 'Optimizing south-north flow…'] },
+  home:        { cn:'← 首页', en:'← Home' },
+  museumName:  { cn:'故宫博物院', en:'The Palace Museum' },
+  museumSub:   { cn:'The Palace Museum · 景山前街 4 号', en:'Forbidden City · 4 Jingshan Front St' },
+  tabA:        { cn:'经典路线库', en:'Route Library' },
+  tabB:        { cn:'重新定制', en:'Re-customize' },
+  recustomBlurb:{ cn:'偏好变了？重新填写问卷，AI 会基于你的最新选择重新匹配路线。', en:'Preferences changed? Retake the quiz and AI will re-match your route.' },
+  btnRecustom: { cn:'重新打开问卷', en:'Reopen quiz' },
+  curRoute:    { cn:'当前路线', en:'Current route' },
+  nextRegion:  { cn:'下一区域', en:'Next area' },
+  finishRoute: { cn:'完成 · 查看路线总结 ✓', en:'Finish · Route summary ✓' },
+  summary:     { cn:'路线总结', en:'Summary' },
+  regionProg:  { cn:'区域', en:'of' },
+  prefTime:    { cn:'停留时间', en:'Duration' },
+  prefInterest:{ cn:'兴趣领域', en:'Interests' },
+  prefPace:    { cn:'游览节奏', en:'Pace' },
+  prefTicket:  { cn:'另购票馆', en:'Paid halls' },
+  prefNone:    { cn:'未选择', en:'None' },
+  sugStay:     { cn:'建议', en:'Suggested' },
+  minUnit:     { cn:'分钟', en:'min' },
+  mustSee:     { cn:'必看', en:'Must-see' },
+  addedForYou: { cn:'为你加入', en:'Added for you' },
+  optional:    { cn:'可取舍', en:'Optional' },
+  optTicket:   { cn:'可选 +¥10', en:'Optional +¥10' },
+  paidTicket:  { cn:'另购票 +¥10', en:'Extra ticket +¥10' },
+  freeEntry:   { cn:'免费区域', en:'Free area' },
+  startTag:    { cn:'入口', en:'Entry' },
+  exitTag:     { cn:'出口', en:'Exit' },
+  emptyTitle:  { cn:'本区域未安排展点', en:'No stops in this area' },
+  emptyDesc:   { cn:'当前路线在此区域没有停留点。如果逛完还有余力，可以自由探索：', en:'No scheduled stops here. If you have spare time, explore freely:' },
+  legendRoute: { cn:'当前区域 / 路线', en:'Current area / route' },
+  legendOther: { cn:'其他区域', en:'Other areas' },
+  mapNote:     { cn:'南 → 北 单向参观 · 午门进 神武门出', en:'One-way S → N · Enter Meridian Gate, exit Shenwu Gate' },
+  detail:      { cn:'查看详情 →', en:'Details →' },
+  notInRoute:  { cn:'不在当前路线中', en:'Not in current route' },
+  highlights:  { cn:'看点', en:'Highlights' },
+  treasures:   { cn:'国宝与珍品', en:'Treasures' },
+  popularity:  { cn:'人气指数', en:'Popularity' },
+  sumTitle:    { cn:'Route Summary · 路线总结', en:'Route Summary' },
+  statTime:    { cn:'预计总时长', en:'Total time' },
+  statStops:   { cn:'站点', en:'Stops' },
+  statRegions: { cn:'覆盖区域', en:'Areas' },
+  statTreasure:{ cn:'国宝', en:'Treasures' },
+  sumTreasures:{ cn:'沿途国宝', en:'Treasures along the way' },
+  sumPractical:{ cn:'实用信息', en:'Practical info' },
+  sumHours:    { cn:'开放', en:'Hours' },
+  sumTicket:   { cn:'门票', en:'Tickets' },
+  sumDirection:{ cn:'动线', en:'Flow' },
+  sumDining:   { cn:'餐饮', en:'Dining' },
+  sumExhibit:  { cn:'当前特展', en:'Now showing' },
+  btnAgain:    { cn:'重新定制路线', en:'Re-customize' },
+  btnCopy:     { cn:'复制路线文本', en:'Copy route text' },
+  btnCopied:   { cn:'已复制 ✓', en:'Copied ✓' },
+  btnBackTop:  { cn:'回到南区', en:'Back to South' },
+  regionNames: {
+    South:     { cn:'南区', en:'South',     subcn:'午门入口 · 家具馆',       suben:'Meridian Gate · Furniture' },
+    Front:     { cn:'前朝', en:'Front',     subcn:'三大殿 · 太和 中和 保和',  suben:'Three Great Halls' },
+    Back:      { cn:'后廷', en:'Back',      subcn:'后三宫 · 乾清 交泰 坤宁',  suben:'Three Back Palaces' },
+    West:      { cn:'西路', en:'West',      subcn:'陶瓷 · 雕塑 · 养心殿',     suben:'Ceramics · Sculpture' },
+    East:      { cn:'东路', en:'East',      subcn:'书画 · 钟表 · 东六宫',     suben:'Painting · Clocks' },
+    Northeast: { cn:'东北', en:'Northeast', subcn:'珍宝馆 · 宁寿宫 · 戏曲',   suben:'Treasure · Ningshou' },
+    North:     { cn:'北区', en:'North',     subcn:'御花园 · 古建馆 · 神武门', suben:'Garden · Shenwu Gate' }
+  }
+};
+let LANG = localStorage.getItem('cp_lang') || 'en';
+const T = key => (STR[key] && STR[key][LANG]) || (STR[key] && STR[key].cn) || key;
+const TL = (obj, field) => {
+  if (!obj) return '';
+  if (LANG === 'en' && obj[field + 'EN']) return obj[field + 'EN'];
+  return obj[field] || '';
+};
+
+/* ═══ 工具 ═══ */
+const $ = s => document.querySelector(s);
+const galleryById = id => GALLERIES.find(g => g.id === id);
+const popOf = gid => POPULARITY.find(x => x.id === gid) || null;
+const regionOf = gid => { const g = galleryById(gid); return g ? g.region : 'South'; };
+const shortName = n => (n || '').replace(/（.*?）/g, '');
+const round5 = n => Math.max(5, Math.round(n / 5) * 5);
+function fmtDur(min) {
+  if (min < 60) return LANG === 'en' ? min + ' min' : min + ' 分钟';
+  const h = Math.floor(min / 60), m = min % 60;
+  if (!m) return LANG === 'en' ? h + ' h' : h + ' 小时';
+  return LANG === 'en' ? h + ' h ' + m + ' min' : h + ' 小时 ' + m + ' 分';
+}
+const esc = s => String(s == null ? '' : s);
+
+/* ═══ AI 路线匹配 ═══ */
+function matchRoute(prefs) {
+  const reasons = [];
+  const paidIds = ['G_Treasure', 'G_Clock', 'G_Ningshou'];
+
+  /* 1. 时间 → 最接近的预置路线（平手时按节奏偏好） */
+  let best = Infinity;
+  ROUTES.forEach(r => { const d = Math.abs(r.duration_min - prefs.timeMin); if (d < best) best = d; });
+  let pool = ROUTES.filter(r => Math.abs(r.duration_min - prefs.timeMin) === best);
+  let base = pool[0];
+  if (pool.length > 1 && prefs.pace === 'photo') base = pool.find(r => r.id === 'photo_spots') || pool[0];
+  if (pool.length > 1 && prefs.pace === 'highlights') base = pool.find(r => r.id === 'highlights_2h') || pool[0];
+  reasons.push(LANG === 'en'
+    ? 'Based on <b>「' + TL(base, 'name') + '」</b> — closest to your time'
+    : '以时长最接近的 <b>「' + base.name + '」</b> 为基底');
+
+  let stops = base.stops.map(s => ({ ...s }));
+
+  /* 2. 门票偏好：只看免费 → 剔除另购票馆 */
+  if (prefs.ticket === 'free') {
+    const removed = stops.filter(s => paidIds.includes(s.galleryId)).length;
+    stops = stops.filter(s => !paidIds.includes(s.galleryId));
+    if (removed) reasons.push(LANG === 'en'
+      ? 'Free-only: <b>skipped paid halls</b> (Treasure / Clock / Ningshou)'
+      : '只看免费：已 <b>跳过珍宝馆 / 钟表馆 / 宁寿宫区</b>');
+  }
+
+  /* 3. 兴趣 → 必含展厅 */
+  const must = [];
+  prefs.interests.forEach(iid => {
+    const it = INTERESTS.find(x => x.id === iid);
+    if (it) must.push(...it.galleries);
+  });
+  const inRoute = new Set(stops.map(s => s.galleryId));
+  const addedNames = [], skippedPaid = [];
+  [...new Set(must)].forEach(gid => {
+    if (inRoute.has(gid)) return;
+    const g = galleryById(gid);
+    if (!g) return;
+    if (prefs.ticket === 'free' && paidIds.includes(gid)) { skippedPaid.push(shortName(g.name)); return; }
+    stops.push({ galleryId:gid, name:shortName(g.name), duration_min:g.walkingTime_min || 15,
+      notes:g.description, added:true });
+    addedNames.push(LANG === 'en' ? g.nameEN.split('(')[0].trim() : shortName(g.name));
+  });
+  if (addedNames.length) reasons.push(LANG === 'en'
+    ? 'Interests added: <b>' + addedNames.join(', ') + '</b>'
+    : '按兴趣必含 <b>' + addedNames.join('、') + '</b>');
+  if (skippedPaid.length) reasons.push(LANG === 'en'
+    ? 'Ticket pref overrode interest: <b>' + skippedPaid.join(', ') + ' skipped</b>'
+    : '门票偏好优先：<b>' + skippedPaid.join('、') + '</b> 未加入');
+
+  /* 4. 节奏调整 */
+  if (prefs.pace === 'highlights') {
+    stops = stops.filter(s => {
+      const g = galleryById(s.galleryId), p = popOf(s.galleryId);
+      return s.duration_min === 0 || (g && g.mustSee) || (p && p.tier <= 2) || must.includes(s.galleryId);
+    });
+    stops.forEach(s => { if (s.duration_min > 0) s.duration_min = round5(s.duration_min * 0.9); });
+    reasons.push(LANG === 'en' ? 'Highlights pace: <b>tier-3 halls dropped</b>, time compressed' : '精选节奏：已 <b>跳过低人气展馆</b>、压缩停留');
+  } else if (prefs.pace === 'deep') {
+    stops.forEach(s => { if (s.duration_min > 0) s.duration_min = round5(s.duration_min * 1.3); });
+    reasons.push(LANG === 'en' ? 'Deep pace: stay <b>+30%</b> at every hall' : '深度节奏：各展馆停留 <b>+30%</b>');
+  } else if (prefs.pace === 'photo') {
+    stops.forEach(s => { if (s.duration_min > 0) s.duration_min = round5(s.duration_min + 5); s.photo = true; });
+    reasons.push(LANG === 'en' ? 'Photography: <b>+5 min photo time</b> at each stop' : '摄影节奏：每站 <b>+5 分钟</b>拍照时间');
+  } else {
+    stops.forEach(s => {
+      if (s.duration_min > 0) s.duration_min = round5(s.duration_min * 1.1);
+      const g = galleryById(s.galleryId);
+      if (g && !g.mustSee) s.optional = true;
+    });
+    reasons.push(LANG === 'en' ? 'Wander pace: non-core halls marked <b>optional</b>' : '漫步节奏：非核心展馆标注为 <b>可自由取舍</b>');
+  }
+
+  /* 5. 门票「到现场再说」→ 标注可选 */
+  if (prefs.ticket === 'later') {
+    stops.forEach(s => { if (paidIds.includes(s.galleryId)) s.optionalTicket = true; });
+    reasons.push(LANG === 'en' ? 'Paid halls marked <b>optional (+¥10 on site)</b>' : '另购票展馆已标注为 <b>可选（现场 +¥10）</b>');
+  }
+
+  /* 6. 出口虚拟站 + 按区域排序（南→北） */
+  stops = stops.filter(s => !(s.duration_min === 0 && /神武门/.test(s.name || '')));
+  stops = stops.map((s, i) => ({ ...s, _i:i }));
+  stops.sort((a, b) => {
+    const ra = REGION_ORDER.indexOf(regionOf(a.galleryId));
+    const rb = REGION_ORDER.indexOf(regionOf(b.galleryId));
+    return ra - rb || a._i - b._i;
+  });
+  stops.forEach((s, i) => { s.order = i + 1; delete s._i; });
+
+  const walking = (base.totalWalkingTime_min || 20) + addedNames.length * 8;
+  const totalMin = round5(stops.reduce((t, s) => t + s.duration_min, 0) + walking);
+
+  return { id:'ai_custom', custom:true, name: LANG === 'en' ? 'AI Custom Route' : 'AI 定制路线',
+    nameEN:'AI Custom Route', basedOn:base.name, description: LANG === 'en' ? 'Adjusted from "' + TL(base, 'name') + '"' : '基于「' + base.name + '」按你的偏好调整',
+    stops, walkingMin:walking, totalMin, reasons };
+}
+
+function normalizePreset(r) {
+  let stops = r.stops.map(s => ({ ...s }));
+  stops = stops.filter(s => !(s.duration_min === 0 && /神武门/.test(s.name || '')));
+  stops = stops.map((s, i) => ({ ...s, _i:i }));
+  stops.sort((a, b) => {
+    const ra = REGION_ORDER.indexOf(regionOf(a.galleryId));
+    const rb = REGION_ORDER.indexOf(regionOf(b.galleryId));
+    return ra - rb || a._i - b._i;
+  });
+  stops.forEach((s, i) => { s.order = i + 1; delete s._i; });
+  const walking = r.totalWalkingTime_min || 20;
+  const totalMin = round5(stops.reduce((t, s) => t + s.duration_min, 0) + walking);
+  return { id:r.id, custom:false, name:r.name, nameEN:r.nameEN, description:r.description,
+    stops, walkingMin:walking, totalMin, reasons:[] };
+}
+
+/* ═══ 全局状态 ═══ */
+const state = {
+  prefs: { timeMin:240, timeLabel:'半天 · 2–4 小时', interests:[], pace:'highlights', ticket:'later' },
+  route: null, region: null, regionsInRoute: [], customRoute: null
+};
+try {
+  const saved = JSON.parse(localStorage.getItem('gg_prefs') || 'null');
+  if (saved && saved.timeMin) state.prefs = saved;
+} catch (e) {}
+
+function exitStop() {
+  return { galleryId:'EXIT', name:'神武门 · 出口', duration_min:0, virtual:true, order:99,
+    notes:'参观结束，出神武门；可至景山公园俯瞰紫禁城全景' };
+}
+function routeRegions(route) {
+  const set = new Set();
+  route.stops.forEach(s => { const g = galleryById(s.galleryId); if (g) set.add(g.region); });
+  set.add('South'); set.add('North');
+  return REGION_ORDER.filter(r => set.has(r));
+}
+function stopsInRegion(route, rg) {
+  const arr = route.stops.filter(s => {
+    const g = galleryById(s.galleryId);
+    return g && g.region === rg;
+  });
+  if (rg === 'South') arr.unshift({ galleryId:'G_MeridianGate', name:'午门 · 安检入场', duration_min:10, virtual:true, order:0, notes:'唯一入口，午门安检入场，大型特展在午门展厅' });
+  if (rg === 'North') arr.push(exitStop());
+  /* 入口虚拟站去重：若路线首站已是午门，则不再重复 */
+  return arr.filter((s, i) => !(s.virtual && s.order === 0 && arr.some((x, j) => j !== i && x.galleryId === 'G_MeridianGate' && !x.virtual)));
+}
+function routeStats(route) {
+  const gids = new Set(route.stops.map(s => s.galleryId));
+  const treasures = ARTWORKS.filter(a => a.isNationalTreasure && gids.has(a.gallery)).length;
+  return { stops:route.stops.length, regions:routeRegions(route).length, treasures, totalMin:route.totalMin };
+}
+
+/* ═══ 问卷 ═══ */
+function renderQuiz() {
+  $('#qTime').innerHTML = TIME_OPTIONS.map(o =>
+    '<button class="opt' + (state.prefs.timeMin === o.min ? ' on' : '') + '" data-v="' + o.min + '" data-l="' + (LANG === 'en' ? o.en : o.label) + '">' +
+    '<span class="ol">' + (LANG === 'en' ? o.en : o.label) + '</span><span class="od">' + (LANG === 'en' ? o.descEN : o.desc) + '</span></button>').join('');
+  $('#qInterests').innerHTML = INTERESTS.map(o =>
+    '<button class="chip' + (state.prefs.interests.includes(o.id) ? ' on' : '') + '" data-v="' + o.id + '">' + (LANG === 'en' ? o.en : o.label) + '</button>').join('');
+  $('#qPace').innerHTML = PACE_OPTIONS.map(o =>
+    '<button class="opt' + (state.prefs.pace === o.id ? ' on' : '') + '" data-v="' + o.id + '">' +
+    '<span class="ol">' + (LANG === 'en' ? o.en : o.label) + '</span><span class="od">' + (LANG === 'en' ? o.descEN : o.desc) + '</span></button>').join('');
+  $('#qTicket').innerHTML = TICKET_OPTIONS.map(o =>
+    '<button class="opt' + (state.prefs.ticket === o.id ? ' on' : '') + '" data-v="' + o.id + '">' +
+    '<span class="ol">' + (LANG === 'en' ? o.en : o.label) + '</span><span class="od">' + (LANG === 'en' ? o.descEN : o.desc) + '</span></button>').join('');
+}
+$('#qTime').addEventListener('click', e => {
+  const b = e.target.closest('.opt'); if (!b) return;
+  state.prefs.timeMin = +b.dataset.v; state.prefs.timeLabel = b.dataset.l; savePrefs(); renderQuiz();
+});
+$('#qPace').addEventListener('click', e => {
+  const b = e.target.closest('.opt'); if (!b) return;
+  state.prefs.pace = b.dataset.v; savePrefs(); renderQuiz();
+});
+$('#qTicket').addEventListener('click', e => {
+  const b = e.target.closest('.opt'); if (!b) return;
+  state.prefs.ticket = b.dataset.v; savePrefs(); renderQuiz();
+});
+$('#qInterests').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  const id = b.dataset.v, arr = state.prefs.interests, i = arr.indexOf(id);
+  if (i >= 0) arr.splice(i, 1); else arr.push(id);
+  savePrefs(); b.classList.toggle('on');
+});
+function savePrefs() { try { localStorage.setItem('gg_prefs', JSON.stringify(state.prefs)); } catch (e) {} }
+
+/* ═══ 阶段切换 ═══ */
+function showPhase(id) {
+  ['flash', 'quiz', 'loading', 'mapPage'].forEach(p => $('#' + p).classList.remove('on'));
+  if (id) $('#' + id).classList.add('on');
+}
+function runLoading(done) {
+  showPhase('loading');
+  const steps = T('loadingSteps');
+  let i = 0;
+  $('#lbarFill').style.width = '10%';
+  const tick = () => {
+    $('#lstep').textContent = steps[i];
+    $('#lbarFill').style.width = Math.min(94, 10 + (i + 1) * 28) + '%';
+    i++;
+    if (i < steps.length) setTimeout(tick, 420);
+    else setTimeout(() => { $('#lbarFill').style.width = '100%'; setTimeout(done, 260); }, 420);
+  };
+  setTimeout(tick, 150);
+}
+
+/* ═══ 地图页渲染 ═══ */
+function setRoute(route, jumpToFirst) {
+  state.route = route;
+  state.regionsInRoute = routeRegions(route);
+  if (route.custom) state.customRoute = route;
+  renderRouteHead();
+  renderLibrary();
+  renderRegionBar();
+  goRegion(jumpToFirst === false && state.region ? state.region : state.regionsInRoute[0]);
+  renderPrefSummary();
+}
+function renderRouteHead() {
+  const route = state.route, st = routeStats(route);
+  $('#routeTitle').textContent = TL(route, 'name');
+  $('#routeMeta').textContent = (LANG === 'en' ? '~' : '约 ') + fmtDur(st.totalMin) +
+    (LANG === 'en' ? ' · ' + st.stops + ' stops · ' + st.regions + ' areas · ' + st.treasures + ' treasures'
+                   : ' · ' + st.stops + ' 个站点 · 跨 ' + st.regions + ' 个区域 · 国宝 ' + st.treasures + ' 件');
+  $('#reasonChips').innerHTML = (route.reasons || []).map(r => '<span class="reason-chip">' + r + '</span>').join('');
+  $('#curRouteName').textContent = TL(route, 'name');
+  $('#curRouteMeta').textContent = fmtDur(st.totalMin) + ' · ' + st.stops + (LANG === 'en' ? ' stops · ' : ' 站 · ') + st.regions + (LANG === 'en' ? ' areas' : ' 区');
+}
+
+/* ── 侧边栏：经典路线库 ── */
+function renderLibrary() {
+  const items = [];
+  if (state.customRoute) items.push(routeItemHTML(state.customRoute, routeStats(state.customRoute), true));
+  ROUTES.forEach(r0 => {
+    const r = normalizePreset(r0);
+    items.push(routeItemHTML(r, routeStats(r), false));
+  });
+  $('#paneA').innerHTML = items.join('');
+  document.querySelectorAll('#paneA .route-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.dataset.rid;
+      const r = id === 'ai_custom' ? state.customRoute : normalizePreset(ROUTES.find(x => x.id === id));
+      setRoute(r, true);
+    });
+  });
+}
+function routeItemHTML(r, st, isCustom) {
+  const on = state.route && state.route.id === r.id ? ' on' : '';
+  return '<div class="route-item' + on + (isCustom ? ' custom' : '') + '" data-rid="' + r.id + '">' +
+    '<div class="rn">' + (isCustom ? '<span class="ai-tag">AI</span>' : '') + esc(TL(r, 'name')) + '</div>' +
+    '<div class="rm">' + (LANG === 'en' ? '~' : '约 ') + fmtDur(st.totalMin) + ' · ' + st.stops + (LANG === 'en' ? ' stops · ' : ' 站 · ') + st.regions + (LANG === 'en' ? ' areas' : ' 区') + '</div>' +
+    '<div class="rd">' + esc(r.description || '') + '</div></div>';
+}
+
+/* ── 侧边栏：重新定制 ── */
+function renderPrefSummary() {
+  const p = state.prefs;
+  const its = p.interests.map(id => { const o = INTERESTS.find(x => x.id === id); return o ? (LANG === 'en' ? o.en : o.label) : null; }).filter(Boolean);
+  const timeO = TIME_OPTIONS.find(o => o.min === p.timeMin);
+  const paceO = PACE_OPTIONS.find(o => o.id === p.pace);
+  const tickO = TICKET_OPTIONS.find(o => o.id === p.ticket);
+  $('#prefSummary').innerHTML =
+    '<div class="ps-row"><span>' + T('prefTime') + '</span><span>' + esc(timeO ? (LANG === 'en' ? timeO.en : timeO.label) : p.timeLabel) + '</span></div>' +
+    '<div class="ps-row"><span>' + T('prefInterest') + '</span><span>' + esc(its.join(LANG === 'en' ? ', ' : '、') || T('prefNone')) + '</span></div>' +
+    '<div class="ps-row"><span>' + T('prefPace') + '</span><span>' + esc(paceO ? (LANG === 'en' ? paceO.en : paceO.label) : '') + '</span></div>' +
+    '<div class="ps-row"><span>' + T('prefTicket') + '</span><span>' + esc(tickO ? (LANG === 'en' ? tickO.en : tickO.label) : '') + '</span></div>';
+}
+$('#tabA').addEventListener('click', () => switchTab('A'));
+$('#tabB').addEventListener('click', () => switchTab('B'));
+function switchTab(t) {
+  $('#tabA').classList.toggle('on', t === 'A');
+  $('#tabB').classList.toggle('on', t === 'B');
+  $('#paneA').classList.toggle('on', t === 'A');
+  $('#paneB').classList.toggle('on', t === 'B');
+}
+$('#btnRecustom').addEventListener('click', () => { renderQuiz(); showPhase('quiz'); });
+
+/* ── 区域栏 ── */
+function renderRegionBar() {
+  $('#regionBar').innerHTML = REGION_ORDER.map(rg => {
+    const has = state.regionsInRoute.includes(rg);
+    const meta = STR.regionNames[rg];
+    return '<button class="region-btn' + (state.region === rg ? ' on' : '') + (has ? '' : ' dim') + '" data-r="' + rg + '">' +
+      meta[LANG] + '<small>' + (LANG === 'en' ? meta.suben : meta.subcn) + '</small></button>';
+  }).join('') + '<span class="region-progress" id="regionProg"></span>';
+  document.querySelectorAll('.region-btn').forEach(b =>
+    b.addEventListener('click', () => goRegion(b.dataset.r)));
+}
+$('#nextRegionBtn').addEventListener('click', () => {
+  const idx = state.regionsInRoute.indexOf(state.region);
+  if (idx >= 0 && idx < state.regionsInRoute.length - 1) goRegion(state.regionsInRoute[idx + 1]);
+  else goRegion('SUMMARY');
+});
+
+/* ── 区域视图 ── */
+function goRegion(rg) {
+  state.region = rg;
+  document.querySelectorAll('.region-btn').forEach(b => b.classList.toggle('on', b.dataset.r === rg));
+  const idx = state.regionsInRoute.indexOf(rg);
+  const prog = $('#regionProg');
+  if (prog) prog.textContent = rg === 'SUMMARY' ? T('summary')
+    : (idx + 1) + ' / ' + state.regionsInRoute.length + ' ' + T('regionProg');
+
+  const view = $('#regionView');
+  if (rg === 'SUMMARY') {
+    view.innerHTML = summaryHTML();
+    bindSummary(view);
+  } else {
+    const stops = stopsInRegion(state.route, rg);
+    const meta = STR.regionNames[rg];
+    let html = '<div class="region-grid"><div class="map-col">' + mapHTML() + '</div>' +
+      '<div class="stops-col"><div class="region-title-row"><span class="region-title">' + meta[LANG] +
+      '<span class="rt-en">' + meta.en.toUpperCase() + '</span></span>' +
+      '<span class="region-sub">' + (LANG === 'en' ? meta.suben : meta.subcn) + '</span></div>';
+    const realStops = stops.filter(s => !s.virtual);
+    if (!realStops.length && rg !== 'South' && rg !== 'North') {
+      const gs = GALLERIES.filter(g => g.region === rg);
+      html += '<div class="region-empty"><h3>' + T('emptyTitle') + '</h3><p>' + T('emptyDesc') + '</p>' +
+        '<div class="fe-list">' + gs.map(g => LANG === 'en' ? g.nameEN : shortName(g.name)).join(' · ') + '</div></div>';
+    } else {
+      html += '<div class="stops">' + stops.map(stopCardHTML).join('') + '</div>';
+    }
+    html += '</div></div>';
+    view.innerHTML = html;
+    bindRegionView(view, rg, stops);
+  }
+  view.scrollTop = 0;
+
+  const btn = $('#nextRegionBtn');
+  if (rg === 'SUMMARY') { btn.style.display = 'none'; return; }
+  btn.style.display = '';
+  if (idx >= 0 && idx < state.regionsInRoute.length - 1) {
+    const nm = STR.regionNames[state.regionsInRoute[idx + 1]];
+    btn.textContent = T('nextRegion') + '：' + nm[LANG] + ' ▸';
+  } else {
+    btn.textContent = T('finishRoute');
+  }
+}
+
+/* ── 站点卡 ── */
+function stopCardHTML(s) {
+  const g = galleryById(s.galleryId);
+  const isExit = s.galleryId === 'EXIT';
+  const tags = [];
+  if (s.virtual && !isExit) tags.push('<span class="stag red">' + T('startTag') + '</span>');
+  if (isExit) tags.push('<span class="stag red">' + T('exitTag') + '</span>');
+  if (g && g.mustSee) tags.push('<span class="stag red">' + T('mustSee') + '</span>');
+  if (s.added) tags.push('<span class="stag red">' + T('addedForYou') + '</span>');
+  if (s.optional) tags.push('<span class="stag soft">' + T('optional') + '</span>');
+  if (s.optionalTicket) tags.push('<span class="stag soft">' + T('optTicket') + '</span>');
+  else if (g && g.ticketExtra) tags.push('<span class="stag soft">' + T('paidTicket') + '</span>');
+  const name = isExit ? T('exitTag') + ' · ' + (LANG === 'en' ? 'Shenwu Gate' : '神武门')
+    : (g ? (LANG === 'en' ? g.nameEN : shortName(g.name)) : s.name);
+  const dur = s.duration_min > 0
+    ? '<div class="stop-dur">' + T('sugStay') + ' ' + s.duration_min + ' ' + T('minUnit') + '</div>' : '';
+  return '<div class="stop-card" data-gid="' + s.galleryId + '">' +
+    '<span class="stop-ord">' + (s.virtual ? (isExit ? '出' : '入') : String(s.order).padStart(2, '0')) + '</span>' +
+    '<div class="stop-name">' + esc(name) + '</div>' + dur +
+    (tags.length ? '<div class="stop-tags">' + tags.join('') + '</div>' : '') +
+    (s.notes ? '<div class="stop-notes">' + esc(s.notes) + '</div>' : '') +
+    '</div>';
+}
+
+/* ── 总结卡 ── */
+function summaryHTML() {
+  const r = state.route, st = routeStats(r), p = PRACTICAL || {};
+  const gids = new Set(r.stops.map(s => s.galleryId));
+  const treasures = ARTWORKS.filter(a => a.isNationalTreasure && gids.has(a.gallery));
+  const hours = p.hours || {}, adm = p.admission || {};
+  const dining = (((p.facilities || {}).dining) || []).map(d => d.name + '（' + d.location + '）').join('、');
+  const exhibitions = (p.currentExhibitions || []).slice(0, 2);
+  return '<div class="sum-card">' +
+    '<div class="sum-hero"><div class="st">' + T('sumTitle') + '</div><h2>' + esc(TL(r, 'name')) + '</h2></div>' +
+    '<div class="sum-stats">' +
+      '<div class="sum-stat"><div class="n">' + fmtDur(st.totalMin) + '</div><div class="l">' + T('statTime') + '</div></div>' +
+      '<div class="sum-stat"><div class="n">' + st.stops + '</div><div class="l">' + T('statStops') + '</div></div>' +
+      '<div class="sum-stat"><div class="n">' + st.regions + '</div><div class="l">' + T('statRegions') + '</div></div>' +
+      '<div class="sum-stat"><div class="n">' + st.treasures + '</div><div class="l">' + T('statTreasure') + '</div></div>' +
+    '</div>' +
+    (treasures.length ? '<div class="sum-sec"><h4>' + T('sumTreasures') + '</h4><ul>' +
+      treasures.map(a => '<li><b>' + esc(TL(a, 'name')) + '</b>（' + esc(a.period) + '）— ' + esc(a.description) + '</li>').join('') + '</ul></div>' : '') +
+    '<div class="sum-sec"><h4>' + T('sumPractical') + '</h4><ul>' +
+      '<li><b>' + T('sumHours') + '：</b>' + (LANG === 'en'
+          ? 'Peak 08:30–17:00 (last entry 16:00) · Off-season 08:30–16:30 · Closed Mondays'
+          : '旺季 08:30–17:00（16:00 停止入院）· 淡季 08:30–16:30 · ' + (hours.closedDay || '周一闭馆')) + '</li>' +
+      '<li><b>' + T('sumTicket') + '：</b>' + (LANG === 'en'
+          ? 'Peak ¥60 / Off-season ¥40 · Treasure & Clock +¥10 each · Advance online booking required, no same-day tickets'
+          : '旺季 ¥60 / 淡季 ¥40 · 珍宝馆、钟表馆各 +¥10 · ' + ((adm.reservation || {}).note || '')) + '</li>' +
+      '<li><b>' + T('sumDirection') + '：</b>' + (hours.direction || '') + '</li>' +
+      (dining ? '<li><b>' + T('sumDining') + '：</b>' + esc(dining) + '</li>' : '') +
+      (exhibitions.length ? '<li><b>' + T('sumExhibit') + '：</b>' + exhibitions.map(x => esc(LANG === 'en' && x.nameEN ? x.nameEN : x.name) + '（' + esc(x.location) + '）').join('；') + '</li>' : '') +
+    '</ul></div>' +
+    '<div class="sum-actions">' +
+      '<button class="btn-solid" id="sumRecustom">' + T('btnAgain') + '</button>' +
+      '<button class="btn-ghost" id="sumCopy">' + T('btnCopy') + '</button>' +
+      '<button class="btn-ghost" id="sumBack">' + T('btnBackTop') + '</button>' +
+    '</div></div>';
+}
+function bindSummary(view) {
+  view.querySelector('#sumRecustom').addEventListener('click', () => { renderQuiz(); showPhase('quiz'); });
+  view.querySelector('#sumBack').addEventListener('click', () => goRegion(state.regionsInRoute[0]));
+  view.querySelector('#sumCopy').addEventListener('click', e => {
+    const r = state.route;
+    let txt = 'CuratorPath · 故宫博物院 The Palace Museum\n' + (LANG === 'en' ? 'Route' : '路线') + '：' + TL(r, 'name') +
+      '\n' + (LANG === 'en' ? 'Est.' : '预计') + '：' + fmtDur(routeStats(r).totalMin) + '\n\n';
+    state.regionsInRoute.forEach(rg => {
+      stopsInRegion(r, rg).forEach(s => {
+        if (s.duration_min === 0 && !s.virtual) return;
+        const g = galleryById(s.galleryId);
+        const nm = s.galleryId === 'EXIT' ? '神武门出 Shenwu Gate Exit' : (g ? shortName(g.name) : s.name);
+        txt += STR.regionNames[rg].cn + ' · ' + nm + (s.duration_min ? '（' + s.duration_min + ' 分钟）' : '') + (s.notes ? ' — ' + s.notes : '') + '\n';
+      });
+    });
+    navigator.clipboard.writeText(txt).then(() => {
+      e.target.textContent = T('btnCopied');
+      setTimeout(() => { e.target.textContent = T('btnCopy'); }, 1600);
+    });
+  });
+}
+
+/* ═══ 故宫底图（几何复用 gugong/gugong-map.html）═══ */
+function mapHTML() {
+  return '<div class="fmap-wrap"><svg class="fmap" viewBox="0 0 760 1060" xmlns="http://www.w3.org/2000/svg">' +
+    '<rect x="20" y="20" width="720" height="1020" rx="3" fill="var(--fill-1)" stroke="var(--line-dark)" stroke-width="1"/>' +
+    '<rect x="40" y="40" width="680" height="980" rx="2" fill="#fff" stroke="var(--fg-muted)" stroke-width="1.5"/>' +
+    '<rect x="50" y="50" width="660" height="960" fill="var(--fill-1)"/>' +
+    '<line x1="380" y1="60" x2="380" y2="1000" class="axis-line"/>' +
+
+    '<g class="area-block" data-gid="G_MeridianGate"><rect class="hl-rect" x="290" y="940" width="180" height="45" rx="2" fill="var(--fill-4)" stroke="var(--line-dark)" stroke-width="1"/><text x="380" y="967" class="lbl" font-size="12" fill="var(--fg)">午门 · 入口</text></g>' +
+    '<g class="area-block" data-gid="EXIT"><rect class="hl-rect" x="310" y="55" width="140" height="35" rx="2" fill="var(--fill-4)" stroke="var(--line-dark)" stroke-width="1"/><text x="380" y="77" class="lbl" font-size="11" fill="var(--fg)">神武门 · 出口</text></g>' +
+    '<g class="area-block"><rect x="692" y="565" width="22" height="70" rx="2" fill="var(--fill-3)" stroke="var(--line-dark)" stroke-width="1"/><text x="703" y="605" class="lbl" font-size="8" fill="var(--fg-soft)" writing-mode="tb">东华门</text></g>' +
+    '<g class="area-block"><rect x="46" y="565" width="22" height="70" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1"/><text x="57" y="605" class="lbl" font-size="8" fill="var(--fg-muted)" writing-mode="tb">西华门</text></g>' +
+
+    '<rect x="215" y="878" width="330" height="45" fill="none" stroke="var(--line-dark)" stroke-width="1" stroke-dasharray="3,3"/>' +
+    '<text x="380" y="905" class="road-lbl">太和门广场 · 金水桥</text>' +
+
+    '<g class="area-block" data-gid="G_Taihe"><rect class="hl-rect" x="260" y="755" width="240" height="90" rx="2" fill="var(--fill-3)" stroke="var(--line-dark)" stroke-width="1.5"/><text x="380" y="795" class="lbl" font-size="15" fill="var(--fg)">太和殿</text><text x="380" y="815" class="lbl-sub" font-size="8" fill="var(--fg-muted)">Hall of Supreme Harmony</text></g>' +
+    '<g class="area-block" data-gid="G_Zhonghe"><rect class="hl-rect" x="330" y="705" width="100" height="35" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1"/><text x="380" y="727" class="lbl" font-size="10" fill="var(--fg-soft)">中和殿</text></g>' +
+    '<g class="area-block" data-gid="G_Baohe"><rect class="hl-rect" x="280" y="635" width="200" height="55" rx="2" fill="var(--fill-3)" stroke="var(--line-dark)" stroke-width="1.5"/><text x="380" y="663" class="lbl" font-size="13" fill="var(--fg)">保和殿</text><text x="380" y="680" class="lbl-sub" font-size="8" fill="var(--fg-muted)">云龙陛石</text></g>' +
+
+    '<rect x="315" y="602" width="130" height="20" fill="none" stroke="var(--line-dark)" stroke-width="1" stroke-dasharray="3,3"/>' +
+    '<text x="380" y="616" class="road-lbl">乾清门</text>' +
+
+    '<g class="area-block" data-gid="G_Qianqing"><rect class="hl-rect" x="290" y="515" width="180" height="65" rx="2" fill="var(--fill-3)" stroke="var(--line-dark)" stroke-width="1.5"/><text x="380" y="548" class="lbl" font-size="13" fill="var(--fg)">乾清宫</text><text x="380" y="566" class="lbl-sub" font-size="8" fill="var(--fg-muted)">正大光明匾</text></g>' +
+    '<g class="area-block" data-gid="G_Jiaotai"><rect class="hl-rect" x="340" y="480" width="80" height="26" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1"/><text x="380" y="498" class="lbl" font-size="9" fill="var(--fg-soft)">交泰殿</text></g>' +
+    '<g class="area-block" data-gid="G_Kunning"><rect class="hl-rect" x="300" y="405" width="160" height="55" rx="2" fill="var(--fill-3)" stroke="var(--line-dark)" stroke-width="1.5"/><text x="380" y="432" class="lbl" font-size="13" fill="var(--fg)">坤宁宫</text><text x="380" y="449" class="lbl-sub" font-size="8" fill="var(--fg-muted)">帝后大婚洞房</text></g>' +
+
+    '<g class="area-block" data-gid="G_ImperialGarden"><rect class="hl-rect" x="280" y="130" width="200" height="110" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1.5"/><text x="380" y="182" class="lbl" font-size="14" fill="var(--fg)">御花园</text><text x="380" y="200" class="lbl-sub" font-size="8" fill="var(--fg-muted)">Imperial Garden</text><circle cx="305" cy="155" r="5" fill="none" stroke="var(--line-dark)" stroke-width="1"/><circle cx="455" cy="155" r="5" fill="none" stroke="var(--line-dark)" stroke-width="1"/></g>' +
+
+    '<g class="area-block" data-gid="G_Wenhua"><rect class="hl-rect" x="540" y="765" width="150" height="70" rx="2" fill="var(--fill-3)" stroke="var(--line-dark)" stroke-width="1.5"/><text x="615" y="797" class="lbl" font-size="11" fill="var(--fg)">文华殿 · 书画</text><text x="615" y="815" class="lbl-sub" font-size="8" fill="var(--fg-muted)">Painting & Calligraphy</text></g>' +
+    '<g class="area-block" data-gid="G_EastSix"><rect class="hl-rect" x="520" y="425" width="155" height="130" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1"/><text x="598" y="488" class="lbl" font-size="12" fill="var(--fg-soft)">东六宫</text><text x="598" y="506" class="lbl-sub" font-size="8" fill="var(--fg-muted)">East Six Palaces</text></g>' +
+    '<g class="area-block" data-gid="G_Clock"><rect class="hl-rect" x="540" y="315" width="150" height="70" rx="2" fill="var(--fill-3)" stroke="var(--line-dark)" stroke-width="1.5"/><text x="615" y="347" class="lbl" font-size="11" fill="var(--fg)">钟表馆</text><text x="615" y="365" class="lbl-sub" font-size="8" fill="var(--fg-muted)">Clock Gallery · +¥10</text></g>' +
+    '<g class="area-block" data-gid="G_Ningshou"><rect class="hl-rect" x="540" y="130" width="150" height="150" rx="2" fill="var(--fill-3)" stroke="var(--line-dark)" stroke-width="1.5"/><text x="615" y="195" class="lbl" font-size="12" fill="var(--fg)">宁寿宫区</text><text x="615" y="215" class="lbl-sub" font-size="9" fill="var(--fg-soft)">珍宝馆 · 九龙壁</text><text x="615" y="232" class="lbl-sub" font-size="8" fill="var(--fg-muted)">+¥10</text></g>' +
+    '<g class="area-block" data-gid="G_Arms"><rect class="hl-rect" x="540" y="605" width="110" height="45" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1"/><text x="595" y="625" class="lbl" font-size="10" fill="var(--fg-soft)">武备馆</text><text x="595" y="640" class="lbl-sub" font-size="7" fill="var(--fg-muted)">箭亭</text></g>' +
+
+    '<g class="area-block" data-gid="G_Wuying"><rect class="hl-rect" x="70" y="765" width="150" height="70" rx="2" fill="var(--fill-3)" stroke="var(--line-dark)" stroke-width="1.5"/><text x="145" y="797" class="lbl" font-size="11" fill="var(--fg)">武英殿 · 陶瓷</text><text x="145" y="815" class="lbl-sub" font-size="8" fill="var(--fg-muted)">Ceramics Gallery</text></g>' +
+    '<g class="area-block" data-gid="G_Yangxin"><rect class="hl-rect" x="90" y="535" width="150" height="65" rx="2" fill="var(--fill-3)" stroke="var(--line-dark)" stroke-width="1.5"/><text x="165" y="567" class="lbl" font-size="12" fill="var(--fg)">养心殿</text><text x="165" y="585" class="lbl-sub" font-size="8" fill="var(--fg-muted)">垂帘听政 · 皇帝寝宫</text></g>' +
+    '<g class="area-block" data-gid="G_WestSix"><rect class="hl-rect" x="85" y="425" width="155" height="85" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1"/><text x="163" y="465" class="lbl" font-size="12" fill="var(--fg-soft)">西六宫</text><text x="163" y="483" class="lbl-sub" font-size="8" fill="var(--fg-muted)">West Six Palaces</text></g>' +
+    '<g class="area-block" data-gid="G_Sculpture"><rect class="hl-rect" x="75" y="275" width="155" height="70" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1"/><text x="153" y="308" class="lbl" font-size="11" fill="var(--fg-soft)">慈宁宫 · 雕塑</text><text x="153" y="325" class="lbl-sub" font-size="8" fill="var(--fg-muted)">Sculpture Gallery</text></g>' +
+    '<g class="area-block" data-gid="G_Bronze"><rect class="hl-rect" x="75" y="175" width="140" height="60" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1"/><text x="145" y="203" class="lbl" font-size="11" fill="var(--fg-soft)">青铜器馆</text><text x="145" y="220" class="lbl-sub" font-size="8" fill="var(--fg-muted)">Bronze Gallery</text></g>' +
+    '<g class="area-block" data-gid="G_Furniture"><rect class="hl-rect" x="75" y="885" width="130" height="45" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1"/><text x="140" y="905" class="lbl" font-size="10" fill="var(--fg-soft)">家具馆</text><text x="140" y="920" class="lbl-sub" font-size="7" fill="var(--fg-muted)">南大库</text></g>' +
+    '<g class="area-block" data-gid="G_Architecture"><rect class="hl-rect" x="605" y="885" width="100" height="45" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1"/><text x="655" y="905" class="lbl" font-size="10" fill="var(--fg-soft)">古建馆</text><text x="655" y="920" class="lbl-sub" font-size="7" fill="var(--fg-muted)">角楼 · 城墙</text></g>' +
+    '<g class="area-block" data-gid="G_Opera"><rect class="hl-rect" x="540" y="60" width="120" height="45" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1"/><text x="600" y="80" class="lbl" font-size="10" fill="var(--fg-soft)">戏曲馆</text><text x="600" y="95" class="lbl-sub" font-size="7" fill="var(--fg-muted)">畅音阁</text></g>' +
+    '<g class="area-block"><rect x="75" y="360" width="95" height="30" rx="2" fill="none" stroke="var(--line-dark)" stroke-width="1" stroke-dasharray="3,3"/><text x="123" y="380" class="lbl" font-size="9" fill="var(--fg-muted)">冰窖餐厅</text></g>' +
+
+    '<g id="rpLayer"></g><g id="mkLayer"></g>' +
+
+    '<text x="380" y="1045" class="compass" fill="var(--fg-soft)">S · 南 · 入口</text>' +
+    '<text x="380" y="48" class="compass">N · 北 · 出口</text>' +
+    '<text x="32" y="530" class="compass" transform="rotate(-90,32,530)">W · 西</text>' +
+    '<text x="743" y="530" class="compass" transform="rotate(90,743,530)">E · 东</text>' +
+    '</svg></div>' +
+    '<div class="map-legend"><span><i class="lg-r"></i>' + T('legendRoute') + '</span><span><i class="lg-g"></i>' + T('legendOther') + '</span></div>' +
+    '<div class="map-note">' + T('mapNote') + '</div>';
+}
+
+/* ── 地图图层：路线高亮 / 区域筛选 / 编号 ── */
+function stopPoint(stop, shareInfo) {
+  const gid = stop.galleryId === 'EXIT' ? 'EXIT' : MAP_BLOCK_OF(stop.galleryId);
+  const p = GID_POS[gid] || { x:380, y:530 };
+  const key = gid;
+  const info = shareInfo[key];
+  if (info.count > 1) {
+    const idx = info.seen++;
+    return { x: p.x + (idx - (info.count - 1) / 2) * 30, y: p.y };
+  }
+  return { x: p.x, y: p.y };
+}
+function buildShareInfo(stops) {
+  const info = {};
+  stops.forEach(s => {
+    const k = s.galleryId === 'EXIT' ? 'EXIT' : MAP_BLOCK_OF(s.galleryId);
+    info[k] = info[k] || { count:0, seen:0 };
+    info[k].count++;
+  });
+  return info;
+}
+function updateMapLayers(view, rg, stops) {
+  const svg = view.querySelector('.fmap');
+  if (!svg) return;
+  /* 区域筛选 + 路线高亮 */
+  const routeGids = new Set(state.route.stops.map(s => MAP_BLOCK_OF(s.galleryId)));
+  svg.querySelectorAll('.area-block').forEach(b => {
+    const gid = b.dataset.gid;
+    const blockRegion = gid === 'EXIT' ? 'North' : (gid ? regionOf(gid) : null);
+    b.classList.toggle('rg-dim', blockRegion !== rg);
+    b.classList.toggle('on-route', !!gid && (routeGids.has(gid) || routeGids.has(MAP_BLOCK_OF(gid))) && blockRegion === rg);
+  });
+  /* 全部站点点位（含出入口） */
+  const allStops = state.route.stops.concat([exitStop()]);
+  const shareAll = buildShareInfo(allStops);
+  const allPts = allStops.map(s => stopPoint(s, shareAll));
+  const rpLayer = svg.querySelector('#rpLayer');
+  const mkLayer = svg.querySelector('#mkLayer');
+  rpLayer.innerHTML = allPts.length > 1
+    ? '<path class="rp-dim" d="M ' + allPts.map(p => p.x + ',' + p.y).join(' L ') + '"/>' : '';
+  /* 当前区域高亮段 + 编号 marker */
+  const shareRg = buildShareInfo(stops);
+  const rgPts = stops.map(s => ({ s, p: stopPoint(s, shareRg) }));
+  let hot = '', mks = '';
+  if (rgPts.length > 1) hot = '<path class="rp-hot" d="M ' + rgPts.map(o => o.p.x + ',' + o.p.y).join(' L ') + '"/>';
+  rgPts.forEach(o => {
+    if (o.s.galleryId === 'EXIT' && rg !== 'North') return;
+    const label = o.s.virtual ? (o.s.galleryId === 'EXIT' ? '出' : '入') : o.s.order;
+    mks += '<g><circle class="marker" cx="' + o.p.x + '" cy="' + o.p.y + '" r="13"/>' +
+      '<text class="marker-num" x="' + o.p.x + '" y="' + o.p.y + '">' + label + '</text></g>';
+  });
+  rpLayer.innerHTML += hot;
+  mkLayer.innerHTML = mks;
+}
+function bindRegionView(view, rg, stops) {
+  updateMapLayers(view, rg, stops);
+  view.querySelectorAll('.stop-card').forEach(el => {
+    el.addEventListener('click', () => {
+      const gid = el.dataset.gid;
+      const s = stops.find(x => x.galleryId === gid) || state.route.stops.find(x => x.galleryId === gid) || null;
+      openStopModal(gid, s);
+    });
+  });
+  view.querySelectorAll('.area-block[data-gid]').forEach(el => {
+    el.addEventListener('click', () => {
+      const gid = el.dataset.gid;
+      const s = state.route.stops.find(x => MAP_BLOCK_OF(x.galleryId) === gid) || null;
+      openStopModal(gid === 'EXIT' ? 'EXIT' : (s ? s.galleryId : gid), s);
+    });
+  });
+}
+
+/* ═══ 展点信息卡（灰底占位图）═══ */
+let currentModal = null;
+function openStopModal(gid, stop) {
+  currentModal = { gid, stop };
+  const isExit = gid === 'EXIT';
+  const g = isExit ? null : galleryById(gid);
+  const pop = g ? popOf(gid) : null;
+  const treasures = g ? ARTWORKS.filter(a => a.gallery === gid || (gid === 'G_Ningshou' && a.gallery === 'G_Treasure') || (gid === 'G_Treasure' && a.gallery === 'G_Ningshou')) : [];
+  const dur = stop && stop.duration_min > 0 ? stop.duration_min : (g ? Math.max(10, g.walkingTime_min || 15) : 0);
+  const name = isExit ? (LANG === 'en' ? 'Shenwu Gate · Exit' : '神武门 · 出口')
+    : (LANG === 'en' ? g.nameEN : shortName(g.name));
+  const enSub = isExit ? 'Gate of Divine Prowess' : (LANG === 'en' ? shortName(g.name) : (g.nameEN || ''));
+  const desc = isExit
+    ? (LANG === 'en' ? 'North gate — the main exit. Jingshan Park across the street offers the best panoramic view of the Forbidden City.'
+                     : '故宫北门，主要出口。出门即景山公园，登万春亭可俯瞰紫禁城全景。')
+    : g.description;
+  const regionTag = isExit ? STR.regionNames.North[LANG] : STR.regionNames[g.region][LANG];
+  const tags = ['<span class="stag red">' + regionTag + '</span>'];
+  if (dur) tags.push('<span class="stag soft">' + T('sugStay') + ' ' + dur + ' ' + T('minUnit') + '</span>');
+  if (g && g.mustSee) tags.push('<span class="stag red">' + T('mustSee') + '</span>');
+  if (g && g.type) tags.push('<span class="stag soft">' + esc(g.type) + '</span>');
+  if (stop && stop.optionalTicket) tags.push('<span class="stag soft">' + T('optTicket') + '</span>');
+  else if (g && g.ticketExtra) tags.push('<span class="stag red">' + T('paidTicket') + '</span>');
+  else if (g) tags.push('<span class="stag soft">' + T('freeEntry') + '</span>');
+  if (!stop && g) tags.push('<span class="stag soft">' + T('notInRoute') + '</span>');
+
+  const phHTML = '<div class="sm-ph"><div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="1"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg></div>' +
+      '<span class="ch">' + (isExit ? '门' : shortName(g.name).charAt(0)) + '</span>' +
+      '<span class="cp">' + (LANG === 'en' ? 'IMAGE PLACEHOLDER' : '图片占位') + '</span></div>';
+  const photoHTML = (g && GALLERY_IMG[gid])
+    ? '<img class="sm-photo" src="' + IMG_BASE + GALLERY_IMG[gid] + '" alt="' + esc(name) + '" loading="lazy" onerror="imgFail(this)">'
+    : '';
+  $('#smBox').innerHTML =
+    '<div class="sm-media">' + phHTML + photoHTML + '</div>' +
+    '<div class="sm-body"><div class="sm-top"><div>' +
+      '<div class="sm-name">' + esc(name) + '</div>' +
+      '<div class="sm-en">' + esc(enSub) + '</div></div>' +
+      '<button class="sm-close" id="smClose">✕</button></div>' +
+    '<div class="sm-meta">' + tags.join('') + '</div>' +
+    '<div class="sm-desc">' + esc(desc) + (stop && stop.notes && !isExit ? '<br><br>' + esc(stop.notes) : '') + '</div>' +
+    (treasures.length ? '<div class="sm-sec"><h5>' + T('highlights') + '</h5>' +
+      treasures.map(a => '<div class="sm-treasure"><img class="tn" src="' + IMG_BASE + 'aw_' + a.id + '.jpg" alt="' + esc(TL(a, 'name')) + '" loading="lazy" onerror="imgFail(this,1)"><span>' + esc(TL(a, 'name')) + '</span><span class="tp">' + esc(a.period) + '</span></div>').join('') + '</div>' : '') +
+    (pop ? '<div class="sm-sec"><h5>' + T('popularity') + ' ' + Math.round(pop.score * 100) + '</h5><div class="sm-pop"><i style="width:' + Math.round(pop.score * 100) + '%"></i></div></div>' : '') +
+    '</div>';
+  $('#stopModal').classList.add('on');
+  $('#smClose').addEventListener('click', closeModal);
+}
+function closeModal() { $('#stopModal').classList.remove('on'); currentModal = null; }
+function imgFail(el, kind) {
+  if (kind === 1) { const s = document.createElement('span'); s.className = 'tn-ph'; el.replaceWith(s); }
+  else { el.remove(); }
+}
+$('#stopModal').addEventListener('click', e => { if (e.target.id === 'stopModal') closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ═══ 问卷提交 / 跳过 ═══ */
+$('#btnGenerate').addEventListener('click', () => {
+  runLoading(() => {
+    const route = matchRoute(state.prefs);
+    setRoute(route, true);
+    switchTab('A');
+    showPhase('mapPage');
+  });
+});
+$('#btnSkip').addEventListener('click', () => {
+  const r0 = ROUTES.find(r => r.id === 'highlights_2h') || ROUTES[0];
+  setRoute(normalizePreset(r0), true);
+  switchTab('A');
+  showPhase('mapPage');
+});
+
+/* ═══ 语言切换 ═══ */
+function applyLang(lang) {
+  LANG = lang === 'en' ? 'en' : 'cn';
+  try { localStorage.setItem('cp_lang', LANG); } catch (e) {}
+  document.documentElement.lang = LANG === 'cn' ? 'zh-CN' : 'en';
+  document.querySelectorAll('#langSwitch button[data-lang]').forEach(b => b.classList.toggle('on', b.dataset.lang === LANG));
+  document.querySelectorAll('[data-t]').forEach(el => { el.innerHTML = T(el.getAttribute('data-t')); });
+  renderQuiz();
+  if (state.route) {
+    renderRouteHead(); renderLibrary(); renderRegionBar();
+    goRegion(state.region || state.regionsInRoute[0]);
+    renderPrefSummary();
+  }
+  if (currentModal) openStopModal(currentModal.gid, currentModal.stop);
+}
+$('#langSwitch').addEventListener('click', e => {
+  const b = e.target.closest('button[data-lang]');
+  if (b && b.dataset.lang !== LANG) applyLang(b.dataset.lang);
+});
+
+/* ═══ 启动 ═══ */
+(async function boot() {
+  applyLang(LANG);
+  const dataReady = loadData();
+  const flash = $('#flash');
+  flash.classList.add('show');
+  await new Promise(r => setTimeout(r, 600));
+  flash.classList.add('hide');
+  await Promise.all([dataReady, new Promise(r => setTimeout(r, 280))]);
+  flash.style.display = 'none';
+  renderQuiz();
+  showPhase('quiz');
+})();
+</script>
+</body>
+</html>
