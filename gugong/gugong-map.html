@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>故宫博物院导览地图</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        @font-face { font-family:'Boska'; src:url('../../fonts/Boska-Bold.otf') format('opentype'); font-weight:700; font-display:swap; }
+        @font-face { font-family:'Boska'; src:url('../../fonts/Boska-Regular.otf') format('opentype'); font-weight:400; font-display:swap; }
+
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --bg:#ffffff;
+            --fg:#3a3632;
+            --fg-soft:#6b6560;
+            --fg-muted:#a09a94;
+            --line:rgba(58,54,50,.10);
+            --line-dark:rgba(58,54,50,.22);
+            --fill-1:#f7f5f2;
+            --fill-2:#edeae6;
+            --fill-3:#e2ded9;
+            --fill-4:#d5d0ca;
+        }
+        body {
+            font-family:'Boska','Georgia',serif;
+            background:var(--bg); color:var(--fg);
+            -webkit-font-smoothing:antialiased;
+            min-height:100vh;
+            display:flex; flex-direction:column; align-items:center;
+            padding:2.5rem 1.5rem;
+        }
+
+        /* ── Title ── */
+        .page-title {
+            text-align:center; margin-bottom:2rem;
+        }
+        .page-title h1 {
+            font-family:'Boska',serif; font-weight:700;
+            font-size:1.6rem; letter-spacing:.12em; color:var(--fg);
+        }
+        .page-title p {
+            font-family:'Space Mono',monospace; font-size:.62rem;
+            letter-spacing:.16em; color:var(--fg-muted);
+            text-transform:uppercase; margin-top:.4rem;
+        }
+
+        /* ── Map ── */
+        .map-wrap {
+            width:100%; max-width:720px;
+        }
+        .map-wrap svg { width:100%; height:auto; display:block; }
+
+        /* ── SVG ── */
+        svg text { user-select:none; }
+        .area-block { cursor:pointer; transition:opacity .18s; }
+        .area-block:hover { opacity:.7; }
+        .lbl {
+            font-family:'Space Grotesk',sans-serif;
+            font-weight:500; text-anchor:middle; pointer-events:none;
+        }
+        .lbl-sub {
+            font-family:'Space Grotesk',sans-serif;
+            font-weight:400; text-anchor:middle; pointer-events:none;
+        }
+        .road-lbl {
+            font-family:'Space Mono',monospace;
+            font-size:8px; fill:var(--fg-muted); text-anchor:middle;
+            letter-spacing:.05em;
+        }
+        .compass {
+            font-family:'Space Mono',monospace;
+            font-size:9px; fill:var(--fg-muted); text-anchor:middle;
+            letter-spacing:.1em;
+        }
+        .axis-line {
+            stroke:var(--line-dark); stroke-width:1;
+            stroke-dasharray:3,5; opacity:.6;
+        }
+
+        /* ── Hover Card ── */
+        .card {
+            position:fixed; z-index:1000;
+            background:#ffffff;
+            border:1px solid rgba(0,0,0,.1);
+            padding:1rem 1.2rem;
+            pointer-events:none; opacity:0;
+            transition:opacity .15s ease;
+            max-width:300px;
+            box-shadow:0 16px 48px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.06);
+        }
+        .card.show { opacity:1; }
+        .card .c-name {
+            font-family:'Boska',serif; font-weight:700;
+            font-size:1.05rem; color:var(--fg); margin-bottom:.1rem;
+        }
+        .card .c-en {
+            font-family:'Space Mono',monospace; font-size:.58rem;
+            letter-spacing:.08em; color:var(--fg-muted);
+            text-transform:uppercase; margin-bottom:.6rem;
+        }
+        .card .c-desc {
+            font-family:'Boska',serif; font-size:.85rem;
+            color:var(--fg-soft); line-height:1.55; margin-bottom:.5rem;
+        }
+        .card .c-meta {
+            display:flex; gap:.5rem; align-items:center; flex-wrap:wrap;
+        }
+        .card .c-tag {
+            font-family:'Space Mono',monospace; font-size:.56rem;
+            letter-spacing:.06em; text-transform:uppercase;
+            padding:.2rem .5rem; border:1px solid var(--line-dark);
+            color:var(--fg-soft);
+        }
+        .card .c-time {
+            font-family:'Space Mono',monospace; font-size:.58rem;
+            color:var(--fg-muted); letter-spacing:.04em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-title">
+        <h1>故宫博物院导览地图</h1>
+        <p>The Palace Museum · Forbidden City</p>
+    </div>
+
+    <div class="map-wrap">
+        <svg viewBox="0 0 760 1060" xmlns="http://www.w3.org/2000/svg">
+            <!-- 护城河 -->
+            <rect x="20" y="20" width="720" height="1020" rx="3" fill="var(--fill-1)" stroke="var(--line-dark)" stroke-width="1"/>
+            <!-- 城墙 -->
+            <rect x="40" y="40" width="680" height="980" rx="2" fill="#fff" stroke="var(--fg-muted)" stroke-width="1.5"/>
+            <!-- 内地面 -->
+            <rect x="50" y="50" width="660" height="960" fill="var(--fill-1)"/>
+
+            <!-- 中轴线 -->
+            <line x1="380" y1="60" x2="380" y2="1000" class="axis-line"/>
+
+            <!-- ===== 城门 ===== -->
+            <g class="area-block" data-name="午门" data-en="Meridian Gate" data-desc="故宫正门，唯一入口。大型特展举办地。" data-tag="入口" data-time="">
+                <rect x="290" y="940" width="180" height="45" rx="2" fill="var(--fill-4)" stroke="var(--line-dark)" stroke-width="1"/>
+                <text x="380" y="967" class="lbl" font-size="12" fill="var(--fg)">午门 · 入口</text>
+            </g>
+            <g class="area-block" data-name="神武门" data-en="Gate of Divine Prowess" data-desc="故宫北门，主要出口。" data-tag="出口" data-time="">
+                <rect x="310" y="55" width="140" height="35" rx="2" fill="var(--fill-4)" stroke="var(--line-dark)" stroke-width="1"/>
+                <text x="380" y="77" class="lbl" font-size="11" fill="var(--fg)">神武门 · 出口</text>
+            </g>
+            <g class="area-block" data-name="东华门" data-en="East Glorious Gate" data-desc="故宫东门，可由此出。" data-tag="出口" data-time="">
+                <rect x="692" y="565" width="22" height="70" rx="2" fill="var(--fill-3)" stroke="var(--line-dark)" stroke-width="1"/>
+                <text x="703" y="605" class="lbl" font-size="8" fill="var(--fg-soft)" writing-mode="tb">东华门</text>
+            </g>
+            <g class="area-block" data-name="西华门" data-en="West Glorious Gate" data-desc="故宫西门（不对外开放）。" data-tag="不开放" data-time="">
+                <rect x="46" y="565" width="22" height="70" rx="2" fill="var(--fill-2)" stroke="var(--line)" stroke-width="1"/>
+                <text x="57" y="605" class="lbl" font-size="8" fill="var(--fg-muted)" writing-mode="tb">西华门</text>
+            </g>
+
+            <!-- 太和门广场 -->
+            <rect x="215" y="878" width="330" height="45" fill="none" stroke="var(--line-dark)" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="380" y="905" class="road-lbl">太和门广场 · 金水桥</text>
+
+            <!-- ===== 前三殿 ===== -->
+            <g class="area-block" data-name="太和殿" data-en="Hall of Supreme Harmony" data-desc="紫禁城最大宫殿，明清皇帝举行大典之所。中国现存最大木结构古建筑，面阔11间，高35米。" data-tag="必游 · 原状陈列" data-time="15 min">
+                <rect x="260" y="755" width="240" height="90" rx="2" fill="var(--fill-3)" stroke="var(--line-dark)" stroke-width="1.5"/>
+                <text x="380" y="795" class="lbl" font-size="15" fill="var(--fg)" style="font-family:'Boska',serif;font-weight:700">太和殿</text>
+                <text x="380" y="815" class="lbl-sub" font-size="8" fill="var(--fg-muted)">Hall of Supreme Harmony</text>
+            </g>
+            <g class="area-block" data-name="中和殿" data-en="Hall of Central Harmony" data-desc="皇帝大典前休息之所，方形攒尖顶。" data-tag="原状陈列" data-time="5 min">
+                <rect x="330" y="705" width="100" height="35" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1"/>
+                <text x="380" y="727" class="lbl" font-size="10" fill="var(--fg-soft)">中和殿</text>
+            </g>
+            <g class="area-block" data-name="保和殿" data-en="Hall of Preserving Harmony" data-desc="清代殿试场所，殿后有最大石雕云龙陛石。" data-tag="必游 · 原状陈列" data-time="10 min">
+                <rect x="280" y="635" width="200" height="55" rx="2" fill="var(--fill-3)" stroke="var(--line-dark)" stroke-width="1.5"/>
+                <text x="380" y="663" class="lbl" font-size="13" fill="var(--fg)" style="font-family:'Boska',serif;font-weight:700">保和殿</text>
+                <text x="380" y="680" class="lbl-sub" font-size="8" fill="var(--fg-muted)">云龙陛石</text>
+            </g>
+
+            <!-- 乾清门 -->
+            <rect x="315" y="602" width="130" height="20" fill="none" stroke="var(--line-dark)" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="380" y="616" class="road-lbl">乾清门</text>
+
+            <!-- ===== 后三宫 ===== -->
+            <g class="area-block" data-name="乾清宫" data-en="Palace of Heavenly Purity" data-desc="明代至清初皇帝寝宫，'正大光明'匾额，秘密立储之处。" data-tag="必游 · 原状陈列" data-time="15 min">
+                <rect x="290" y="515" width="180" height="65" rx="2" fill="var(--fill-3)" stroke="var(--line-dark)" stroke-width="1.5"/>
+                <text x="380" y="548" class="lbl" font-size="13" fill="var(--fg)" style="font-family:'Boska',serif;font-weight:700">乾清宫</text>
+                <text x="380" y="566" class="lbl-sub" font-size="8" fill="var(--fg-muted)">正大光明匾</text>
+            </g>
+            <g class="area-block" data-name="交泰殿" data-en="Hall of Union" data-desc="存放皇帝二十五宝玺之处。" data-tag="原状陈列" data-time="3 min">
+                <rect x="340" y="480" width="80" height="26" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1"/>
+                <text x="380" y="498" class="lbl" font-size="9" fill="var(--fg-soft)">交泰殿</text>
+            </g>
+            <g class="area-block" data-name="坤宁宫" data-en="Palace of Earthly Tranquility" data-desc="明代皇后寝宫，清代改为萨满教祭祀场所及帝后大婚洞房。" data-tag="必游 · 原状陈列" data-time="10 min">
+                <rect x="300" y="405" width="160" height="55" rx="2" fill="var(--fill-3)" stroke="var(--line-dark)" stroke-width="1.5"/>
+                <text x="380" y="432" class="lbl" font-size="13" fill="var(--fg)" style="font-family:'Boska',serif;font-weight:700">坤宁宫</text>
+                <text x="380" y="449" class="lbl-sub" font-size="8" fill="var(--fg-muted)">帝后大婚洞房</text>
+            </g>
+
+            <!-- ===== 御花园 ===== -->
+            <g class="area-block" data-name="御花园" data-en="Imperial Garden" data-desc="紫禁城内唯一花园，明代始建，古柏参天，亭台楼阁，堆秀山。" data-tag="必游 · 园林" data-time="15 min">
+                <rect x="280" y="130" width="200" height="110" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1.5"/>
+                <text x="380" y="182" class="lbl" font-size="14" fill="var(--fg)" style="font-family:'Boska',serif;font-weight:700">御花园</text>
+                <text x="380" y="200" class="lbl-sub" font-size="8" fill="var(--fg-muted)">Imperial Garden</text>
+                <circle cx="305" cy="155" r="5" fill="none" stroke="var(--line-dark)" stroke-width="1"/>
+                <circle cx="455" cy="155" r="5" fill="none" stroke="var(--line-dark)" stroke-width="1"/>
+                <circle cx="315" cy="220" r="4" fill="none" stroke="var(--line)" stroke-width="1"/>
+                <circle cx="445" cy="218" r="4" fill="none" stroke="var(--line)" stroke-width="1"/>
+            </g>
+
+            <!-- ===== 东路 ===== -->
+            <g class="area-block" data-name="文华殿（书画馆）" data-en="Hall of Literary Glory" data-desc="故宫书画常设展馆，分批展出历代书画精品。清明上河图、千里江山图曾在此展出。" data-tag="必游 · 展馆" data-time="20 min">
+                <rect x="540" y="765" width="150" height="70" rx="2" fill="var(--fill-3)" stroke="var(--line-dark)" stroke-width="1.5"/>
+                <text x="615" y="797" class="lbl" font-size="11" fill="var(--fg)" style="font-family:'Boska',serif;font-weight:700">文华殿 · 书画</text>
+                <text x="615" y="815" class="lbl-sub" font-size="8" fill="var(--fg-muted)">Painting & Calligraphy</text>
+            </g>
+            <g class="area-block" data-name="东六宫" data-en="East Six Palaces" data-desc="景仁宫、承乾宫、钟粹宫等，后妃生活区。延禧宫（未完工水晶宫）。" data-tag="后宫区" data-time="15 min">
+                <rect x="520" y="425" width="155" height="130" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1"/>
+                <text x="598" y="488" class="lbl" font-size="12" fill="var(--fg-soft)" style="font-family:'Boska',serif;font-weight:700">东六宫</text>
+                <text x="598" y="506" class="lbl-sub" font-size="8" fill="var(--fg-muted)">East Six Palaces</text>
+            </g>
+            <g class="area-block" data-name="钟表馆（奉先殿）" data-en="Clock Gallery" data-desc="奉先殿内，展出清宫收藏的中外精美钟表，英国、法国、瑞士及广州、苏州制造。" data-tag="必游 · +¥10" data-time="20 min">
+                <rect x="540" y="315" width="150" height="70" rx="2" fill="var(--fill-3)" stroke="var(--line-dark)" stroke-width="1.5"/>
+                <text x="615" y="347" class="lbl" font-size="11" fill="var(--fg)" style="font-family:'Boska',serif;font-weight:700">钟表馆</text>
+                <text x="615" y="365" class="lbl-sub" font-size="8" fill="var(--fg-muted)">Clock Gallery · +¥10</text>
+            </g>
+            <g class="area-block" data-name="宁寿宫区（珍宝馆）" data-en="Ningshou Palace / Treasure Gallery" data-desc="乾隆太上皇宫殿区：皇极殿、养性殿、乐寿堂、颐和轩、珍妃井、九龙壁。展出清代宫廷珍宝。" data-tag="必游 · +¥10" data-time="30 min">
+                <rect x="540" y="130" width="150" height="150" rx="2" fill="var(--fill-3)" stroke="var(--line-dark)" stroke-width="1.5"/>
+                <text x="615" y="195" class="lbl" font-size="12" fill="var(--fg)" style="font-family:'Boska',serif;font-weight:700">宁寿宫区</text>
+                <text x="615" y="215" class="lbl-sub" font-size="9" fill="var(--fg-soft)">珍宝馆 · 九龙壁</text>
+                <text x="615" y="232" class="lbl-sub" font-size="8" fill="var(--fg-muted)">+¥10</text>
+            </g>
+            <g class="area-block" data-name="武备馆（箭亭）" data-en="Arms Gallery" data-desc="箭亭内，展示清代武备：弓箭、刀剑、甲胄。" data-tag="展馆" data-time="10 min">
+                <rect x="540" y="605" width="110" height="45" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1"/>
+                <text x="595" y="625" class="lbl" font-size="10" fill="var(--fg-soft)">武备馆</text>
+                <text x="595" y="640" class="lbl-sub" font-size="7" fill="var(--fg-muted)">箭亭</text>
+            </g>
+
+            <!-- ===== 西路 ===== -->
+            <g class="area-block" data-name="武英殿（陶瓷馆）" data-en="Hall of Martial Valor" data-desc="故宫陶瓷常设展馆，400余件精品，从新石器至明清。" data-tag="必游 · 展馆" data-time="20 min">
+                <rect x="70" y="765" width="150" height="70" rx="2" fill="var(--fill-3)" stroke="var(--line-dark)" stroke-width="1.5"/>
+                <text x="145" y="797" class="lbl" font-size="11" fill="var(--fg)" style="font-family:'Boska',serif;font-weight:700">武英殿 · 陶瓷</text>
+                <text x="145" y="815" class="lbl-sub" font-size="8" fill="var(--fg-muted)">Ceramics Gallery</text>
+            </g>
+            <g class="area-block" data-name="养心殿" data-en="Hall of Mental Cultivation" data-desc="雍正至清末皇帝实际居住和理政之所，垂帘听政发生地。" data-tag="必游 · 原状陈列" data-time="15 min">
+                <rect x="90" y="535" width="150" height="65" rx="2" fill="var(--fill-3)" stroke="var(--line-dark)" stroke-width="1.5"/>
+                <text x="165" y="567" class="lbl" font-size="12" fill="var(--fg)" style="font-family:'Boska',serif;font-weight:700">养心殿</text>
+                <text x="165" y="585" class="lbl-sub" font-size="8" fill="var(--fg-muted)">垂帘听政 · 皇帝寝宫</text>
+            </g>
+            <g class="area-block" data-name="西六宫" data-en="West Six Palaces" data-desc="储秀宫（慈禧居所）、翊坤宫、长春宫等，后妃生活区。" data-tag="后宫区" data-time="15 min">
+                <rect x="85" y="425" width="155" height="85" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1"/>
+                <text x="163" y="465" class="lbl" font-size="12" fill="var(--fg-soft)" style="font-family:'Boska',serif;font-weight:700">西六宫</text>
+                <text x="163" y="483" class="lbl-sub" font-size="8" fill="var(--fg-muted)">West Six Palaces</text>
+            </g>
+            <g class="area-block" data-name="雕塑馆（慈宁宫）" data-en="Sculpture Gallery" data-desc="慈宁宫内，425件雕塑：陶俑、画像砖石、佛像。含秦始皇兵马俑。" data-tag="展馆" data-time="15 min">
+                <rect x="75" y="275" width="155" height="70" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1"/>
+                <text x="153" y="308" class="lbl" font-size="11" fill="var(--fg-soft)" style="font-family:'Boska',serif;font-weight:700">慈宁宫 · 雕塑</text>
+                <text x="153" y="325" class="lbl-sub" font-size="8" fill="var(--fg-muted)">Sculpture Gallery</text>
+            </g>
+            <g class="area-block" data-name="青铜器馆" data-en="Bronze Gallery" data-desc="展出故宫藏15000余件青铜器中的精品，先秦有铭文青铜器近1600件。" data-tag="展馆" data-time="15 min">
+                <rect x="75" y="175" width="140" height="60" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1"/>
+                <text x="145" y="203" class="lbl" font-size="11" fill="var(--fg-soft)" style="font-family:'Boska',serif;font-weight:700">青铜器馆</text>
+                <text x="145" y="220" class="lbl-sub" font-size="8" fill="var(--fg-muted)">Bronze Gallery</text>
+            </g>
+            <g class="area-block" data-name="家具馆（南大库）" data-en="Furniture Gallery" data-desc="南大库，展出明清宫廷家具6000余件中的精品。" data-tag="展馆" data-time="10 min">
+                <rect x="75" y="885" width="130" height="45" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1"/>
+                <text x="140" y="905" class="lbl" font-size="10" fill="var(--fg-soft)">家具馆</text>
+                <text x="140" y="920" class="lbl-sub" font-size="7" fill="var(--fg-muted)">南大库</text>
+            </g>
+            <g class="area-block" data-name="古建馆（角楼·城墙）" data-en="Architecture Gallery" data-desc="东华门城楼、东南角楼、城墙段。展出古建构件、样式雷烫样，可登城墙俯瞰全景。" data-tag="展馆 · 登城墙" data-time="20 min">
+                <rect x="605" y="885" width="100" height="45" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1"/>
+                <text x="655" y="905" class="lbl" font-size="10" fill="var(--fg-soft)">古建馆</text>
+                <text x="655" y="920" class="lbl-sub" font-size="7" fill="var(--fg-muted)">角楼 · 城墙</text>
+            </g>
+            <g class="area-block" data-name="戏曲馆（畅音阁）" data-en="Opera Gallery" data-desc="畅音阁大戏台及阅是楼，展示清代宫廷戏曲文化。" data-tag="展馆" data-time="10 min">
+                <rect x="540" y="60" width="120" height="45" rx="2" fill="var(--fill-2)" stroke="var(--line-dark)" stroke-width="1"/>
+                <text x="600" y="80" class="lbl" font-size="10" fill="var(--fg-soft)">戏曲馆</text>
+                <text x="600" y="95" class="lbl-sub" font-size="7" fill="var(--fg-muted)">畅音阁</text>
+            </g>
+            <g class="area-block" data-name="冰窖餐厅" data-en="Ice Cellar Restaurant" data-desc="慈宁宫西侧，故宫内用餐处。" data-tag="餐饮" data-time="">
+                <rect x="75" y="360" width="95" height="30" rx="2" fill="none" stroke="var(--line-dark)" stroke-width="1" stroke-dasharray="3,3"/>
+                <text x="123" y="380" class="lbl" font-size="9" fill="var(--fg-muted)">冰窖餐厅</text>
+            </g>
+
+            <!-- 方位 -->
+            <text x="380" y="1045" class="compass" fill="var(--fg-soft)">S · 南 · 入口</text>
+            <text x="380" y="48" class="compass">N · 北 · 出口</text>
+            <text x="32" y="530" class="compass" transform="rotate(-90,32,530)">W · 西</text>
+            <text x="743" y="530" class="compass" transform="rotate(90,743,530)">E · 东</text>
+        </svg>
+    </div>
+
+    <!-- Hover Card -->
+    <div class="card" id="card"></div>
+
+    <script>
+        const card = document.getElementById('card');
+        document.querySelectorAll('.area-block').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                const { name, en, desc, tag, time } = el.dataset;
+                let html = `<div class="c-name">${name}</div>`;
+                if (en) html += `<div class="c-en">${en}</div>`;
+                if (desc) html += `<div class="c-desc">${desc}</div>`;
+                html += `<div class="c-meta">`;
+                if (tag) html += `<span class="c-tag">${tag}</span>`;
+                if (time) html += `<span class="c-time">${time}</span>`;
+                html += `</div>`;
+                card.innerHTML = html;
+                card.classList.add('show');
+            });
+            el.addEventListener('mousemove', (e) => {
+                const x = Math.min(e.clientX + 16, window.innerWidth - 320);
+                const y = Math.min(e.clientY - 12, window.innerHeight - 200);
+                card.style.left = x + 'px';
+                card.style.top = y + 'px';
+            });
+            el.addEventListener('mouseleave', () => {
+                card.classList.remove('show');
+            });
+        });
+    </script>
+</body>
+</html>

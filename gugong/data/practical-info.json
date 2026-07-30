@@ -1,0 +1,90 @@
+{
+  "museum": {
+    "name": "故宫博物院",
+    "nameEN": "The Palace Museum (Forbidden City)",
+    "shortName": "故宫",
+    "location": {
+      "address": "北京市东城区景山前街4号",
+      "addressEN": "No. 4 Jingshan Front Street, Dongcheng District, Beijing",
+      "coordinates": { "lat": 39.9163, "lng": 116.3972 }
+    },
+    "totalArea": "720,000 sqm (72 hectares)",
+    "buildings": "980+ buildings, 8,707 rooms",
+    "collection": "1,950,000+ artifacts (195万件)",
+    "opened": "1925-10-10",
+    "unesco": "World Heritage Site since 1987",
+    "annualVisitors": "19,000,000+ (pre-pandemic peak)"
+  },
+  "hours": {
+    "lastUpdated": "2026-07-29",
+    "source": "https://www.dpm.org.cn/Visit.html",
+    "peakSeason": {
+      "period": "April 1 - October 31",
+      "open": "08:30",
+      "lastEntry": "16:00",
+      "treasureClockLastEntry": "16:10",
+      "close": "17:00"
+    },
+    "offSeason": {
+      "period": "November 1 - March 31",
+      "open": "08:30",
+      "lastEntry": "15:30",
+      "treasureClockLastEntry": "15:40",
+      "close": "16:30"
+    },
+    "closedDay": "Monday (except national holidays)",
+    "direction": "South to North only. Enter via Meridian Gate (午门), exit via Shenwu Gate (神武门) or Donghua Gate (东华门)"
+  },
+  "admission": {
+    "source": "https://ticket.dpm.org.cn/",
+    "peakSeason": { "adult": 60, "currency": "RMB" },
+    "offSeason": { "adult": 40, "currency": "RMB" },
+    "treasureGallery": { "price": 10, "note": "珍宝馆，宁寿宫区" },
+    "clockGallery": { "price": 10, "note": "钟表馆，奉先殿" },
+    "free": ["Children under 1.2m", "Disabled visitors", "Military personnel (Aug 1)", "Seniors 60+ (half price)"],
+    "reservation": {
+      "required": true,
+      "method": "WeChat Mini Program '故宫博物院' or official website",
+      "advanceDays": 7,
+      "note": "No same-day tickets. Must book online in advance.约满即止"
+    },
+    "annualPass": { "price": 300, "note": "年票300元，不含珍宝馆和钟表馆" }
+  },
+  "specialNotes": {
+    "trafficControl": "Daily visitor limit enforced; peak days may require queuing",
+    "securityCheck": "All visitors must pass security check at Meridian Gate",
+    "prohibitedItems": "Large bags, tripods, selfie sticks, drones, food/drinks in galleries",
+    "wheelchair": "Available for free at Meridian Gate service center"
+  },
+  "currentExhibitions": [
+    {
+      "name": "百年守护——从紫禁城到故宫博物院",
+      "nameEN": "A Century of Guardianship",
+      "location": "午门展厅 (Meridian Gate Gallery)",
+      "dates": "2025-09-30 onwards",
+      "note": "故宫建院100周年大展，展出清明上河图、伯远帖、五牛图等国宝",
+      "ticketRequired": false
+    },
+    {
+      "name": "万法归一：萨迦寺历史文化与艺术",
+      "nameEN": "All Laws Return to One: Sakya Temple",
+      "location": "午门展厅",
+      "dates": "2026-02-09 onwards",
+      "ticketRequired": false
+    },
+    {
+      "name": "腾跃古今——马文化数字艺术展",
+      "location": "大高玄殿数字馆",
+      "dates": "2025-01-07 to 2026-10-18",
+      "ticketRequired": false
+    }
+  ],
+  "facilities": {
+    "dining": [
+      { "name": "冰窖餐厅", "location": "慈宁宫西侧", "type": "Restaurant" },
+      { "name": "角楼咖啡", "location": "神武门外", "type": "Cafe" }
+    ],
+    "services": ["Wheelchair rental", "Stroller rental", "Audio guide (40 RMB)", "Luggage storage", "First aid", "Lost and found"],
+    "audioGuide": { "price": 40, "languages": ["Chinese", "English", "Japanese", "French", "German", "Spanish", "Russian", "Korean"] }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "popularityEstimates": {
+    "description": "估算值(0-1)，综合参考故宫官网、TripAdvisor、小红书、携程、马蜂窝等。id 已对齐 galleries.json 的画廊 id。",
+    "lastUpdated": "2026-07-29",
+    "items": [
+      { "id": "G_Taihe", "name": "太和殿（金銮殿）", "score": 1.0, "tier": 1, "notes": "故宫第一地标，所有游客必到；中轴线核心" },
+      { "id": "G_MeridianGate", "name": "午门特展", "score": 0.95, "tier": 1, "notes": "百年守护大展展出清明上河图等国宝，引发排队热潮" },
+      { "id": "G_Treasure", "name": "珍宝馆", "score": 0.90, "tier": 1, "notes": "九龙壁+宫廷珍宝，几乎所有攻略推荐；需额外购票" },
+      { "id": "G_Clock", "name": "钟表馆", "score": 0.85, "tier": 1, "notes": "精美机械钟表，互动性强；需额外购票" },
+      { "id": "G_Qianqing", "name": "乾清宫", "score": 0.85, "tier": 1, "notes": "正大光明匾、秘密立储；中轴线必到" },
+      { "id": "G_Kunning", "name": "坤宁宫", "score": 0.80, "tier": 2, "notes": "帝后大婚洞房、萨满祭祀；中轴线" },
+      { "id": "G_ImperialGarden", "name": "御花园", "score": 0.80, "tier": 2, "notes": "紫禁城唯一花园，古柏亭台；出神武门前最后一站" },
+      { "id": "G_Yangxin", "name": "养心殿", "score": 0.75, "tier": 2, "notes": "垂帘听政、雍正起居；历史剧迷必到" },
+      { "id": "G_Wenhua", "name": "文华殿（书画馆）", "score": 0.75, "tier": 2, "notes": "书画爱好者必到；但展品轮换，不一定有最顶级的" },
+      { "id": "G_Wuying", "name": "武英殿（陶瓷馆）", "score": 0.70, "tier": 2, "notes": "陶瓷爱好者必到；400余件精品" },
+      { "id": "G_Ningshou", "name": "宁寿宫区", "score": 0.70, "tier": 2, "notes": "乾隆太上皇宫殿区；含珍宝馆、九龙壁、珍妃井" },
+      { "id": "G_WestSix", "name": "西六宫（储秀宫等）", "score": 0.60, "tier": 3, "notes": "慈禧居所；延禧宫话题性" },
+      { "id": "G_Sculpture", "name": "雕塑馆", "score": 0.55, "tier": 3, "notes": "含兵马俑；但位置偏西，游客较少" },
+      { "id": "G_Bronze", "name": "青铜器馆", "score": 0.50, "tier": 3, "notes": "专业性强；普通游客兴趣一般" },
+      { "id": "G_Architecture", "name": "古建馆（角楼/城墙）", "score": 0.55, "tier": 3, "notes": "可登城墙看全景；建筑爱好者偏爱" },
+      { "id": "G_EastSix", "name": "东六宫", "score": 0.50, "tier": 3, "notes": "延禧宫(水晶宫)有话题性" }
+    ]
+  }
+}

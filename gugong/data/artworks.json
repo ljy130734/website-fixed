@@ -1,0 +1,111 @@
+{
+  "artworks": [
+    {
+      "id": "qingming_shanghe",
+      "name": "清明上河图",
+      "nameEN": "Along the River During the Qingming Festival",
+      "artist": "张择端 (Zhang Zeduan)",
+      "period": "北宋 (~1100 AD)",
+      "gallery": "G_Wenhua",
+      "category": "绘画",
+      "description": "中国十大传世名画之一，描绘北宋汴京繁华市井。故宫最受关注的国宝，极少展出",
+      "isNationalTreasure": true,
+      "note": "非长期展出，仅在特展中偶尔亮相"
+    },
+    {
+      "id": "qianli_jiangshan",
+      "name": "千里江山图",
+      "nameEN": "A Thousand Li of Rivers and Mountains",
+      "artist": "王希孟 (Wang Ximeng)",
+      "period": "北宋 (1113 AD)",
+      "gallery": "G_Wenhua",
+      "category": "绘画",
+      "description": "18岁天才少年唯一传世之作，青绿山水巅峰，近12米长卷",
+      "isNationalTreasure": true,
+      "note": "极少展出，最近一次为2017年"
+    },
+    {
+      "id": "wuniu_tu",
+      "name": "五牛图",
+      "nameEN": "Five Oxen",
+      "artist": "韩滉 (Han Huang)",
+      "period": "唐代",
+      "gallery": "G_Wenhua",
+      "category": "绘画",
+      "description": "现存最古老的纸本中国画，五头牛形态各异",
+      "isNationalTreasure": true
+    },
+    {
+      "id": "boyuan_tie",
+      "name": "伯远帖",
+      "nameEN": "Bo Yuan Tie (Letter to Bo Yuan)",
+      "artist": "王珣 (Wang Xun)",
+      "period": "东晋",
+      "gallery": "G_Wenhua",
+      "category": "书法",
+      "description": "东晋王氏家族唯一传世真迹，'三希'之一",
+      "isNationalTreasure": true
+    },
+    {
+      "id": "taihe_dian",
+      "name": "太和殿（金銮殿）",
+      "nameEN": "Hall of Supreme Harmony",
+      "period": "明永乐十八年(1420)始建，清康熙重建",
+      "gallery": "G_Taihe",
+      "category": "建筑",
+      "description": "中国现存最大木结构古建筑，面阔11间，高35.05米，皇帝登基、大婚、册封大典之所",
+      "isNationalTreasure": true
+    },
+    {
+      "id": "jiulong_bi",
+      "name": "九龙壁",
+      "nameEN": "Nine Dragon Screen",
+      "period": "清乾隆三十七年(1772)",
+      "gallery": "G_Ningshou",
+      "category": "建筑/琉璃",
+      "description": "宁寿宫区皇极门前，长29.4米，九条蟠龙栩栩如生，中国三大九龙壁之一",
+      "isNationalTreasure": true
+    },
+    {
+      "id": "zhengda_guangming",
+      "name": "正大光明匾",
+      "nameEN": "Zhengda Guangming Plaque",
+      "period": "清顺治帝御笔",
+      "gallery": "G_Qianqing",
+      "category": "宫廷文物",
+      "description": "乾清宫正殿高悬，清代秘密立储制度核心——储君诏书藏于匾后",
+      "isNationalTreasure": false
+    },
+    {
+      "id": "treasure_collection",
+      "name": "珍宝馆藏品（金瓯永固杯、玉雕等）",
+      "nameEN": "Treasure Gallery Collection",
+      "period": "清代",
+      "gallery": "G_Treasure",
+      "category": "珍宝",
+      "description": "清宫造办处制作的金银器、玉器、宝石、珐琅，代表清代工艺最高水平",
+      "isNationalTreasure": false
+    },
+    {
+      "id": "clock_collection",
+      "name": "钟表馆藏品（各种机械钟表）",
+      "nameEN": "Clock Gallery Collection",
+      "period": "18-19世纪",
+      "gallery": "G_Clock",
+      "category": "钟表",
+      "description": "清宫收藏的中外机械钟表，英国、法国、瑞士及广州、苏州制造，带自动人偶表演",
+      "isNationalTreasure": false
+    },
+    {
+      "id": "qin_shi_huang_yong",
+      "name": "秦始皇兵马俑（故宫藏）",
+      "nameEN": "Terracotta Warriors (Palace Museum collection)",
+      "period": "秦代",
+      "gallery": "G_Sculpture",
+      "category": "雕塑",
+      "description": "慈宁宫雕塑馆藏有秦始皇兵马俑",
+      "isNationalTreasure": false
+    }
+  ],
+  "source": "综合自故宫官网dpm.org.cn、百度百科、各旅游指南"
+}

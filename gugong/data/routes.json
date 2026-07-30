@@ -1,0 +1,102 @@
+{
+  "routes": [
+    {
+      "id": "highlights_2h",
+      "name": "2小时中轴精华",
+      "nameEN": "2-Hour Central Axis Highlights",
+      "duration_min": 120,
+      "description": "沿中轴线快速打卡故宫最核心宫殿",
+      "stops": [
+        { "order": 1, "galleryId": "G_MeridianGate", "name": "午门", "duration_min": 10, "notes": "入口，看当期特展" },
+        { "order": 2, "galleryId": "G_Taihe", "name": "太和殿", "duration_min": 15, "notes": "金銮殿，故宫核心" },
+        { "order": 3, "galleryId": "G_Zhonghe", "name": "中和殿", "duration_min": 5 },
+        { "order": 4, "galleryId": "G_Baohe", "name": "保和殿", "duration_min": 10, "notes": "看云龙陛石" },
+        { "order": 5, "galleryId": "G_Qianqing", "name": "乾清宫", "duration_min": 15, "notes": "正大光明匾" },
+        { "order": 6, "galleryId": "G_Kunning", "name": "坤宁宫", "duration_min": 10 },
+        { "order": 7, "galleryId": "G_ImperialGarden", "name": "御花园", "duration_min": 15 },
+        { "order": 8, "galleryId": "G_MeridianGate", "name": "神武门出", "duration_min": 0 }
+      ],
+      "totalWalkingTime_min": 20,
+      "note": "纯中轴线，不含东西路展馆"
+    },
+    {
+      "id": "half_day",
+      "name": "半日经典游",
+      "nameEN": "Half-Day Classic Tour",
+      "duration_min": 240,
+      "description": "中轴线+珍宝馆+钟表馆+御花园，故宫最经典路线",
+      "stops": [
+        { "order": 1, "galleryId": "G_MeridianGate", "name": "午门（含特展）", "duration_min": 20 },
+        { "order": 2, "galleryId": "G_Taihe", "name": "太和殿", "duration_min": 15 },
+        { "order": 3, "galleryId": "G_Baohe", "name": "保和殿", "duration_min": 10 },
+        { "order": 4, "galleryId": "G_Qianqing", "name": "乾清宫", "duration_min": 15 },
+        { "order": 5, "galleryId": "G_Kunning", "name": "坤宁宫", "duration_min": 10 },
+        { "order": 6, "galleryId": "G_Clock", "name": "钟表馆", "duration_min": 20, "notes": "额外购票10元" },
+        { "order": 7, "galleryId": "G_Treasure", "name": "珍宝馆+九龙壁", "duration_min": 25, "notes": "额外购票10元" },
+        { "order": 8, "galleryId": "G_Ningshou", "name": "宁寿宫区", "duration_min": 15 },
+        { "order": 9, "galleryId": "G_ImperialGarden", "name": "御花园", "duration_min": 15 },
+        { "order": 10, "galleryId": "G_MeridianGate", "name": "神武门出", "duration_min": 0 }
+      ],
+      "totalWalkingTime_min": 30
+    },
+    {
+      "id": "full_day",
+      "name": "全天深度游",
+      "nameEN": "Full Day Deep Dive",
+      "duration_min": 420,
+      "description": "全面覆盖故宫所有开放区域和展馆",
+      "stops": [
+        { "order": 1, "galleryId": "G_MeridianGate", "name": "午门特展", "duration_min": 30 },
+        { "order": 2, "galleryId": "G_Wuying", "name": "武英殿（陶瓷馆）", "duration_min": 25 },
+        { "order": 3, "galleryId": "G_Taihe", "name": "太和殿", "duration_min": 15 },
+        { "order": 4, "galleryId": "G_Baohe", "name": "保和殿", "duration_min": 10 },
+        { "order": 5, "galleryId": "G_Wenhua", "name": "文华殿（书画馆）", "duration_min": 25 },
+        { "order": 6, "galleryId": "G_Qianqing", "name": "乾清宫", "duration_min": 15 },
+        { "order": 7, "galleryId": "G_Yangxin", "name": "养心殿", "duration_min": 15 },
+        { "order": 8, "galleryId": "G_WestSix", "name": "西六宫", "duration_min": 20 },
+        { "order": 9, "galleryId": "G_Kunning", "name": "坤宁宫", "duration_min": 10 },
+        { "order": 10, "galleryId": "G_Clock", "name": "钟表馆", "duration_min": 20 },
+        { "order": 11, "galleryId": "G_EastSix", "name": "东六宫", "duration_min": 15 },
+        { "order": 12, "galleryId": "G_Treasure", "name": "珍宝馆+九龙壁", "duration_min": 25 },
+        { "order": 13, "galleryId": "G_Ningshou", "name": "宁寿宫区", "duration_min": 20 },
+        { "order": 14, "galleryId": "G_Sculpture", "name": "雕塑馆", "duration_min": 15 },
+        { "order": 15, "galleryId": "G_ImperialGarden", "name": "御花园", "duration_min": 15 }
+      ],
+      "totalWalkingTime_min": 45
+    },
+    {
+      "id": "photo_spots",
+      "name": "摄影打卡线",
+      "nameEN": "Photography Highlights",
+      "duration_min": 180,
+      "description": "故宫最出片的拍照点",
+      "stops": [
+        { "order": 1, "galleryId": "G_MeridianGate", "name": "午门", "duration_min": 10, "notes": "宏伟城门" },
+        { "order": 2, "galleryId": "G_Taihe", "name": "太和殿广场", "duration_min": 15, "notes": "最开阔的宫殿广场" },
+        { "order": 3, "galleryId": "G_Baohe", "name": "保和殿后云龙陛石", "duration_min": 10 },
+        { "order": 4, "galleryId": "G_Qianqing", "name": "乾清宫", "duration_min": 10 },
+        { "order": 5, "galleryId": "G_Treasure", "name": "九龙壁", "duration_min": 10 },
+        { "order": 6, "galleryId": "G_ImperialGarden", "name": "御花园", "duration_min": 15, "notes": "古柏+亭台" },
+        { "order": 7, "galleryId": "G_Architecture", "name": "角楼/城墙", "duration_min": 20, "notes": "最佳全景视角" }
+      ],
+      "totalWalkingTime_min": 25
+    },
+    {
+      "id": "family_kids",
+      "name": "亲子探索线",
+      "nameEN": "Family & Kids Explorer",
+      "duration_min": 240,
+      "description": "适合带孩子的趣味路线",
+      "stops": [
+        { "order": 1, "galleryId": "G_MeridianGate", "name": "午门", "duration_min": 10, "notes": "巨大的城门，孩子会震撼" },
+        { "order": 2, "galleryId": "G_Taihe", "name": "太和殿", "duration_min": 15, "notes": "龙椅！" },
+        { "order": 3, "galleryId": "G_Qianqing", "name": "乾清宫", "duration_min": 10 },
+        { "order": 4, "galleryId": "G_Clock", "name": "钟表馆", "duration_min": 20, "notes": "会动的机械人偶，孩子最爱" },
+        { "order": 5, "galleryId": "G_Treasure", "name": "珍宝馆", "duration_min": 20, "notes": "闪闪发光的珍宝" },
+        { "order": 6, "galleryId": "G_Ningshou", "name": "九龙壁", "duration_min": 10, "notes": "数龙！" },
+        { "order": 7, "galleryId": "G_ImperialGarden", "name": "御花园", "duration_min": 15, "notes": "可以跑跑" }
+      ],
+      "totalWalkingTime_min": 25
+    }
+  ]
+}

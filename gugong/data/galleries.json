@@ -1,0 +1,255 @@
+{
+  "galleries": [
+    {
+      "id": "G_MeridianGate",
+      "name": "午门展厅",
+      "nameEN": "Meridian Gate Gallery",
+      "zone": "South (Entrance)",
+      "region": "South",
+      "description": "故宫正门，大型特展举办地。百年守护大展、萨迦寺展等均在此",
+      "walkingTime_min": 0,
+      "mustSee": true,
+      "ticketExtra": false
+    },
+    {
+      "id": "G_Taihe",
+      "name": "太和殿（金銮殿）",
+      "nameEN": "Hall of Supreme Harmony",
+      "zone": "Central Axis - Front Three Halls",
+      "region": "Front",
+      "description": "紫禁城最大宫殿，明清皇帝举行大典之所。中国现存最大木结构古建筑",
+      "walkingTime_min": 10,
+      "mustSee": true,
+      "type": "原状陈列"
+    },
+    {
+      "id": "G_Zhonghe",
+      "name": "中和殿",
+      "nameEN": "Hall of Central Harmony",
+      "zone": "Central Axis - Front Three Halls",
+      "region": "Front",
+      "description": "皇帝大典前休息之所，方形攒尖顶",
+      "walkingTime_min": 2,
+      "mustSee": false,
+      "type": "原状陈列"
+    },
+    {
+      "id": "G_Baohe",
+      "name": "保和殿",
+      "nameEN": "Hall of Preserving Harmony",
+      "zone": "Central Axis - Front Three Halls",
+      "region": "Front",
+      "description": "清代殿试场所，殿后有最大石雕云龙陛石",
+      "walkingTime_min": 5,
+      "mustSee": true,
+      "type": "原状陈列"
+    },
+    {
+      "id": "G_Qianqing",
+      "name": "乾清宫",
+      "nameEN": "Palace of Heavenly Purity",
+      "zone": "Central Axis - Back Three Palaces",
+      "region": "Back",
+      "description": "明代至清初皇帝寝宫，'正大光明'匾额，秘密立储之处",
+      "walkingTime_min": 15,
+      "mustSee": true,
+      "type": "原状陈列"
+    },
+    {
+      "id": "G_Jiaotai",
+      "name": "交泰殿",
+      "nameEN": "Hall of Union",
+      "zone": "Central Axis - Back Three Palaces",
+      "region": "Back",
+      "description": "存放皇帝二十五宝玺之处",
+      "walkingTime_min": 3,
+      "mustSee": false,
+      "type": "原状陈列"
+    },
+    {
+      "id": "G_Kunning",
+      "name": "坤宁宫",
+      "nameEN": "Palace of Earthly Tranquility",
+      "zone": "Central Axis - Back Three Palaces",
+      "region": "Back",
+      "description": "明代皇后寝宫，清代改为萨满教祭祀场所及帝后大婚洞房",
+      "walkingTime_min": 10,
+      "mustSee": true,
+      "type": "原状陈列"
+    },
+    {
+      "id": "G_Yangxin",
+      "name": "养心殿",
+      "nameEN": "Hall of Mental Cultivation",
+      "zone": "West of Central Axis",
+      "region": "West",
+      "description": "雍正至清末皇帝实际居住和理政之所，垂帘听政发生地",
+      "walkingTime_min": 10,
+      "mustSee": true,
+      "type": "原状陈列"
+    },
+    {
+      "id": "G_Wenhua",
+      "name": "文华殿（书画馆）",
+      "nameEN": "Hall of Literary Glory (Painting & Calligraphy Gallery)",
+      "zone": "East - Wenhua Hall Area",
+      "region": "East",
+      "description": "故宫书画常设展馆，分批展出历代书画精品。清明上河图、千里江山图曾在此展出",
+      "walkingTime_min": 20,
+      "mustSee": true,
+      "ticketExtra": false
+    },
+    {
+      "id": "G_Wuying",
+      "name": "武英殿（陶瓷馆）",
+      "nameEN": "Hall of Martial Valor (Ceramics Gallery)",
+      "zone": "West - Wuying Hall Area",
+      "region": "West",
+      "description": "故宫陶瓷常设展馆，400余件精品，从新石器至明清。2026年6-7月曾临时闭馆检修",
+      "walkingTime_min": 20,
+      "mustSee": true,
+      "ticketExtra": false
+    },
+    {
+      "id": "G_Treasure",
+      "name": "珍宝馆",
+      "nameEN": "Treasure Gallery",
+      "zone": "Northeast - Ningshou Palace Area",
+      "region": "Northeast",
+      "description": "宁寿宫区内，展出清代宫廷珍宝：金银器、玉器、宝石、珐琅等。含九龙壁",
+      "walkingTime_min": 25,
+      "mustSee": true,
+      "ticketExtra": true,
+      "extraPrice": 10
+    },
+    {
+      "id": "G_Clock",
+      "name": "钟表馆",
+      "nameEN": "Clock Gallery",
+      "zone": "East - Fengxian Hall",
+      "region": "East",
+      "description": "奉先殿内，展出清宫收藏的中外精美钟表，英国、法国、瑞士及广州、苏州制造",
+      "walkingTime_min": 20,
+      "mustSee": true,
+      "ticketExtra": true,
+      "extraPrice": 10
+    },
+    {
+      "id": "G_Sculpture",
+      "name": "雕塑馆",
+      "nameEN": "Sculpture Gallery",
+      "zone": "West - Cining Palace",
+      "region": "West",
+      "description": "慈宁宫内，425件雕塑：陶俑、画像砖石、佛像。含秦始皇兵马俑",
+      "walkingTime_min": 15,
+      "mustSee": false,
+      "ticketExtra": false
+    },
+    {
+      "id": "G_Bronze",
+      "name": "青铜器馆",
+      "nameEN": "Bronze Gallery",
+      "zone": "West",
+      "region": "West",
+      "description": "展出故宫藏15000余件青铜器中的精品，先秦有铭文青铜器近1600件",
+      "walkingTime_min": 15,
+      "mustSee": false,
+      "ticketExtra": false
+    },
+    {
+      "id": "G_Architecture",
+      "name": "古建馆",
+      "nameEN": "Architecture Gallery",
+      "zone": "Southeast - Donghua Gate & Corner Tower",
+      "region": "North",
+      "description": "东华门城楼、东南角楼、城墙段。展出古建构件、样式雷烫样，可登城墙",
+      "walkingTime_min": 20,
+      "mustSee": false,
+      "ticketExtra": false
+    },
+    {
+      "id": "G_Opera",
+      "name": "戏曲馆",
+      "nameEN": "Opera Gallery",
+      "zone": "Northeast - Changyin Pavilion",
+      "region": "Northeast",
+      "description": "畅音阁大戏台及阅是楼，展示清代宫廷戏曲文化",
+      "walkingTime_min": 10,
+      "mustSee": false,
+      "ticketExtra": false
+    },
+    {
+      "id": "G_Furniture",
+      "name": "家具馆",
+      "nameEN": "Furniture Gallery",
+      "zone": "South - Nandaku",
+      "region": "South",
+      "description": "南大库，展出明清宫廷家具6000余件中的精品",
+      "walkingTime_min": 10,
+      "mustSee": false,
+      "ticketExtra": false
+    },
+    {
+      "id": "G_Arms",
+      "name": "武备馆",
+      "nameEN": "Arms Gallery",
+      "zone": "East - Jianting (Arrow Pavilion)",
+      "region": "East",
+      "description": "箭亭内，展示清代武备：弓箭、刀剑、甲胄",
+      "walkingTime_min": 10,
+      "mustSee": false,
+      "ticketExtra": false
+    },
+    {
+      "id": "G_ImperialGarden",
+      "name": "御花园",
+      "nameEN": "Imperial Garden",
+      "zone": "North - Behind Back Three Palaces",
+      "region": "North",
+      "description": "紫禁城内唯一花园，明代始建，古柏参天，亭台楼阁，堆秀山",
+      "walkingTime_min": 15,
+      "mustSee": true,
+      "ticketExtra": false
+    },
+    {
+      "id": "G_Ningshou",
+      "name": "宁寿宫区（含珍宝馆）",
+      "nameEN": "Ningshou Palace Area",
+      "zone": "Northeast",
+      "region": "Northeast",
+      "description": "乾隆太上皇宫殿区：皇极殿、养性殿、乐寿堂、颐和轩、珍妃井、九龙壁",
+      "walkingTime_min": 30,
+      "mustSee": true,
+      "ticketExtra": true,
+      "extraPrice": 10
+    },
+    {
+      "id": "G_WestSix",
+      "name": "西六宫",
+      "nameEN": "West Six Palaces",
+      "zone": "West of Back Three Palaces",
+      "region": "West",
+      "description": "储秀宫(慈禧居所)、翊坤宫、长春宫等，后妃生活区",
+      "walkingTime_min": 15,
+      "mustSee": false,
+      "ticketExtra": false
+    },
+    {
+      "id": "G_EastSix",
+      "name": "东六宫",
+      "nameEN": "East Six Palaces",
+      "zone": "East of Back Three Palaces",
+      "region": "East",
+      "description": "景仁宫、承乾宫、钟粹宫等，后妃生活区。延禧宫(未完工水晶宫)",
+      "walkingTime_min": 15,
+      "mustSee": false,
+      "ticketExtra": false
+    }
+  ],
+  "layoutSummary": {
+    "centralAxis": "午门 → 太和门 → 太和殿 → 中和殿 → 保和殿 → 乾清门 → 乾清宫 → 交泰殿 → 坤宁宫 → 御花园 → 神武门",
+    "eastRoute": "文华殿(书画馆) → 东六宫 → 钟表馆(奉先殿) → 宁寿宫区(珍宝馆/九龙壁)",
+    "westRoute": "武英殿(陶瓷馆) → 西六宫 → 养心殿 → 慈宁宫(雕塑馆)",
+    "note": "故宫实行南向北单向参观，从午门进，神武门或东华门出"
+  }
+}
