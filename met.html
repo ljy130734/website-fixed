@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CuratorPath · 大都会艺术博物馆路线规划</title>
+<meta name="description" content="The Metropolitan Museum of Art 大都会艺术博物馆 AI 路线规划">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  @font-face { font-family:'Telma'; src:url('fonts/Telma-Medium.otf') format('opentype'); font-weight:500; font-style:normal; font-display:swap; }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --bg:#ffffff; --ink:#111111; --ink-60:rgba(17,17,17,.6); --ink-40:rgba(17,17,17,.4);
+    --line:1px solid #111111; --line-soft:1px solid rgba(17,17,17,.14); --panel:#fafafa;
+    --acc:#2C3E50; --acc-soft:rgba(44,62,80,.08);
+    --font-ui:'Space Grotesk',system-ui,-apple-system,sans-serif;
+    --font-mono:'Space Mono',monospace;
+    --font-brand:'Telma','Space Grotesk',serif;
+  }
+  html,body { height:100%; }
+  body { font-family:var(--font-ui); background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased; overflow:hidden; }
+  button { font-family:inherit; cursor:pointer; }
+  ::selection { background:var(--acc); color:#fff; }
+
+  .btn-solid { background:var(--ink); color:var(--bg); border:var(--line); padding:.85rem 2rem;
+    font-family:var(--font-mono); font-size:.78rem; letter-spacing:.14em; text-transform:uppercase; transition:opacity .15s; }
+  .btn-solid:hover { opacity:.82; }
+  .btn-ghost { background:var(--bg); color:var(--ink); border:var(--line); padding:.85rem 2rem;
+    font-family:var(--font-mono); font-size:.78rem; letter-spacing:.14em; text-transform:uppercase; transition:.15s; }
+  .btn-ghost:hover { background:var(--ink); color:var(--bg); }
+
+  /* ═══ PHASE 0 · 品牌闪现 ═══ */
+  #flash { position:fixed; inset:0; z-index:400; background:var(--bg);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.1rem;
+    opacity:0; transition:opacity .25s ease; }
+  #flash.show { opacity:1; animation:flashIn .4s ease; }
+  @keyframes flashIn { from { opacity:0; } to { opacity:1; } }
+  #flash.hide { opacity:0; pointer-events:none; }
+  #flash .fb { font-family:var(--font-brand); font-size:clamp(3rem,8vw,6.5rem); letter-spacing:.03em; }
+  #flash .fs { font-family:var(--font-mono); font-size:.7rem; letter-spacing:.28em; color:var(--ink-60); text-transform:uppercase; }
+
+  /* ═══ PHASE 1 · 问卷 ═══ */
+  #quiz { position:fixed; inset:0; z-index:300; background:var(--bg); overflow-y:auto; display:none; }
+  #quiz.on { display:block; animation:fadeUp .45s ease; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+  .quiz-inner { max-width:760px; margin:0 auto; padding:3.2rem 2rem 7rem; }
+  .quiz-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:2.8rem; }
+  .quiz-brand { font-family:var(--font-brand); font-size:1.3rem; letter-spacing:.05em; }
+  .quiz-museum { font-family:var(--font-mono); font-size:.68rem; letter-spacing:.14em; color:var(--ink-60); text-transform:uppercase; text-align:right; }
+  .quiz-title { font-size:clamp(1.9rem,4.5vw,2.7rem); font-weight:700; letter-spacing:-.02em; line-height:1.18; }
+  .quiz-sub { margin-top:.7rem; color:var(--ink-60); font-size:.95rem; font-weight:300; }
+  .q-block { margin-top:2.4rem; }
+  .q-head { display:flex; align-items:baseline; gap:.8rem; margin-bottom:1rem; }
+  .q-num { font-family:var(--font-mono); font-size:.72rem; color:var(--ink-40); letter-spacing:.1em; }
+  .q-label { font-size:1.05rem; font-weight:500; }
+  .q-hint { font-family:var(--font-mono); font-size:.64rem; color:var(--ink-40); letter-spacing:.08em; margin-left:auto; text-transform:uppercase; }
+  .opt-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:.6rem; }
+  .opt { border:var(--line); background:var(--bg); padding:.9rem .9rem .8rem; text-align:left; transition:.13s; display:flex; flex-direction:column; gap:.25rem; }
+  .opt:hover { background:var(--panel); }
+  .opt.on { background:var(--acc); border-color:var(--acc); color:#fff; }
+  .opt .ol { font-size:.92rem; font-weight:500; }
+  .opt .od { font-family:var(--font-mono); font-size:.62rem; letter-spacing:.05em; opacity:.55; }
+  .chips { display:flex; flex-wrap:wrap; gap:.5rem; }
+  .chip { border:var(--line); background:var(--bg); padding:.5rem 1rem; font-size:.84rem; font-weight:300; transition:.13s; }
+  .chip:hover { background:var(--panel); }
+  .chip.on { background:var(--acc); border-color:var(--acc); color:#fff; }
+  .quiz-actions { margin-top:3rem; display:flex; gap:.8rem; align-items:center; }
+  #btnSkip { position:fixed; right:2rem; bottom:2rem; z-index:310; background:var(--bg); color:var(--ink-60);
+    border:var(--line); padding:.8rem 1.5rem; font-family:var(--font-mono); font-size:.7rem;
+    letter-spacing:.12em; text-transform:uppercase; transition:.15s; box-shadow:4px 4px 0 rgba(17,17,17,.12); }
+  #btnSkip:hover { color:#fff; background:var(--acc); border-color:var(--acc); }
+
+  /* ═══ PHASE 1.5 · AI 加载 ═══ */
+  #loading { position:fixed; inset:0; z-index:350; background:var(--bg);
+    display:none; flex-direction:column; align-items:center; justify-content:center; gap:1.6rem; }
+  #loading.on { display:flex; animation:fadeUp .3s ease; }
+  #loading .lt { font-size:1.6rem; font-weight:700; letter-spacing:-.01em; }
+  #loading .lbar { width:220px; height:1px; background:rgba(17,17,17,.15); position:relative; overflow:hidden; }
+  #loading .lbar i { position:absolute; left:0; top:0; bottom:0; width:0; background:var(--acc); transition:width .4s ease; }
+  #loading .lstep { font-family:var(--font-mono); font-size:.68rem; letter-spacing:.16em; color:var(--ink-60); text-transform:uppercase; min-height:1em; }
+
+  /* ═══ PHASE 2 · 地图页 ═══ */
+  #mapPage { display:none; height:100vh; grid-template-columns:330px 1fr; }
+  #mapPage.on { display:grid; animation:fadeUp .45s ease; }
+  @media(max-width:900px){ #mapPage.on { grid-template-columns:1fr; grid-template-rows:auto 1fr; } #sidebar,#main{ min-width:0; } }
+
+  #sidebar { border-right:var(--line); display:flex; flex-direction:column; min-height:0; background:var(--bg); }
+  @media(max-width:900px){ #sidebar{ border-right:none; border-bottom:var(--line); } }
+  .sb-head { padding:1.3rem 1.4rem 1.1rem; border-bottom:var(--line-soft); }
+  .sb-brand-row { display:flex; align-items:baseline; justify-content:space-between; }
+  .sb-brand { font-family:var(--font-brand); font-size:1.15rem; letter-spacing:.05em; }
+  .sb-home { font-family:var(--font-mono); font-size:.62rem; letter-spacing:.12em; color:var(--ink-60); text-decoration:none; text-transform:uppercase; }
+  .sb-home:hover { color:var(--ink); text-decoration:underline; }
+  .sb-museum { margin-top:.5rem; font-size:1.02rem; font-weight:700; letter-spacing:-.01em; }
+  .sb-museum-sub { font-family:var(--font-mono); font-size:.6rem; letter-spacing:.1em; color:var(--ink-40); margin-top:.25rem; text-transform:uppercase; }
+  .sb-tabs { display:flex; border-bottom:var(--line-soft); }
+  .sb-tab { flex:1; background:none; border:none; padding:.75rem 0 .65rem;
+    font-family:var(--font-mono); font-size:.68rem; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--ink-40); border-bottom:2px solid transparent; margin-bottom:-1px; transition:.15s; }
+  .sb-tab.on { color:var(--ink); border-bottom-color:var(--acc); }
+  .sb-body { flex:1; overflow-y:auto; padding:1.1rem 1.2rem; min-height:0; }
+  @media(max-width:900px){ .sb-body{ max-height:34vh; } }
+  .sb-pane { display:none; } .sb-pane.on { display:block; }
+
+  .route-item { border:var(--line-soft); padding:.85rem .95rem; margin-bottom:.55rem; cursor:pointer; background:var(--bg); transition:.13s; }
+  .route-item:hover { border-color:var(--ink); }
+  .route-item.on { border:1px solid var(--acc); box-shadow:inset 3px 0 0 var(--acc); }
+  .route-item .rn { font-size:.92rem; font-weight:500; display:flex; align-items:center; gap:.5rem; }
+  .route-item .rn .en { display:block; font-family:var(--font-mono); font-size:.58rem; font-weight:400; color:var(--ink-40); letter-spacing:.05em; margin-top:.15rem; text-transform:uppercase; }
+  .route-item .rm { font-family:var(--font-mono); font-size:.62rem; color:var(--ink-60); margin-top:.35rem; letter-spacing:.04em; }
+  .route-item .rd { font-size:.76rem; color:var(--ink-60); font-weight:300; margin-top:.3rem; line-height:1.5; }
+  .route-item .ai-tag { font-family:var(--font-mono); font-size:.56rem; letter-spacing:.14em; border:1px solid var(--acc); color:var(--acc); padding:.12rem .4rem; text-transform:uppercase; }
+  .route-item.custom { border:1px dashed var(--acc); }
+
+  .recustom-blurb { font-size:.86rem; color:var(--ink-60); font-weight:300; line-height:1.7; margin-bottom:1.2rem; }
+  .pref-summary { border:var(--line-soft); padding:.9rem 1rem; margin-bottom:1.2rem; }
+  .pref-summary .ps-row { display:flex; justify-content:space-between; gap:1rem; font-size:.78rem; padding:.28rem 0; }
+  .pref-summary .ps-row span:first-child { color:var(--ink-60); font-weight:300; flex:0 0 auto; }
+  .pref-summary .ps-row span:last-child { font-family:var(--font-mono); font-size:.68rem; text-align:right; }
+
+  .sb-foot { border-top:var(--line-soft); padding:.9rem 1.2rem; }
+  .sb-cur { font-family:var(--font-mono); font-size:.62rem; color:var(--ink-40); letter-spacing:.14em; text-transform:uppercase; margin-bottom:.4rem; }
+  .sb-cur-route { font-size:.92rem; font-weight:500; }
+  .sb-cur-meta { font-family:var(--font-mono); font-size:.64rem; color:var(--ink-60); margin-top:.25rem; }
+
+  #main { display:flex; flex-direction:column; min-height:0; position:relative; background:var(--bg); }
+  .route-head { padding:1.2rem 1.8rem 1rem; border-bottom:var(--line-soft); }
+  .route-head h1 { font-size:1.45rem; font-weight:700; letter-spacing:-.02em; }
+  .route-head h1 .en { display:block; font-family:var(--font-mono); font-size:.62rem; font-weight:400; letter-spacing:.12em; color:var(--ink-40); margin-top:.3rem; text-transform:uppercase; }
+  .route-meta { font-family:var(--font-mono); font-size:.68rem; color:var(--ink-60); margin-top:.45rem; letter-spacing:.05em; }
+  .reason-chips { display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.6rem; }
+  .reason-chip { font-family:var(--font-mono); font-size:.6rem; letter-spacing:.06em; border:var(--line-soft); padding:.22rem .55rem; color:var(--ink-60); }
+  .reason-chip b { color:var(--acc); font-weight:700; }
+
+  .floor-bar { display:flex; align-items:stretch; border-bottom:var(--line); overflow-x:auto; background:var(--bg); }
+  .floor-btn { background:none; border:none; border-right:var(--line-soft); padding:.7rem 1.35rem .6rem;
+    font-family:var(--font-mono); font-size:.8rem; font-weight:700; letter-spacing:.1em; color:var(--ink-40);
+    transition:.13s; white-space:nowrap; }
+  .floor-btn small { display:block; font-size:.52rem; font-weight:400; letter-spacing:.12em; margin-top:.12rem; text-transform:uppercase; opacity:.75; }
+  .floor-btn:hover { color:var(--ink); background:var(--panel); }
+  .floor-btn.on { background:var(--acc); color:#fff; }
+  .floor-btn.dim { opacity:.35; }
+  .floor-btn.dim.on { opacity:1; }
+  .floor-btn.locked { opacity:.3; cursor:not-allowed; }
+  .floor-progress { margin-left:auto; align-self:center; padding:0 1.2rem; font-family:var(--font-mono);
+    font-size:.62rem; color:var(--ink-40); letter-spacing:.12em; white-space:nowrap; text-transform:uppercase; }
+
+  .floor-view { flex:1; overflow-y:auto; padding:1.5rem 1.8rem 6.5rem; min-height:0; }
+  .floor-title-row { display:flex; align-items:baseline; gap:1rem; margin-bottom:1.1rem; flex-wrap:wrap; }
+  .floor-title { font-family:var(--font-mono); font-size:1.05rem; font-weight:700; letter-spacing:.12em; }
+  .floor-sub { font-size:.8rem; color:var(--ink-60); font-weight:300; }
+  .floor-access-note { width:100%; font-family:var(--font-mono); font-size:.64rem; color:var(--acc); letter-spacing:.04em; }
+
+  /* ── 真实地图 + SVG 叠加 ── */
+  .fmap-real-wrap { border:var(--line); max-width:1020px; position:relative; background:#fff; overflow:hidden; }
+  .fmap-real-wrap img { width:100%; height:auto; display:block; }
+  .fmap-real-svg { position:absolute; inset:0; width:100%; height:100%; }
+  .fmap-real-svg .route-path { stroke:var(--acc); stroke-width:5; fill:none; stroke-dasharray:14 10; stroke-linejoin:round; stroke-linecap:round; animation:dashmove 1.2s linear infinite; opacity:.9; }
+  @keyframes dashmove { to { stroke-dashoffset:-24; } }
+  .fmap-real-svg .marker { fill:#fff; stroke:var(--acc); stroke-width:3; filter:drop-shadow(0 2px 4px rgba(0,0,0,.3)); }
+  .fmap-real-svg .marker-num { font-family:'Space Mono',monospace; font-size:17px; font-weight:700; fill:var(--acc); text-anchor:middle; dominant-baseline:central; }
+  .fmap-real-svg .g-box:hover .marker { fill:var(--acc); }
+  .fmap-real-svg .g-box:hover .marker-num { fill:#fff; }
+  .fmap-real-svg .g-label { font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:500; fill:#111; text-anchor:middle; paint-order:stroke; stroke:#fff; stroke-width:4px; stroke-linejoin:round; }
+  .fmap-real-svg .g-sub { font-family:'Space Mono',monospace; font-size:11px; fill:rgba(17,17,17,.72); text-anchor:middle; paint-order:stroke; stroke:#fff; stroke-width:3px; stroke-linejoin:round; }
+  .fmap-real-svg .off-dot { fill:rgba(17,17,17,.28); }
+  .fmap-real-svg .g-hit { cursor:pointer; fill:transparent; }
+
+  /* ── 楼层内站点列表 ── */
+  .stops { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:.7rem; max-width:1020px; margin-top:1.1rem; }
+  .stop-card { border:var(--line); background:var(--bg); padding:.9rem 1rem; cursor:pointer; transition:.13s; position:relative; }
+  .stop-card:hover { background:var(--panel); box-shadow:4px 4px 0 var(--acc); transform:translate(-2px,-2px); }
+  .stop-ord { position:absolute; top:.8rem; right:.9rem; font-family:var(--font-mono); font-size:.78rem; font-weight:700; color:var(--acc); opacity:.55; }
+  .stop-name { font-size:.98rem; font-weight:700; letter-spacing:-.01em; padding-right:2rem; }
+  .stop-name .en { display:block; font-family:var(--font-mono); font-size:.58rem; font-weight:400; color:var(--ink-40); letter-spacing:.06em; margin-top:.2rem; text-transform:uppercase; }
+  .stop-dur { font-family:var(--font-mono); font-size:.64rem; color:var(--ink-60); letter-spacing:.05em; margin-top:.35rem; }
+  .stop-tags { display:flex; gap:.35rem; margin-top:.5rem; flex-wrap:wrap; }
+  .stag { font-family:var(--font-mono); font-size:.54rem; letter-spacing:.12em; padding:.16rem .45rem; border:var(--line); text-transform:uppercase; }
+  .stag.inv { background:var(--acc); border-color:var(--acc); color:#fff; }
+  .stag.soft { border-color:rgba(17,17,17,.25); color:var(--ink-60); }
+  .stop-notes { margin-top:.5rem; font-size:.8rem; color:var(--ink-60); font-weight:300; line-height:1.55; }
+
+  .floor-empty { max-width:640px; border:1px dashed rgba(17,17,17,.35); padding:2rem; margin-top:1rem; }
+  .floor-empty h3 { font-size:1.05rem; font-weight:700; margin-bottom:.5rem; }
+  .floor-empty p { font-size:.86rem; color:var(--ink-60); font-weight:300; line-height:1.7; }
+  .floor-empty .fe-list { font-family:var(--font-mono); font-size:.7rem; color:var(--ink-60); margin-top:1rem; line-height:2; }
+
+  #nextFloorBtn { position:absolute; right:1.6rem; bottom:1.6rem; z-index:20;
+    background:var(--acc); color:#fff; border:1px solid var(--acc);
+    font-family:var(--font-mono); font-size:.74rem; letter-spacing:.12em; text-transform:uppercase;
+    padding:.95rem 1.6rem; box-shadow:5px 5px 0 rgba(44,62,80,.22); transition:.15s; }
+  #nextFloorBtn:hover { transform:translate(-2px,-2px); box-shadow:7px 7px 0 rgba(44,62,80,.22); }
+
+  /* ── 总结卡片 ── */
+  .sum-card { border:var(--line); max-width:860px; }
+  .sum-hero { padding:1.7rem 1.8rem 1.3rem; border-bottom:var(--line-soft); }
+  .sum-hero .st { font-family:var(--font-mono); font-size:.62rem; letter-spacing:.22em; color:var(--ink-40); text-transform:uppercase; }
+  .sum-hero h2 { font-size:1.65rem; font-weight:700; letter-spacing:-.02em; margin-top:.5rem; }
+  .sum-hero h2 .en { display:block; font-family:var(--font-mono); font-size:.62rem; font-weight:400; letter-spacing:.14em; color:var(--ink-40); margin-top:.35rem; text-transform:uppercase; }
+  .sum-stats { display:grid; grid-template-columns:repeat(4,1fr); border-bottom:var(--line-soft); }
+  @media(max-width:640px){ .sum-stats{ grid-template-columns:repeat(2,1fr); } }
+  .sum-stat { padding:1.1rem 1rem; border-right:var(--line-soft); text-align:center; }
+  .sum-stat:last-child { border-right:none; }
+  .sum-stat .n { font-size:1.9rem; font-weight:700; letter-spacing:-.02em; color:var(--acc); }
+  .sum-stat .l { font-family:var(--font-mono); font-size:.56rem; letter-spacing:.16em; color:var(--ink-40); margin-top:.3rem; text-transform:uppercase; }
+  .sum-sec { padding:1.2rem 1.8rem; border-bottom:var(--line-soft); }
+  .sum-sec h4 { font-family:var(--font-mono); font-size:.62rem; letter-spacing:.2em; color:var(--ink-40); text-transform:uppercase; margin-bottom:.7rem; }
+  .sum-sec p, .sum-sec li { font-size:.85rem; color:var(--ink-60); font-weight:300; line-height:1.8; }
+  .sum-sec ul { list-style:none; }
+  .sum-sec li b { color:var(--ink); font-weight:500; }
+  .sum-floor { font-family:var(--font-mono); font-size:.68rem; color:var(--acc); letter-spacing:.14em; margin:.6rem 0 .2rem; }
+  .sum-actions { display:flex; gap:.7rem; padding:1.2rem 1.8rem; flex-wrap:wrap; }
+
+  /* ── 展点信息卡 ── */
+  #stopModal { position:fixed; inset:0; z-index:500; background:rgba(255,255,255,.85); backdrop-filter:blur(4px);
+    display:none; align-items:center; justify-content:center; padding:1.5rem; }
+  #stopModal.on { display:flex; animation:fadeUp .25s ease; }
+  .sm-box { background:var(--bg); border:var(--line); max-width:560px; width:100%; max-height:88vh; overflow-y:auto; box-shadow:8px 8px 0 rgba(44,62,80,.16); }
+  .sm-img { width:100%; aspect-ratio:16/9.5; object-fit:cover; display:block; border-bottom:var(--line); background:var(--panel); }
+  .sm-extra-img { width:100%; display:block; border:var(--line); margin:0 0 1rem; background:var(--panel); }
+  .sm-ph { aspect-ratio:16/9.5; border-bottom:var(--line); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.6rem; background:var(--panel); }
+  .sm-ph .ch { font-size:2.2rem; }
+  .sm-ph .cp { font-family:var(--font-mono); font-size:.56rem; letter-spacing:.26em; color:var(--ink-40); text-transform:uppercase; }
+  .sm-body { padding:1.3rem 1.5rem 1.5rem; }
+  .sm-top { display:flex; align-items:flex-start; gap:1rem; }
+  .sm-name { font-size:1.3rem; font-weight:700; letter-spacing:-.01em; }
+  .sm-en { font-family:var(--font-mono); font-size:.6rem; color:var(--ink-40); letter-spacing:.08em; margin-top:.25rem; text-transform:uppercase; }
+  .sm-close { margin-left:auto; background:none; border:var(--line); width:34px; height:34px; font-size:1rem; line-height:1; transition:.13s; flex:0 0 auto; }
+  .sm-close:hover { background:var(--acc); border-color:var(--acc); color:#fff; }
+  .sm-meta { display:flex; flex-wrap:wrap; gap:.4rem; margin:.85rem 0 .95rem; }
+  .sm-meta .stag { font-size:.58rem; padding:.26rem .55rem; }
+  .sm-desc { font-size:.86rem; color:var(--ink-60); font-weight:300; line-height:1.75; }
+  .sm-sec { margin-top:1.05rem; }
+  .sm-sec h5 { font-family:var(--font-mono); font-size:.58rem; letter-spacing:.2em; color:var(--ink-40); text-transform:uppercase; margin-bottom:.5rem; }
+  .sm-art { display:flex; justify-content:space-between; gap:1rem; font-size:.84rem; font-weight:300; padding:.34rem 0; border-bottom:var(--line-soft); }
+  .sm-art:last-child { border-bottom:none; }
+  .sm-art .an b { font-weight:500; }
+  .sm-art .an .ae { display:block; font-family:var(--font-mono); font-size:.58rem; color:var(--ink-40); letter-spacing:.04em; margin-top:.1rem; }
+  .sm-art .ap { font-family:var(--font-mono); font-size:.6rem; color:var(--ink-40); white-space:nowrap; }
+  .sm-pop { height:3px; background:rgba(17,17,17,.12); margin-top:.4rem; }
+  .sm-pop i { display:block; height:100%; background:var(--acc); }
+  .sm-pd { margin-top:.9rem; font-family:var(--font-mono); font-size:.58rem; letter-spacing:.1em; color:var(--ink-40); text-transform:uppercase; }
+
+  /* ── 语言切换 ── */
+  #langToggle{ position:fixed; top:1rem; right:1rem; z-index:600; display:flex; gap:0;
+    border:1px solid rgba(17,17,17,.18); background:rgba(255,255,255,.92); backdrop-filter:blur(6px);
+    border-radius:4px; overflow:hidden; font-family:var(--font-mono); font-size:.7rem; }
+  #langToggle button{ background:transparent; border:none; padding:.4rem .75rem;
+    color:var(--ink-40); cursor:pointer; transition:.13s; }
+  #langToggle button.on{ color:#fff; background:var(--acc); }
+  #langToggle button:hover{ color:var(--ink); }
+  #langToggle button.on:hover{ color:#fff; }
+
+  /* ═══ 手机端适配 ═══ */
+  @media(max-width:640px){
+    .quiz-inner { padding:2rem 1.2rem 6rem; }
+    .quiz-title { font-size:1.5rem; }
+    .opt-grid { grid-template-columns:1fr 1fr; gap:.5rem; }
+    .chip { padding:.42rem .7rem; font-size:.78rem; }
+    #btnSkip { right:1rem; bottom:1.2rem; }
+    #sidebar { max-height:36vh; }
+    .sb-body { max-height:20vh; }
+    .route-item .rd { display:none; }
+    .route-head { padding:.9rem 1rem .7rem; }
+    .route-head h1 { font-size:1.15rem; }
+    .floor-btn { padding:.55rem .85rem .5rem; font-size:.72rem; }
+    .floor-view { padding:1rem 1rem 5.5rem; }
+    .fmap-real-svg .marker-num { font-size:26px; }
+    .fmap-real-svg .g-label { font-size:22px; stroke-width:5px; }
+    .fmap-real-svg .g-sub { font-size:16px; }
+    .fmap-real-svg .route-path { stroke-width:7; }
+    .stops { grid-template-columns:1fr; }
+    .stop-card:hover { box-shadow:none; transform:none; }
+    #nextFloorBtn { right:1rem; bottom:1rem; padding:.75rem 1.1rem; }
+    #stopModal { padding:.5rem; }
+    .sm-box { max-height:92vh; }
+    .sum-actions .btn-solid, .sum-actions .btn-ghost { flex:1; text-align:center; }
+  }
+</style>
+</head>
+<body>
+<div id="langToggle"><button data-lang="zh" class="on">中</button><button data-lang="en">EN</button></div>
+
+<!-- PHASE 0 · 品牌闪现 -->
+<div id="flash">
+  <div class="fb">CuratorPath</div>
+  <div class="fs" id="flashSub">正在加载 The Metropolitan Museum of Art…</div>
+</div>
+
+<!-- PHASE 1 · 偏好问卷 -->
+<div id="quiz">
+  <div class="quiz-inner">
+    <div class="quiz-top">
+      <span class="quiz-brand">CuratorPath</span>
+      <span class="quiz-museum">大都会艺术博物馆<br>The Metropolitan Museum of Art</span>
+    </div>
+    <h1 class="quiz-title" data-i18n="告诉我们你的偏好，<br>剩下的交给 AI。">告诉我们你的偏好，<br>剩下的交给 AI。</h1>
+    <p class="quiz-sub" data-i18n="4 个小问题，生成一条只属于你的参观路线。也可以直接跳过，使用经典路线。">4 个小问题，生成一条只属于你的参观路线。也可以直接跳过，使用经典路线。</p>
+
+    <div class="q-block">
+      <div class="q-head"><span class="q-num">01</span><span class="q-label" data-i18n="你打算停留多久？">你打算停留多久？</span></div>
+      <div class="opt-grid" id="qTime"></div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-head"><span class="q-num">02</span><span class="q-label" data-i18n="对哪些领域感兴趣？">对哪些领域感兴趣？</span><span class="q-hint" data-i18n="可多选">可多选</span></div>
+      <div class="chips" id="qInterests"></div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-head"><span class="q-num">03</span><span class="q-label" data-i18n="想要什么游览节奏？">想要什么游览节奏？</span></div>
+      <div class="opt-grid" id="qPace"></div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-head"><span class="q-num">04</span><span class="q-label" data-i18n="是否需要无障碍路线？">是否需要无障碍路线？</span></div>
+      <div class="opt-grid" id="qAccess" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));"></div>
+    </div>
+
+    <div class="quiz-actions">
+      <button class="btn-solid" id="btnGenerate" data-i18n="生成我的路线 →">生成我的路线 →</button>
+    </div>
+  </div>
+  <button id="btnSkip" data-i18n="跳过 · 使用经典路线 →">跳过 · 使用经典路线 →</button>
+</div>
+
+<!-- PHASE 1.5 · AI 加载 -->
+<div id="loading">
+  <div class="lt" data-i18n="AI 正在规划…">AI 正在规划…</div>
+  <div class="lbar"><i id="lbarFill"></i></div>
+  <div class="lstep" id="lstep">正在分析你的偏好…</div>
+</div>
+
+<!-- PHASE 2 · 地图页 -->
+<div id="mapPage">
+  <aside id="sidebar">
+    <div class="sb-head">
+      <div class="sb-brand-row">
+        <span class="sb-brand">CuratorPath</span>
+        <a class="sb-home" href="index.html?skip=1" data-i18n="← 首页">← 首页</a>
+      </div>
+      <div class="sb-museum">大都会艺术博物馆</div>
+      <div class="sb-museum-sub">The Metropolitan Museum of Art · New York</div>
+    </div>
+    <div class="sb-tabs">
+      <button class="sb-tab on" id="tabA" data-i18n="经典路线库">经典路线库</button>
+      <button class="sb-tab" id="tabB" data-i18n="重新定制">重新定制</button>
+    </div>
+    <div class="sb-body">
+      <div class="sb-pane on" id="paneA"></div>
+      <div class="sb-pane" id="paneB">
+        <p class="recustom-blurb" data-i18n="偏好变了？重新填写问卷，AI 会基于你的最新选择重新匹配路线。">偏好变了？重新填写问卷，AI 会基于你的最新选择重新匹配路线。</p>
+        <div class="pref-summary" id="prefSummary"></div>
+        <button class="btn-solid" id="btnRecustom" style="width:100%;" data-i18n="重新打开问卷">重新打开问卷</button>
+      </div>
+    </div>
+    <div class="sb-foot">
+      <div class="sb-cur" data-i18n="当前路线">当前路线</div>
+      <div class="sb-cur-route" id="curRouteName">—</div>
+      <div class="sb-cur-meta" id="curRouteMeta">—</div>
+    </div>
+  </aside>
+
+  <main id="main">
+    <div class="route-head">
+      <h1 id="routeTitle">—</h1>
+      <div class="route-meta" id="routeMeta"></div>
+      <div class="reason-chips" id="reasonChips"></div>
+    </div>
+    <div class="floor-bar" id="floorBar"></div>
+    <div class="floor-view" id="floorView"></div>
+    <button id="nextFloorBtn">下一层 ▸</button>
+  </main>
+</div>
+
+<!-- 展点信息卡 -->
+<div id="stopModal"><div class="sm-box" id="smBox"></div></div>
+
+<script>
+'use strict';
+/* ════════════════════════════════════════════════
+   CuratorPath · 大都会艺术博物馆（The Met）路线规划
+   品牌闪现 → 问卷(可跳过) → AI 规划 → 楼层地图（真实底图+热点）
+   ════════════════════════════════════════════════ */
+const $ = s => document.querySelector(s);
+
+const DATA_BASE = 'america/data/';
+const IMG_BASE  = 'america/images/artworks/opt/';
+const MAP_BASE  = 'america/images/maps/';
+
+/* ── 楼层定义（按官方地图：1F=A1 / 2F=A2 / Rooftop=A5）── */
+const FLOORS = ['1F', '2F', 'Roof'];
+const FLOOR_LABEL = {
+  '1F':   { cn:'一层', en:'First Floor',  sub:'埃及艺术 · 希腊罗马雕塑 · 武器盔甲 · 大厅', subEN:'Egyptian · Greek & Roman · Arms & Armor · Great Hall' },
+  '2F':   { cn:'二层', en:'Second Floor', sub:'欧洲绘画 · 印象派 · 美国馆 · 亚洲艺术', subEN:'European Paintings · Impressionists · American Wing · Asian Art' },
+  'Roof': { cn:'屋顶', en:'Roof Garden',  sub:'屋顶花园（季节性开放）', subEN:'Roof Garden (seasonal)' }
+};
+const REAL_MAPS = {
+  '1F':   { src:'f1.png',   w:2000, h:1302 },
+  '2F':   { src:'f2.png',   w:2000, h:1243 },
+  'Roof': { src:'roof.png', w:2000, h:1217 }
+};
+
+/* ── i18n（中文优先，英文小字副标）── */
+const I18N_LANG = { current: 'zh' };
+function T(zh, en) { return I18N_LANG.current === 'en' ? (en || zh) : zh; }
+const EN_MAP = {
+  '告诉我们你的偏好，<br>剩下的交给 AI。':'Tell us your preferences,<br>let AI do the rest.',
+  '4 个小问题，生成一条只属于你的参观路线。也可以直接跳过，使用经典路线。':'4 quick questions for a route made just for you. Or skip and use a classic route.',
+  '你打算停留多久？':'How long will you stay?',
+  '对哪些领域感兴趣？':'What interests you?',
+  '可多选':'Select all',
+  '想要什么游览节奏？':'Your pace?',
+  '是否需要无障碍路线？':'Need an accessible route?',
+  '生成我的路线 →':'Generate My Route →',
+  '跳过 · 使用经典路线 →':'Skip · Classic Route →',
+  '正在加载 The Metropolitan Museum of Art…':'Loading The Metropolitan Museum of Art…',
+  'AI 正在规划…':'AI is planning…',
+  '正在分析你的偏好…':'Analyzing your preferences…',
+  '正在匹配展厅与路线…':'Matching galleries & routes…',
+  '正在优化楼层动线…':'Optimizing floor flow…',
+  '← 首页':'← Home',
+  '经典路线库':'Classic Routes','重新定制':'Recustomize',
+  '偏好变了？重新填写问卷，AI 会基于你的最新选择重新匹配路线。':'Preferences changed? Refill the quiz and AI will re-match your route.',
+  '重新打开问卷':'Reopen Quiz','当前路线':'Current Route',
+  '停留时间':'Duration','兴趣领域':'Interests','游览节奏':'Pace','无障碍':'Accessibility',
+  '未选择':'None','需要':'Required','不需要':'Not needed',
+  '为你加入':'Added for you','起点':'Start','必看':'Must-see','可取舍':'Optional',
+  '季节性开放':'Seasonal','无障碍可达':'Accessible','休息点':'Rest stop',
+  '路线总结':'Route Summary','第':'Floor ','层':'',
+  '下一层：':'Next: ','结束游览 ✓':'Finish Tour ✓',
+  '本层未安排展厅':'No stops on this floor',
+  '当前路线在这一层没有停留点。如果逛完还有余力，可以自由探索：':'This floor is not in your route. Feel free to explore:',
+  '预计总时长':'Total Duration','展厅站点':'Galleries','覆盖楼层':'Floors','亮点展品':'Highlights',
+  '沿途亮点展品':'Highlights Along the Way','实用信息':'Practical Info',
+  '重新定制路线':'Replan','复制路线文本':'Share Route','已复制 ✓':'Copied ✓','回到第一层':'Back to 1F',
+  '分钟':' min','小时':' h','建议停留':'Suggested','约':'~','站':' stops','个展厅':' galleries',
+  '人气指数':'Popularity','路线备注：':'Route notes: ',
+  '本层站点':'Stops on this floor','开放：':'Hours: ','门票：':'Admission: ','屋顶花园：':'Roof Garden: ',
+  '无障碍提示：':'Accessibility: ','IMAGE UNAVAILABLE':'IMAGE UNAVAILABLE',
+  '大都会艺术博物馆':'The Metropolitan Museum of Art',
+  '82街入口 · 安检入馆':'82nd Street Entrance · Security',
+  'AI 定制路线':'AI Custom Route','跨':'Across',
+  '周一/二/四/日 10:00–17:00，周五/六至 21:00，周三闭馆':'Mon/Tue/Thu/Sun 10:00–17:00, Fri/Sat until 21:00, closed Wednesdays',
+  '非纽约州居民：成人 $30，老人/学生 $22，12 岁以下免费；纽约州居民随心付费':'Non-NY residents: Adults $30, Seniors/Students $22, under 12 free; NY residents pay-what-you-wish',
+  '季节性开放（约 4–10 月），视天气而定；2025 季后将闭园大修':'Seasonal (approx. Apr–Oct), weather dependent; closing after 2025 season for renovation',
+  '馆内电梯贯通各层（大厅北侧与美国馆翼），可绕行 Grand Staircase 大台阶':'Elevators serve all floors (north of Great Hall & American Wing); Grand Staircase can be bypassed',
+  '电梯位于大厅北侧与美国馆翼，贯通各层；Grand Staircase 大台阶可绕行。':'Elevators: north of Great Hall & American Wing, all floors; Grand Staircase bypass available.'
+};
+
+/* 数据字段取语言：中文优先（nameCN），英文模式用 name */
+function gname(g)  { return I18N_LANG.current === 'en' ? g.name : (g.nameCN || g.name); }
+function gname2(g) { return I18N_LANG.current === 'en' ? (g.nameCN || '') : g.name; }
+function gdesc(g)  { return I18N_LANG.current === 'en' ? (g.description || '') : (g.descriptionCN || g.description || ''); }
+function sname(s)  { return I18N_LANG.current === 'en' ? s.name : (s.nameCN || s.name); }
+function snotes(s) { return I18N_LANG.current === 'en' ? (s.notes || '') : (s.notesCN || s.notes || ''); }
+function rname(r)  { return I18N_LANG.current === 'en' ? r.name : (r.nameCN || r.name); }
+function rname2(r) { return I18N_LANG.current === 'en' ? (r.nameCN || '') : r.name; }
+function rdesc(r)  { return I18N_LANG.current === 'en' ? (r.description || '') : (r.descriptionCN || r.description || ''); }
+
+/* ── 展品中文名 ── */
+const ART_CN = {
+  547802:'丹铎神庙', 11417:'华盛顿横渡特拉华河', 436532:'戴草帽的自画像',
+  437127:'睡莲池上的桥', 437879:'年轻女子习作', 437394:'亚里士多德与荷马半身像',
+  438817:'舞蹈课', 196439:'十四岁的小舞者', 12127:'X 夫人',
+  488978:'秋之韵（第30号）', 544450:'哈特谢普苏特坐像', 322609:'人首翼狮（拉玛苏）',
+  436524:'向日葵', 436535:'麦田与柏树', 436529:'阿尔勒妇女（吉努夫人）',
+  437133:'圣阿德雷斯的花园', 437135:'蛙塘', 436528:'鸢尾花',
+  436530:'夹竹桃', 436533:'一双鞋'
+};
+function aname(a) { return I18N_LANG.current === 'en' ? a.title : (ART_CN[a.objectID] || a.title); }
+
+/* ── 本地压缩图映射（objectID → opt/ 文件名）── */
+const LOCAL_IMG = {
+  11417:'11417_Washington_Crossing_the_Delaware.jpg',
+  12127:'12127_Madame_X_Virginie_Amélie_Avegno_Gautreau.jpg',
+  196439:'196439_The_Little_Fourteen-Year-Old_Dancer.jpg',
+  322609:'322609_Human-headed_winged_lion_lamassu.jpg',
+  436524:'436524_Sunflowers.jpg', 436528:'436528_Irises.jpg',
+  436529:'436529_LArlésienne_Madame_Joseph-Michel_Ginoux_Marie_Julien_18481911.jpg',
+  436530:'436530_Oleanders.jpg',
+  436532:'436532_Self-Portrait_with_a_Straw_Hat_obverse_The_Potato_Peeler.jpg',
+  436533:'436533_Shoes.jpg', 436535:'436535_Wheat_Field_with_Cypresses.jpg',
+  437394:'437394_Aristotle_with_a_Bust_of_Homer.jpg',
+  437879:'437879_Study_of_a_Young_Woman.jpg',
+  438817:'438817_The_Dance_Class.jpg',
+  544450:'544450_Seated_Statue_of_Hatshepsut.jpg',
+  547802:'547802_The_Temple_of_Dendur.jpg'
+};
+
+/* galleryNumber 无值或不准确时的归属覆盖 */
+const ART_G_OVERRIDE = { 544450:'G_Egyptian_General', 322609:'G_Assyrian', 436528:'G_Impressionist' };
+
+/* ── 展馆实景图（gallery id → opt/ 文件名，首张为信息卡头图）── */
+const GALLERY_IMG = {
+  G_ArmsArmor:         ['gal_G_ArmsArmor.jpg'],
+  G_GreekRoman:        ['gal_G_GreekRoman.jpg'],
+  G_Lehman:            ['gal_G_Lehman.jpg','gal_G_Lehman_collection.jpg'],
+  G_EuropeanPaintings: ['gal_G_EuropeanPaintings.jpg'],
+  G_Islamic:           ['gal_G_Islamic.jpg'],
+  G_Chinese:           ['gal_G_Chinese.jpg'],
+  G_AstorCourt:        ['gal_G_AstorCourt.jpg'],
+  G_Modern:            ['gal_G_Modern.jpg']
+};
+
+/* ── 人气 id → 画廊 id ── */
+const POP_MAP = {
+  temple_dendur:'G131', egyptian_art:'G_Egyptian_General', lamassu:'G_Assyrian',
+  islamic_art:'G_Islamic', arms_armor:'G_ArmsArmor', greek_roman:'G_GreekRoman',
+  astor_court:'G_AstorCourt', european_paintings:'G_EuropeanPaintings',
+  van_gogh:'G_Impressionist', monet_waterlilies:'G_Impressionist', degas_dance:'G_Impressionist',
+  vermeer:'G_Dutch', rembrandt:'G_Dutch', washington_crossing:'G_American',
+  madame_x:'G_American', pollock:'G_Modern', hatshepsut:'G_Egyptian_General',
+  roof_garden:'G_Roof'
+};
+
+/* ── 兴趣 → 必含展厅（画廊 id）── */
+const INTERESTS = [
+  { id:'impression', label:'印象派与现代艺术', labelEN:'Impressionism & Modern', gids:['G_Impressionist','G_Modern'] },
+  { id:'egypt',      label:'古埃及',           labelEN:'Ancient Egypt',          gids:['G_Egyptian_General','G131'] },
+  { id:'greek',      label:'古希腊罗马',       labelEN:'Greek & Roman',          gids:['G_GreekRoman'] },
+  { id:'asia',       label:'亚洲艺术',         labelEN:'Asian Art',              gids:['G_AstorCourt','G_Chinese'] },
+  { id:'europaint',  label:'欧洲古典绘画',     labelEN:'European Paintings',     gids:['G_EuropeanPaintings','G_Dutch'] },
+  { id:'sculpture',  label:'雕塑与建筑',       labelEN:'Sculpture & Architecture', gids:['G_GreekRoman','G_Assyrian','G_ArmsArmor'] },
+  { id:'arms',       label:'武器与盔甲',       labelEN:'Arms & Armor',           gids:['G_ArmsArmor'] },
+  { id:'islamic',    label:'伊斯兰艺术',       labelEN:'Islamic Art',            gids:['G_Islamic'] },
+  { id:'photo',      label:'摄影打卡',         labelEN:'Photo Spots',            gids:[] }
+];
+const TIME_OPTIONS = [
+  { id:'t12',   label:'1~2小时',          labelEN:'1–2 hours',        min:120, desc:'精华速览', descEN:'Highlights' },
+  { id:'t24',   label:'半天 2~4小时',     labelEN:'Half day · 2–4h',  min:240, desc:'经典节奏', descEN:'Classic pace' },
+  { id:'t47',   label:'一整天 4~7小时',   labelEN:'Full day · 4–7h',  min:360, desc:'全部看遍', descEN:'See it all' }
+];
+const PACE_OPTIONS = [
+  { id:'highlights', label:'精选必看', labelEN:'Highlights',   desc:'只看核心，节奏紧凑', descEN:'Core only, brisk' },
+  { id:'deep',       label:'深度慢逛', labelEN:'Deep dive',    desc:'看全看细，不赶时间', descEN:'Thorough, unhurried' },
+  { id:'photo',      label:'摄影打卡', labelEN:'Photo tour',   desc:'直奔最出片机位',     descEN:'Best photo spots' },
+  { id:'wander',     label:'随性漫步', labelEN:'Wander',       desc:'有主线，也留空白',   descEN:'Loose, with breaks' }
+];
+const ACCESS_OPTIONS = [
+  { id:'no',  label:'否',   labelEN:'No',  desc:'常规动线',           descEN:'Standard route' },
+  { id:'yes', label:'是',   labelEN:'Yes', desc:'电梯优先 · 少台阶', descEN:'Elevator first' }
+];
+const DEFAULT_ROUTE_ID = 'highlights_2h';
+
+/* ═══ 数据（fetch 优先，EMBEDDED 内嵌兜底）═══ */
+let GALLERIES = [], ROUTES = [], ARTWORKS = [], POPULARITY = [], PRACTICAL = null;
+
+async function loadData() {
+  try {
+    const [g, r, a, p, info] = await Promise.all([
+      fetch(DATA_BASE + 'galleries.json').then(x => { if (!x.ok) throw 0; return x.json(); }),
+      fetch(DATA_BASE + 'routes.json').then(x => { if (!x.ok) throw 0; return x.json(); }),
+      fetch(DATA_BASE + 'artworks.json').then(x => { if (!x.ok) throw 0; return x.json(); }),
+      fetch(DATA_BASE + 'popularity.json').then(x => { if (!x.ok) throw 0; return x.json(); }),
+      fetch(DATA_BASE + 'practical-info.json').then(x => { if (!x.ok) throw 0; return x.json(); })
+    ]);
+    GALLERIES = g.galleries; ROUTES = r.routes;
+    ARTWORKS = Array.isArray(a) ? a : (a.artworks || []);
+    POPULARITY = p.popularityEstimates.items; PRACTICAL = info;
+  } catch (e) {
+    const d = EMBEDDED;
+    GALLERIES = d.galleries; ROUTES = d.routes; ARTWORKS = d.artworks;
+    POPULARITY = d.popularity; PRACTICAL = d.practical;
+  }
+}
+
+const galleryById = id => GALLERIES.find(g => g.id === id);
+const popOf = gid => {
+  for (const [pid, g] of Object.entries(POP_MAP)) {
+    if (g === gid) { const p = POPULARITY.find(x => x.id === pid); if (p) return p; }
+  }
+  return null;
+};
+function floorKey(f) { return (f === 'Rooftop' || f === 'Roof') ? 'Roof' : String(f) + 'F'; }
+function round5(n) { return Math.max(5, Math.round(n / 5) * 5); }
+
+/* galleryNumber（可能为区间）→ 画廊 id，精确小区间优先 */
+function galleryOfNumber(numStr) {
+  if (!numStr) return null;
+  const n = parseInt(numStr, 10);
+  if (isNaN(n)) return null;
+  let best = null, bestSpan = Infinity;
+  GALLERIES.forEach(g => {
+    if (!g.galleryNumber) return;
+    const parts = String(g.galleryNumber).split('-').map(x => parseInt(x, 10));
+    const lo = parts[0], hi = parts.length > 1 ? parts[1] : parts[0];
+    if (n >= lo && n <= hi) {
+      const span = hi - lo;
+      if (span < bestSpan) { bestSpan = span; best = g.id; }
+    }
+  });
+  return best;
+}
+function artworksOfGallery(gid) {
+  return ARTWORKS.filter(a => (ART_G_OVERRIDE[a.objectID] || galleryOfNumber(a.galleryNumber)) === gid);
+}
+
+/* ═══ AI 路线匹配 ═══ */
+function matchRoute(prefs) {
+  const reasons = [];
+
+  /* 1. 时间/节奏 → 基底路线 */
+  let baseId;
+  if (prefs.pace === 'photo' || prefs.interests.includes('photo')) baseId = 'instagram_spots';
+  else if (prefs.timeMin <= 120) baseId = prefs.interests.includes('impression') ? 'impressionist_focus' : 'highlights_2h';
+  else if (prefs.timeMin <= 240) baseId = 'ancient_civilizations';
+  else baseId = 'full_day';
+  const base = ROUTES.find(r => r.id === baseId) || ROUTES[0];
+  reasons.push(T('以 <b>「' + rname(base) + '」</b> 为基底', 'Based on <b>「' + rname(base) + '」</b>'));
+
+  let stops = base.stops.map(s => ({ ...s }));
+
+  /* 2. 兴趣 → 必含展厅 */
+  const must = [];
+  prefs.interests.forEach(iid => {
+    const it = INTERESTS.find(x => x.id === iid);
+    if (it) must.push(...it.gids);
+  });
+  const inRoute = new Set(stops.map(s => s.galleryId));
+  const addedNames = [];
+  [...new Set(must)].forEach(gid => {
+    if (inRoute.has(gid)) return;
+    const g = galleryById(gid);
+    if (!g) return;
+    stops.push({ galleryId: gid, name: g.name, nameCN: g.nameCN, duration_min: 15,
+      notes: g.description, notesCN: g.descriptionCN, added: true });
+    addedNames.push(gname(g));
+  });
+  if (addedNames.length) reasons.push(T('按兴趣必含 <b>' + addedNames.join('、') + '</b>', 'Added by interest: <b>' + addedNames.join(', ') + '</b>'));
+
+  /* 3. 节奏 → 停留调整 */
+  if (prefs.pace === 'highlights') {
+    stops = stops.filter(s => {
+      const g = galleryById(s.galleryId), p = popOf(s.galleryId);
+      return (g && g.mustSee) || (p && p.tier <= 2) || must.includes(s.galleryId);
+    });
+    stops.forEach(s => { s.duration_min = round5(s.duration_min * 0.8); });
+    reasons.push(T('精选节奏：保留 tier1~2 核心展厅，停留 <b>×0.8</b>', 'Highlights: tier 1–2 only, stops <b>×0.8</b>'));
+  } else if (prefs.pace === 'deep') {
+    stops.forEach(s => { s.duration_min = round5(s.duration_min * 1.3); });
+    reasons.push(T('深度节奏：覆盖 tier2~3，各站停留 <b>×1.3</b>', 'Deep dive: tier 2–3, stops <b>×1.3</b>'));
+  } else if (prefs.pace === 'photo') {
+    reasons.push(T('摄影打卡：串联 <b>最出片机位</b>', 'Photo tour: <b>most photogenic spots</b>'));
+  } else {
+    stops.forEach(s => {
+      const g = galleryById(s.galleryId);
+      if (g && !g.mustSee) s.optional = true;
+    });
+    reasons.push(T('随性漫步：非核心展厅标注 <b>可取舍</b>，大厅/咖啡馆可作休息点', 'Wander: non-core marked <b>optional</b>, Great Hall & cafés as rest stops'));
+  }
+
+  /* 4. 按楼层排序（1F → 2F → Roof），同层保持原顺序 */
+  const fOrd = { '1': 0, '2': 1, 'Rooftop': 2, 'Roof': 2 };
+  stops = stops.map((s, i) => ({ ...s, _i: i }));
+  stops.sort((a, b) => {
+    const ga = galleryById(a.galleryId), gb = galleryById(b.galleryId);
+    const fa = ga ? (fOrd[String(ga.floor)] ?? 1) : 1;
+    const fb = gb ? (fOrd[String(gb.floor)] ?? 1) : 1;
+    return fa - fb || a._i - b._i;
+  });
+  stops.forEach((s, i) => { s.order = i + 1; delete s._i; });
+
+  if (prefs.access) reasons.push(T('无障碍：已标注 <b>电梯位置</b>，Grand Staircase 大台阶可绕行', 'Accessible: <b>elevators marked</b>, Grand Staircase bypass'));
+
+  const walking = (base.totalWalkingTime_min || 15) + addedNames.length * 5;
+  const totalMin = round5(stops.reduce((t, s) => t + s.duration_min, 0) + walking);
+
+  return { id:'ai_custom', custom:true, name:'AI Custom Route', nameCN:'AI 定制路线',
+    basedOn: rname(base), description: base.description, descriptionCN: '基于「' + rname(base) + '」按你的偏好调整',
+    stops, walkingMin: walking, totalMin, reasons };
+}
+
+function normalizePreset(r) {
+  const stops = r.stops.map((s, i) => ({ ...s, order: i + 1 }));
+  const walking = r.totalWalkingTime_min || 15;
+  const totalMin = round5(stops.reduce((t, s) => t + s.duration_min, 0) + walking);
+  return { id:r.id, custom:false, name:r.name, nameCN:r.nameCN, description:r.description, descriptionCN:r.descriptionCN,
+    stops, walkingMin:walking, totalMin, reasons:[] };
+}
+
+/* ═══ 全局状态 ═══ */
+const state = {
+  prefs: { timeMin:120, timeLabel:'1~2小时', interests:[], pace:'highlights', access:false },
+  route: null, floor: null, floorsInRoute: [], customRoute: null,
+  modalGid: null, modalStop: null
+};
+
+function entryStop() {
+  return { galleryId:'ENTRY', name:'82nd Street Entrance', nameCN:T('82街入口 · 安检入馆','82nd Street Entrance · Security'),
+    duration_min:10, notes:'Security check, coat check & info at Great Hall', notesCN:'安检后进入大厅，可存包、取导览图', virtual:true, order:0 };
+}
+function routeFloors(route) {
+  const set = new Set(['1F']); /* 入口总在 1F */
+  route.stops.forEach(s => { const g = galleryById(s.galleryId); if (g) set.add(floorKey(g.floor)); });
+  return FLOORS.filter(f => set.has(f));
+}
+function stopsOnFloor(route, fk) {
+  if (fk === '1F') return [entryStop()].concat(route.stops.filter(s => { const g = galleryById(s.galleryId); return g && floorKey(g.floor) === '1F'; }));
+  return route.stops.filter(s => { const g = galleryById(s.galleryId); return g && floorKey(g.floor) === fk; });
+}
+function routeStats(route) {
+  const gids = new Set(route.stops.map(s => s.galleryId));
+  const hl = ARTWORKS.filter(a => a.isHighlight && gids.has(ART_G_OVERRIDE[a.objectID] || galleryOfNumber(a.galleryNumber))).length;
+  return { stops: route.stops.length, floors: routeFloors(route).length, highlights: hl, totalMin: route.totalMin };
+}
+function fmtDur(min) {
+  if (min < 60) return min + T('分钟',' min');
+  const h = Math.floor(min / 60), m = min % 60;
+  return m ? h + T('小时',' h') + ' ' + m + T('分钟',' min') : h + T('小时',' h');
+}
+
+/* ═══ 问卷 ═══ */
+function renderQuiz() {
+  $('#qTime').innerHTML = TIME_OPTIONS.map(o =>
+    '<button class="opt' + (state.prefs.timeMin === o.min ? ' on' : '') + '" data-v="' + o.min + '" data-l="' + o.label + '">' +
+    '<span class="ol">' + T(o.label, o.labelEN) + '</span><span class="od">' + T(o.desc, o.descEN) + '</span></button>').join('');
+  $('#qInterests').innerHTML = INTERESTS.map(o =>
+    '<button class="chip' + (state.prefs.interests.includes(o.id) ? ' on' : '') + '" data-v="' + o.id + '">' + T(o.label, o.labelEN) + '</button>').join('');
+  $('#qPace').innerHTML = PACE_OPTIONS.map(o =>
+    '<button class="opt' + (state.prefs.pace === o.id ? ' on' : '') + '" data-v="' + o.id + '">' +
+    '<span class="ol">' + T(o.label, o.labelEN) + '</span><span class="od">' + T(o.desc, o.descEN) + '</span></button>').join('');
+  $('#qAccess').innerHTML = ACCESS_OPTIONS.map(o =>
+    '<button class="opt' + ((state.prefs.access ? 'yes' : 'no') === o.id ? ' on' : '') + '" data-v="' + o.id + '">' +
+    '<span class="ol">' + T(o.label, o.labelEN) + '</span><span class="od">' + T(o.desc, o.descEN) + '</span></button>').join('');
+}
+$('#qTime').addEventListener('click', e => {
+  const b = e.target.closest('.opt'); if (!b) return;
+  state.prefs.timeMin = +b.dataset.v; state.prefs.timeLabel = b.dataset.l; renderQuiz();
+});
+$('#qPace').addEventListener('click', e => {
+  const b = e.target.closest('.opt'); if (!b) return;
+  state.prefs.pace = b.dataset.v; renderQuiz();
+});
+$('#qAccess').addEventListener('click', e => {
+  const b = e.target.closest('.opt'); if (!b) return;
+  state.prefs.access = b.dataset.v === 'yes'; renderQuiz();
+});
+$('#qInterests').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  const id = b.dataset.v, arr = state.prefs.interests, i = arr.indexOf(id);
+  if (i >= 0) arr.splice(i, 1); else arr.push(id);
+  b.classList.toggle('on');
+});
+
+/* ═══ 阶段切换 ═══ */
+function showPhase(id) {
+  ['flash','quiz','loading','mapPage'].forEach(p => $('#' + p).classList.remove('on'));
+  if (id) $('#' + id).classList.add('on');
+}
+function runLoading(done) {
+  showPhase('loading');
+  const steps = [T('正在分析你的偏好…','Analyzing your preferences…'), T('正在匹配展厅与路线…','Matching galleries & routes…'), T('正在优化楼层动线…','Optimizing floor flow…')];
+  let i = 0;
+  $('#lbarFill').style.width = '10%';
+  const tick = () => {
+    $('#lstep').textContent = steps[i];
+    $('#lbarFill').style.width = Math.min(94, 10 + (i + 1) * 28) + '%';
+    i++;
+    if (i < steps.length) setTimeout(tick, 420);
+    else setTimeout(() => { $('#lbarFill').style.width = '100%'; setTimeout(done, 260); }, 420);
+  };
+  setTimeout(tick, 150);
+}
+
+/* ═══ 地图页渲染 ═══ */
+function setRoute(route, jumpToFirst) {
+  state.route = route;
+  state.floorsInRoute = routeFloors(route);
+  if (route.custom) state.customRoute = route;
+  renderLibrary();
+  const st = routeStats(route);
+  $('#routeTitle').innerHTML = rname(route) + '<span class="en">' + rname2(route) + '</span>';
+  $('#routeMeta').textContent =
+    T('约','~') + ' ' + fmtDur(st.totalMin) + ' · ' + st.stops + T('个展厅',' galleries') + ' · ' + st.floors + T('层','F') + ' · ' + T('亮点展品','Highlights') + ' ' + st.highlights;
+  $('#reasonChips').innerHTML = (route.reasons || []).map(r => '<span class="reason-chip">' + r + '</span>').join('');
+  $('#curRouteName').textContent = rname(route);
+  $('#curRouteMeta').textContent = fmtDur(st.totalMin) + ' · ' + st.stops + T('站',' stops') + ' · ' + st.floors + T('层','F');
+  renderFloorBar();
+  goFloor(jumpToFirst === false && state.floor ? state.floor : state.floorsInRoute[0]);
+  renderPrefSummary();
+}
+
+/* ── 侧边栏 ── */
+function renderLibrary() {
+  const items = [];
+  if (state.customRoute) items.push(routeItemHTML(state.customRoute, routeStats(state.customRoute), true));
+  ROUTES.forEach(r0 => {
+    const r = normalizePreset(r0);
+    items.push(routeItemHTML(r, routeStats(r), false));
+  });
+  $('#paneA').innerHTML = items.join('');
+  document.querySelectorAll('#paneA .route-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.dataset.rid;
+      const r = id === 'ai_custom' ? state.customRoute : normalizePreset(ROUTES.find(x => x.id === id));
+      setRoute(r, true);
+    });
+  });
+}
+function routeItemHTML(r, st, isCustom) {
+  const on = state.route && state.route.id === r.id ? ' on' : '';
+  return '<div class="route-item' + on + (isCustom ? ' custom' : '') + '" data-rid="' + r.id + '">' +
+    '<div class="rn">' + (isCustom ? '<span class="ai-tag">AI</span>' : '') + '<span>' + rname(r) + '<span class="en">' + rname2(r) + '</span></span></div>' +
+    '<div class="rm">' + T('约','~') + ' ' + fmtDur(st.totalMin) + ' · ' + st.stops + ' ' + T('站','stops') + ' · ' + T('跨','Across') + ' ' + st.floors + ' ' + T('层','F') + '</div>' +
+    '<div class="rd">' + rdesc(r) + '</div></div>';
+}
+function renderPrefSummary() {
+  const p = state.prefs;
+  const its = p.interests.map(id => { const o = INTERESTS.find(x => x.id === id); return o ? T(o.label, o.labelEN) : ''; }).filter(Boolean);
+  const pace = PACE_OPTIONS.find(x => x.id === p.pace);
+  $('#prefSummary').innerHTML =
+    '<div class="ps-row"><span>' + T('停留时间','Duration') + '</span><span>' + p.timeLabel + '</span></div>' +
+    '<div class="ps-row"><span>' + T('兴趣领域','Interests') + '</span><span>' + (its.join('、') || T('未选择','None')) + '</span></div>' +
+    '<div class="ps-row"><span>' + T('游览节奏','Pace') + '</span><span>' + (pace ? T(pace.label, pace.labelEN) : '') + '</span></div>' +
+    '<div class="ps-row"><span>' + T('无障碍','Accessibility') + '</span><span>' + (p.access ? T('需要','Required') : T('不需要','Not needed')) + '</span></div>';
+}
+$('#tabA').addEventListener('click', () => switchTab('A'));
+$('#tabB').addEventListener('click', () => switchTab('B'));
+function switchTab(t) {
+  $('#tabA').classList.toggle('on', t === 'A');
+  $('#tabB').classList.toggle('on', t === 'B');
+  $('#paneA').classList.toggle('on', t === 'A');
+  $('#paneB').classList.toggle('on', t === 'B');
+}
+$('#btnRecustom').addEventListener('click', () => { renderQuiz(); showPhase('quiz'); });
+
+/* ── 楼层栏 ── */
+function renderFloorBar() {
+  $('#floorBar').innerHTML = FLOORS.map(f => {
+    const has = state.floorsInRoute.includes(f);
+    const lb = FLOOR_LABEL[f];
+    /* Rooftop：含屋顶的路线才点亮，否则灰色不可点 */
+    const locked = (f === 'Roof' && !has);
+    return '<button class="floor-btn' + (state.floor === f ? ' on' : '') + (has ? '' : ' dim') + (locked ? ' locked' : '') + '" data-f="' + f + '"' + (locked ? ' disabled' : '') + '>' +
+      (f === 'Roof' ? 'Rooftop' : f) + '<small>' + T(lb.cn, lb.en) + '</small></button>';
+  }).join('') + '<span class="floor-progress" id="floorProg"></span>';
+  document.querySelectorAll('.floor-btn').forEach(b =>
+    b.addEventListener('click', () => { if (!b.classList.contains('locked')) goFloor(b.dataset.f); }));
+}
+$('#nextFloorBtn').addEventListener('click', () => {
+  const idx = state.floorsInRoute.indexOf(state.floor);
+  if (idx >= 0 && idx < state.floorsInRoute.length - 1) goFloor(state.floorsInRoute[idx + 1]);
+  else goFloor('SUMMARY');
+});
+
+/* ── 楼层视图 ── */
+function goFloor(fk) {
+  state.floor = fk;
+  document.querySelectorAll('.floor-btn').forEach(b => b.classList.toggle('on', b.dataset.f === fk));
+  const idx = state.floorsInRoute.indexOf(fk);
+  const prog = $('#floorProg');
+  if (prog) prog.textContent = fk === 'SUMMARY' ? T('路线总结','Route Summary') : T('第','Floor ') + (idx + 1) + ' / ' + state.floorsInRoute.length + ' ' + T('层','');
+
+  const view = $('#floorView');
+  if (fk === 'SUMMARY') {
+    view.innerHTML = summaryHTML();
+    bindSummary(view);
+  } else {
+    const stops = stopsOnFloor(state.route, fk);
+    const lb = FLOOR_LABEL[fk];
+    let html = '<div class="floor-title-row"><span class="floor-title">' + (fk === 'Roof' ? 'Rooftop' : fk) + ' · ' + T(lb.cn, lb.en) + '</span>' +
+      '<span class="floor-sub">' + T(lb.sub, lb.subEN) + '</span>' +
+      (state.prefs.access ? '<span class="floor-access-note">♿ ' + T('电梯位于大厅北侧与美国馆翼，贯通各层；Grand Staircase 大台阶可绕行。','Elevators: north of Great Hall & American Wing, all floors; Grand Staircase bypass available.') + '</span>' : '') +
+      '</div>';
+    html += floorMapReal(fk, stops);
+    const realStops = stops.filter(s => !s.virtual);
+    if (!realStops.length && fk !== '1F') {
+      const gs = GALLERIES.filter(g => floorKey(g.floor) === fk);
+      html += '<div class="floor-empty"><h3>' + T('本层未安排展厅','No stops on this floor') + '</h3>' +
+        '<p>' + T('当前路线在这一层没有停留点。如果逛完还有余力，可以自由探索：','This floor is not in your route. Feel free to explore:') + '</p>' +
+        '<div class="fe-list">' + gs.map(g => gname(g)).join(' · ') + '</div></div>';
+    } else {
+      html += '<div class="stops">' + stops.map(stopCardHTML).join('') + '</div>';
+    }
+    view.innerHTML = html;
+    bindFloorView(view);
+  }
+  view.scrollTop = 0;
+
+  const btn = $('#nextFloorBtn');
+  if (fk === 'SUMMARY') { btn.style.display = 'none'; return; }
+  btn.style.display = '';
+  btn.textContent = (idx >= 0 && idx < state.floorsInRoute.length - 1)
+    ? T('下一层：','Next: ') + (state.floorsInRoute[idx + 1] === 'Roof' ? 'Rooftop' : state.floorsInRoute[idx + 1]) + ' ▸'
+    : T('结束游览 ✓','Finish Tour ✓');
+}
+
+/* ── 真实地图 + 热点/路线叠加 ── */
+function floorMapReal(fk, stops) {
+  const mapInfo = REAL_MAPS[fk];
+  const W = mapInfo.w, H = mapInfo.h;
+  const onRouteIds = stops.map(s => s.galleryId);
+
+  /* 热点：该层所有画廊（含 ENTRY） */
+  const spots = [];
+  if (fk === '1F') spots.push({ gid:'ENTRY', x:0.495, y:0.80 });
+  GALLERIES.forEach(g => {
+    if (floorKey(g.floor) === fk && g.hotspot) spots.push({ gid:g.id, x:g.hotspot.x, y:g.hotspot.y });
+  });
+  const pos = {};
+  spots.forEach(s => { pos[s.gid] = { x: s.x * W, y: s.y * H }; });
+
+  /* 路线连线（按站点顺序，跳过跨层断点） */
+  const pts = onRouteIds.map(gid => pos[gid] ? { ...pos[gid], gid } : null).filter(Boolean);
+  const path = pts.length > 1
+    ? '<path class="route-path" d="M ' + pts.map(p => p.x + ',' + p.y).join(' L ') + '"/>'
+    : '';
+
+  const markersHTML = spots.map(sp => {
+    const m = pos[sp.gid];
+    const onIdx = onRouteIds.indexOf(sp.gid);
+    const onRoute = onIdx >= 0;
+    const g = sp.gid === 'ENTRY' ? null : galleryById(sp.gid);
+    const nm = sp.gid === 'ENTRY' ? T('入口','Entrance') : gname(g);
+    const stop = onRoute ? stops[onIdx] : null;
+
+    if (onRoute) {
+      return '<g class="g-box" data-gid="' + sp.gid + '">' +
+        '<text class="g-label" x="' + m.x + '" y="' + (m.y - 34) + '">' + nm + '</text>' +
+        '<circle class="marker" cx="' + m.x + '" cy="' + m.y + '" r="19"/>' +
+        '<text class="marker-num" x="' + m.x + '" y="' + m.y + '">' + (sp.gid === 'ENTRY' ? T('始','S') : stop.order) + '</text>' +
+        (sp.gid !== 'ENTRY' ? '<text class="g-sub" x="' + m.x + '" y="' + (m.y + 42) + '">' + stop.duration_min + ' min</text>' : '') +
+        '<circle class="g-hit" cx="' + m.x + '" cy="' + m.y + '" r="34"/>' +
+        '</g>';
+    }
+    return '<g class="g-box" data-gid="' + sp.gid + '">' +
+      '<circle class="off-dot" cx="' + m.x + '" cy="' + m.y + '" r="7"/>' +
+      '<text class="g-sub" x="' + m.x + '" y="' + (m.y + 26) + '">' + nm + '</text>' +
+      '<circle class="g-hit" cx="' + m.x + '" cy="' + m.y + '" r="28"/>' +
+      '</g>';
+  }).join('');
+
+  return '<div class="fmap-real-wrap">' +
+    '<img src="' + MAP_BASE + mapInfo.src + '" alt="' + fk + ' floor plan" loading="lazy" decoding="async">' +
+    '<svg class="fmap-real-svg" viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">' +
+    path + markersHTML + '</svg></div>';
+}
+
+/* ── 站点卡片 ── */
+function stopCardHTML(s) {
+  const g = galleryById(s.galleryId);
+  const tags = [];
+  if (s.virtual) tags.push('<span class="stag inv">' + T('起点','Start') + '</span>');
+  if (g && g.mustSee) tags.push('<span class="stag inv">' + T('必看','Must-see') + '</span>');
+  if (s.added) tags.push('<span class="stag inv">' + T('为你加入','Added for you') + '</span>');
+  if (s.optional) tags.push('<span class="stag soft">' + T('可取舍','Optional') + '</span>');
+  if (g && g.seasonal) tags.push('<span class="stag soft">' + T('季节性开放','Seasonal') + '</span>');
+  if (state.prefs.access && !s.virtual) tags.push('<span class="stag soft">♿ ' + T('无障碍可达','Accessible') + '</span>');
+  return '<div class="stop-card" data-gid="' + s.galleryId + '">' +
+    '<span class="stop-ord">' + (s.virtual ? T('始','S') : String(s.order).padStart(2, '0')) + '</span>' +
+    '<div class="stop-name">' + (g ? gname(g) : sname(s)) + '<span class="en">' + (g ? gname2(g) : (I18N_LANG.current === 'en' ? '' : s.name)) + '</span></div>' +
+    '<div class="stop-dur">' + T('建议停留','Suggested') + ' ' + s.duration_min + T('分钟',' min') + '</div>' +
+    (tags.length ? '<div class="stop-tags">' + tags.join('') + '</div>' : '') +
+    (snotes(s) ? '<div class="stop-notes">' + snotes(s) + '</div>' : '') +
+    '</div>';
+}
+function bindFloorView(view) {
+  view.querySelectorAll('.stop-card, .fmap-real-svg .g-box').forEach(el => {
+    el.addEventListener('click', () => {
+      const gid = el.dataset.gid;
+      if (gid === 'ENTRY') { openEntryModal(); return; }
+      if (!galleryById(gid)) return;
+      const s = state.route.stops.find(x => x.galleryId === gid) || null;
+      openStopModal(gid, s);
+    });
+  });
+}
+
+/* ── 总结卡片 ── */
+function summaryHTML() {
+  const r = state.route, st = routeStats(r);
+  const gids = new Set(r.stops.map(s => s.galleryId));
+  const hlArts = ARTWORKS.filter(a => a.isHighlight && gids.has(ART_G_OVERRIDE[a.objectID] || galleryOfNumber(a.galleryNumber)));
+
+  let floorLists = '';
+  state.floorsInRoute.forEach(f => {
+    const ss = stopsOnFloor(r, f).filter(s => !s.virtual);
+    if (!ss.length) return;
+    const lb = FLOOR_LABEL[f];
+    floorLists += '<div class="sum-floor">' + (f === 'Roof' ? 'Rooftop' : f) + ' · ' + T(lb.cn, lb.en) + '</div><ul>' +
+      ss.map(s => { const g = galleryById(s.galleryId); return '<li><b>' + String(s.order).padStart(2,'0') + ' · ' + (g ? gname(g) : sname(s)) + '</b>（' + s.duration_min + T('分钟',' min') + '）</li>'; }).join('') + '</ul>';
+  });
+
+  return '<div class="sum-card">' +
+    '<div class="sum-hero"><div class="st">Route Summary · ' + T('路线总结','路线总结') + '</div><h2>' + rname(r) + '<span class="en">' + rname2(r) + '</span></h2></div>' +
+    '<div class="sum-stats">' +
+      '<div class="sum-stat"><div class="n">' + fmtDur(st.totalMin) + '</div><div class="l">' + T('预计总时长','Total Duration') + '</div></div>' +
+      '<div class="sum-stat"><div class="n">' + st.stops + '</div><div class="l">' + T('展厅站点','Galleries') + '</div></div>' +
+      '<div class="sum-stat"><div class="n">' + st.floors + '</div><div class="l">' + T('覆盖楼层','Floors') + '</div></div>' +
+      '<div class="sum-stat"><div class="n">' + st.highlights + '</div><div class="l">' + T('亮点展品','Highlights') + '</div></div>' +
+    '</div>' +
+    '<div class="sum-sec"><h4>' + T('本层站点','Stops by floor') + '</h4>' + floorLists + '</div>' +
+    (hlArts.length ? '<div class="sum-sec"><h4>' + T('沿途亮点展品','Highlights Along the Way') + '</h4><ul>' +
+      hlArts.slice(0, 8).map(a => '<li><b>' + aname(a) + '</b>（' + (a.objectDate || '') + '）— ' + (a.artistDisplayName || a.department || '') + '</li>').join('') + '</ul></div>' : '') +
+    '<div class="sum-sec"><h4>' + T('实用信息','Practical Info') + '</h4><ul>' +
+      '<li><b>' + T('开放：','Hours: ') + '</b>' + T('周一/二/四/日 10:00–17:00，周五/六至 21:00，周三闭馆','Mon/Tue/Thu/Sun 10:00–17:00, Fri/Sat until 21:00, closed Wednesdays') + '</li>' +
+      '<li><b>' + T('门票：','Admission: ') + '</b>' + T('非纽约州居民：成人 $30，老人/学生 $22，12 岁以下免费；纽约州居民随心付费','Non-NY: Adults $30, Seniors/Students $22, under 12 free; NY residents pay-what-you-wish') + '</li>' +
+      (gids.has('G_Roof') ? '<li><b>' + T('屋顶花园：','Roof Garden: ') + '</b>' + T('季节性开放（约 4–10 月），视天气而定；2025 季后将闭园大修','Seasonal (Apr–Oct), weather dependent; closing after 2025 season for renovation') + '</li>' : '') +
+      (state.prefs.access ? '<li><b>' + T('无障碍提示：','Accessibility: ') + '</b>' + T('馆内电梯贯通各层（大厅北侧与美国馆翼），可绕行 Grand Staircase 大台阶','Elevators serve all floors (north of Great Hall & American Wing); Grand Staircase can be bypassed') + '</li>' : '') +
+    '</ul></div>' +
+    '<div class="sum-actions">' +
+      '<button class="btn-solid" id="sumShare">' + T('复制路线文本','Share Route') + '</button>' +
+      '<button class="btn-ghost" id="sumRecustom">' + T('重新定制路线','Replan') + '</button>' +
+      '<button class="btn-ghost" id="sumBack">' + T('回到第一层','Back to 1F') + '</button>' +
+    '</div></div>';
+}
+function bindSummary(view) {
+  view.querySelector('#sumRecustom').addEventListener('click', () => { renderQuiz(); showPhase('quiz'); });
+  view.querySelector('#sumBack').addEventListener('click', () => goFloor(state.floorsInRoute[0]));
+  view.querySelector('#sumShare').addEventListener('click', e => {
+    const r = state.route;
+    let txt = 'CuratorPath · The Metropolitan Museum of Art\n' + T('路线','Route') + ': ' + rname(r) + ' / ' + rname2(r) + '\n' + T('预计','Est.') + ': ' + fmtDur(routeStats(r).totalMin) + '\n\n';
+    state.floorsInRoute.forEach(f => {
+      stopsOnFloor(r, f).forEach(s => {
+        const g = galleryById(s.galleryId);
+        txt += (f === 'Roof' ? 'Rooftop' : f) + ' · ' + (g ? gname(g) : sname(s)) + ' (' + s.duration_min + ' min)' + (snotes(s) ? ' — ' + snotes(s) : '') + '\n';
+      });
+    });
+    navigator.clipboard.writeText(txt).then(() => {
+      e.target.textContent = T('已复制 ✓','Copied ✓');
+      setTimeout(() => { e.target.textContent = T('复制路线文本','Share Route'); }, 1600);
+    }).catch(() => {});
+  });
+}
+
+/* ═══ 展点信息卡 ═══ */
+function artImgHTML(a, alt) {
+  /* Met 官网小图优先 → 本地压缩图 fallback → 占位符 */
+  const local = LOCAL_IMG[a.objectID] ? IMG_BASE + encodeURI(LOCAL_IMG[a.objectID]) : null;
+  const remote = a.primaryImageSmall || '';
+  if (remote) {
+    return '<img class="sm-img" src="' + remote + '" alt="' + alt + '" loading="lazy" decoding="async"' +
+      (local ? ' onerror="this.onerror=function(){this.outerHTML=phHTML()};this.src=\'' + local + '\'"' : ' onerror="this.outerHTML=phHTML()"') + '>';
+  }
+  if (local) {
+    return '<img class="sm-img" src="' + local + '" alt="' + alt + '" loading="lazy" decoding="async" onerror="this.outerHTML=phHTML()">';
+  }
+  return phHTML();
+}
+function phHTML() {
+  return '<div class="sm-ph"><span class="ch">📷</span><span class="cp">' + T('IMAGE UNAVAILABLE','IMAGE UNAVAILABLE') + '</span></div>';
+}
+window.phHTML = phHTML;
+function galImgHTML(file, alt, cls) {
+  return '<img class="' + (cls || 'sm-img') + '" src="' + IMG_BASE + encodeURI(file) + '" alt="' + alt + '" loading="lazy" decoding="async" onerror="this.outerHTML=phHTML()">';
+}
+
+function openStopModal(gid, stop) {
+  const g = galleryById(gid);
+  const pop = popOf(gid);
+  const arts = artworksOfGallery(gid);
+  const hero = arts.find(a => a.isHighlight && (a.primaryImageSmall || LOCAL_IMG[a.objectID])) || arts.find(a => a.primaryImageSmall || LOCAL_IMG[a.objectID]) || arts[0];
+  const dur = stop ? stop.duration_min : 15;
+  state.modalGid = gid; state.modalStop = stop;
+
+  /* 展馆实景图优先 → 亮点展品图 → 占位符 */
+  const gimgs = GALLERY_IMG[gid] || [];
+  const media = gimgs.length ? galImgHTML(gimgs[0], gname(g))
+              : (hero ? artImgHTML(hero, gname(g)) : phHTML());
+  const extraImgs = gimgs.slice(1).map(f => galImgHTML(f, gname(g), 'sm-extra-img')).join('');
+  const artList = arts.slice(0, 6).map(a =>
+    '<div class="sm-art"><span class="an"><b>' + aname(a) + '</b><span class="ae">' + a.title + '</span></span>' +
+    '<span class="ap">' + (a.objectDate || '') + '</span></div>').join('');
+
+  $('#smBox').innerHTML = media +
+    '<div class="sm-body"><div class="sm-top"><div>' +
+      '<div class="sm-name">' + gname(g) + '</div>' +
+      '<div class="sm-en">' + g.name + '</div></div>' +
+      '<button class="sm-close" id="smClose">✕</button></div>' +
+    '<div class="sm-meta">' +
+      '<span class="stag inv">' + floorKey(g.floor) + '</span>' +
+      (g.zone ? '<span class="stag soft">' + g.zone + '</span>' : '') +
+      '<span class="stag soft">' + T('建议停留','Suggested') + ' ' + dur + T('分钟',' min') + '</span>' +
+      (g.mustSee ? '<span class="stag inv">🔥 ' + T('必看','Must-see') + '</span>' : '') +
+      (g.seasonal ? '<span class="stag soft">' + T('季节性开放','Seasonal') + '</span>' : '') +
+      (state.prefs.access ? '<span class="stag soft">♿ ' + T('无障碍可达','Accessible') + '</span>' : '') +
+    '</div>' +
+    '<div class="sm-desc">' + gdesc(g) +
+      (g.note ? '<br><br>' + T(g.noteCN || g.note, g.note) : '') +
+      (stop && snotes(stop) ? '<br><br>' + T('路线备注：','Route notes: ') + snotes(stop) : '') + '</div>' +
+    extraImgs +
+    (artList ? '<div class="sm-sec"><h5>' + T('亮点展品','Highlights') + '</h5>' + artList + '</div>' : '') +
+    (hero && hero.creditLine && !gimgs.length ? '<div class="sm-pd">' + (hero.isPublicDomain ? 'ℹ️ Public Domain / 公有领域' : '© The Met') + ' · ' + hero.creditLine + '</div>' : '') +
+    (pop ? '<div class="sm-sec"><h5>' + T('人气指数','Popularity') + ' ' + Math.round(pop.score * 100) + '</h5><div class="sm-pop"><i style="width:' + Math.round(pop.score * 100) + '%"></i></div></div>' : '') +
+    '</div>';
+  $('#stopModal').classList.add('on');
+  $('#smClose').addEventListener('click', closeModal);
+}
+function openEntryModal() {
+  state.modalGid = 'ENTRY'; state.modalStop = null;
+  $('#smBox').innerHTML =
+    '<div class="sm-body"><div class="sm-top"><div>' +
+      '<div class="sm-name">' + T('82街入口 · 安检入馆','82nd Street Entrance · Security') + '</div>' +
+      '<div class="sm-en">82nd Street Entrance and Exit</div></div>' +
+      '<button class="sm-close" id="smClose">✕</button></div>' +
+    '<div class="sm-meta"><span class="stag inv">1F</span><span class="stag soft">' + T('建议停留','Suggested') + ' 10' + T('分钟',' min') + '</span><span class="stag inv">' + T('起点','Start') + '</span></div>' +
+    '<div class="sm-desc">' + T('自 82 街入口安检入馆，进入大厅（Great Hall）可取导览图、存包。大都会门票：非纽约州居民成人 $30，老人/学生 $22，12 岁以下免费；纽约州居民随心付费。','Enter via 82nd Street security into the Great Hall — grab a map, check your coat. Admission: Non-NY adults $30, seniors/students $22, under 12 free; NY residents pay-what-you-wish.') + '</div>' +
+    '<div class="sm-sec"><h5>' + T('实用信息','Practical Info') + '</h5>' +
+      '<div class="sm-art"><span class="an">' + T('开放时间','Hours') + '</span><span class="ap">' + T('10:00–17:00（周五/六至 21:00，周三闭馆）','10:00–17:00 (Fri/Sat till 21:00, closed Wed)') + '</span></div>' +
+      '<div class="sm-art"><span class="an">' + T('地址','Address') + '</span><span class="ap">1000 Fifth Ave, New York</span></div>' +
+      '<div class="sm-art"><span class="an">' + T('无障碍','Accessibility') + '</span><span class="ap">' + T('轮椅通行，电梯贯通各层','Wheelchair accessible, elevators to all floors') + '</span></div>' +
+    '</div></div>';
+  $('#stopModal').classList.add('on');
+  $('#smClose').addEventListener('click', closeModal);
+}
+function closeModal() { $('#stopModal').classList.remove('on'); state.modalGid = null; state.modalStop = null; }
+$('#stopModal').addEventListener('click', e => { if (e.target.id === 'stopModal') closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ═══ 语言切换（整页即时切换，已打开弹卡重渲染）═══ */
+function applyLang(lang) {
+  I18N_LANG.current = lang;
+  localStorage.setItem('cp_lang_met', lang);
+  document.documentElement.lang = lang === 'en' ? 'en' : 'zh-CN';
+  document.querySelectorAll('#langToggle button').forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.innerHTML = T(el.dataset.i18n, EN_MAP[el.dataset.i18n] || el.dataset.i18n);
+  });
+  $('#flashSub').textContent = T('正在加载 The Metropolitan Museum of Art…','Loading The Metropolitan Museum of Art…');
+  renderQuiz();
+  if (state.route) {
+    const cf = state.floor;
+    setRoute(state.route, false);
+    if (cf) goFloor(cf);
+  } else {
+    renderLibrary();
+  }
+  renderPrefSummary();
+  /* 已打开弹卡重渲染 */
+  if (state.modalGid) {
+    if (state.modalGid === 'ENTRY') openEntryModal();
+    else openStopModal(state.modalGid, state.modalStop);
+  }
+}
+document.getElementById('langToggle').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b || b.dataset.lang === I18N_LANG.current) return;
+  applyLang(b.dataset.lang);
+});
+
+/* ═══ 问卷提交 / 跳过 ═══ */
+$('#btnGenerate').addEventListener('click', () => {
+  runLoading(() => {
+    const route = matchRoute(state.prefs);
+    setRoute(route, true);
+    switchTab('A');
+    showPhase('mapPage');
+  });
+});
+$('#btnSkip').addEventListener('click', () => {
+  const r0 = ROUTES.find(r => r.id === DEFAULT_ROUTE_ID) || ROUTES[0];
+  setRoute(normalizePreset(r0), true);
+  switchTab('A');
+  showPhase('mapPage');
+});
+
+/* ═══ EMBEDDED：file:// 兜底（与 america/data/*.json 一致）═══ */
+const EMBEDDED = {"galleries":[{"id":"G131","galleryNumber":"131","name":"Sackler Wing - Temple of Dendur","nameCN":"丹铎神庙（赛克勒翼厅）","department":"Egyptian Art","floor":1,"zone":"North","description":"Massive glass-walled wing housing the complete Temple of Dendur, with reflecting pool and Central Park view","descriptionCN":"玻璃幕墙展厅完整保存古埃及丹铎神庙，水池倒映，可眺望中央公园","walkingTimeFromEntrance_min":10,"nearbyGalleries":["G129","G130"],"mustSee":true,"hotspot":{"x":0.905,"y":0.58}},{"id":"G_Egyptian_General","galleryNumber":"118-132","name":"Egyptian Art Galleries","nameCN":"埃及艺术馆","department":"Egyptian Art","floor":1,"zone":"North","description":"39 rooms of ancient Egyptian art, 26,000+ objects displayed chronologically","descriptionCN":"39 个展厅按年代陈列 26,000+ 件古埃及文物，木乃伊、石棺与哈特谢普苏特坐像","walkingTimeFromEntrance_min":8,"nearbyGalleries":["G131"],"mustSee":true,"hotspot":{"x":0.83,"y":0.8}},{"id":"G_Assyrian","galleryNumber":"401-406","name":"Assyrian Sculpture Court","nameCN":"亚述雕塑厅","department":"Ancient West Asian Art","floor":2,"zone":"South","description":"Monumental lamassu (human-headed winged lions) and relief panels from ancient Assyrian palaces","descriptionCN":"来自亚述宫殿的巨型人首翼狮（拉玛苏）与浮雕石板，镇守门厅","walkingTimeFromEntrance_min":12,"nearbyGalleries":["G_Islamic"],"mustSee":true,"hotspot":{"x":0.31,"y":0.81}},{"id":"G_Islamic","galleryNumber":"450-464","name":"Islamic Art Galleries","nameCN":"伊斯兰艺术馆","department":"Islamic Art","floor":2,"zone":"South","description":"1,300 years of Islamic civilization art, geometric patterns, calligraphy, ceramics","descriptionCN":"1300 年伊斯兰文明艺术：几何纹样、书法、陶瓷与大马士革厅","walkingTimeFromEntrance_min":15,"nearbyGalleries":["G_Assyrian"],"mustSee":false,"hotspot":{"x":0.11,"y":0.85}},{"id":"G_ArmsArmor","galleryNumber":"371-379","name":"Lauder Galleries of Arms and Armor","nameCN":"武器与盔甲馆（劳德展厅）","department":"Arms and Armor","floor":1,"zone":"West/South (Morgan Wing)","description":"World-class arms and armor collection including Henry VIII's armor, Japanese samurai gear","descriptionCN":"世界级武器盔甲收藏：亨利八世铠甲、日本武士装备，骑马盔甲阵列极具震撼","walkingTimeFromEntrance_min":10,"nearbyGalleries":[],"mustSee":true,"hotspot":{"x":0.715,"y":0.5}},{"id":"G_GreekRoman","galleryNumber":"162-167","name":"Greek and Roman Sculpture Court","nameCN":"希腊与罗马雕塑厅","department":"Greek and Roman Art","floor":1,"zone":"East/Center","description":"Two-story Ionic-columned hall with skylights, marble statues including Three Graces","descriptionCN":"双层爱奥尼柱廊大厅，天窗下的大理石雕像群，含《美惠三女神》","walkingTimeFromEntrance_min":8,"nearbyGalleries":["G_AstorCourt"],"mustSee":true,"hotspot":{"x":0.11,"y":0.81}},{"id":"G_AstorCourt","galleryNumber":"210","name":"Astor Court (Chinese Garden)","nameCN":"阿斯特中国庭院（明轩）","department":"Asian Art","floor":2,"zone":"Center","description":"Ming-style courtyard modeled after the Master of Nets Garden in Suzhou","descriptionCN":"以苏州网师园为蓝本的明代风格庭院，曼哈顿中心的一片江南","walkingTimeFromEntrance_min":10,"nearbyGalleries":["G_GreekRoman","G_Chinese"],"mustSee":true,"hotspot":{"x":0.855,"y":0.83}},{"id":"G_Chinese","galleryNumber":"210-219","name":"Chinese Art Galleries","nameCN":"中国艺术馆","department":"Asian Art","floor":2,"zone":"Center/North","description":"Chinese art spanning 4,000 years, including calligraphy, porcelain, paintings","descriptionCN":"横跨四千年的中国艺术：书法、瓷器、绘画与佛教造像","walkingTimeFromEntrance_min":10,"nearbyGalleries":["G_AstorCourt"],"mustSee":false,"hotspot":{"x":0.72,"y":0.84}},{"id":"G_EuropeanPaintings","galleryNumber":"600-830","name":"European Paintings","nameCN":"欧洲绘画馆","department":"European Paintings","floor":2,"zone":"Center/South","description":"2,500+ European paintings from 13th-19th centuries, including works by Rembrandt, Vermeer, Van Gogh, Monet, Degas","descriptionCN":"2500+ 件 13-19 世纪欧洲绘画，伦勃朗、维米尔、梵高、莫奈、德加云集","walkingTimeFromEntrance_min":5,"nearbyGalleries":["G_Impressionist","G_Dutch"],"mustSee":true,"hotspot":{"x":0.5,"y":0.41}},{"id":"G_Impressionist","galleryNumber":"814-825","name":"Impressionist and Post-Impressionist Galleries","nameCN":"印象派与后印象派展厅","department":"European Paintings","floor":2,"zone":"South","description":"Monet, Van Gogh, Degas, Cezanne - the most popular section of European Paintings","descriptionCN":"莫奈、梵高、德加、塞尚——全馆人气最高的展厅区域","walkingTimeFromEntrance_min":8,"nearbyGalleries":["G_EuropeanPaintings"],"mustSee":true,"keyGalleryNumbers":["815","818","819","822","825"],"hotspot":{"x":0.125,"y":0.57}},{"id":"G_Dutch","galleryNumber":"614-618","name":"Dutch Golden Age Galleries","nameCN":"荷兰黄金时代展厅","department":"European Paintings","floor":2,"zone":"Center","description":"Vermeer, Rembrandt, Hals - Dutch 17th century masters","descriptionCN":"维米尔、伦勃朗、哈尔斯——荷兰 17 世纪黄金时代大师之作","walkingTimeFromEntrance_min":7,"nearbyGalleries":["G_EuropeanPaintings"],"mustSee":true,"hotspot":{"x":0.385,"y":0.28}},{"id":"G_American","galleryNumber":"760-774","name":"American Wing","nameCN":"美国馆","department":"The American Wing","floor":2,"zone":"North","description":"75+ galleries of American art and design, 17th-20th century, including period rooms","descriptionCN":"75+ 展厅呈现 17-20 世纪美国艺术与设计，含《华盛顿横渡特拉华河》与《X夫人》","walkingTimeFromEntrance_min":8,"nearbyGalleries":[],"mustSee":true,"hotspot":{"x":0.85,"y":0.27}},{"id":"G_Lehman","galleryNumber":"950-964","name":"Robert Lehman Wing","nameCN":"罗伯特·雷曼翼厅","department":"European Paintings","floor":1,"zone":"South","description":"Old Master paintings in an intimate setting, quieter galleries","descriptionCN":"雷曼家族珍藏的欧洲古典大师绘画，环境私密安静","walkingTimeFromEntrance_min":12,"nearbyGalleries":["G_EuropeanPaintings"],"mustSee":false,"hotspot":{"x":0.48,"y":0.14}},{"id":"G_Modern","galleryNumber":"851-855","name":"Modern and Contemporary Art","nameCN":"现当代艺术馆","department":"Modern and Contemporary Art","floor":2,"zone":"South","description":"20th century art including Pollock, Warhol, and contemporary works","descriptionCN":"20 世纪至今：波洛克《秋之韵》、沃霍尔与当代新作","walkingTimeFromEntrance_min":10,"nearbyGalleries":["G_Impressionist"],"mustSee":false,"hotspot":{"x":0.14,"y":0.17}},{"id":"G_Roof","galleryNumber":null,"name":"Roof Garden","nameCN":"屋顶花园","department":null,"floor":"Rooftop","zone":"Top","description":"Seasonal rooftop garden with commissioned art installation, Central Park and skyline views","descriptionCN":"季节性开放的屋顶花园，年度委任艺术装置，俯瞰中央公园与曼哈顿天际线","walkingTimeFromEntrance_min":15,"nearbyGalleries":[],"mustSee":true,"seasonal":true,"note":"Open approximately April-October, weather dependent","noteCN":"约 4-10 月开放，视天气而定；2025 季后闭园大修","hotspot":{"x":0.2,"y":0.33}}],"routes":[{"id":"highlights_2h","name":"2-Hour Highlights","nameCN":"2小时精华速览","duration_min":120,"description":"See The Met's absolute must-sees in 2 hours","descriptionCN":"2 小时看完大都会镇馆必看","stops":[{"order":1,"galleryId":"G131","name":"Temple of Dendur","nameCN":"丹铎神庙","duration_min":20,"notes":"Start here - most iconic","notesCN":"从这里开始——全馆最具标志性"},{"order":2,"galleryId":"G_GreekRoman","name":"Greek & Roman Sculpture Court","nameCN":"希腊与罗马雕塑厅","duration_min":15,"notes":"Walk through Great Hall, head to F2","notesCN":"穿过大厅即可到达"},{"order":3,"galleryId":"G_AstorCourt","name":"Astor Court","nameCN":"阿斯特中国庭院","duration_min":10,"notes":"Peaceful Chinese garden","notesCN":"静谧的中国园林"},{"order":4,"galleryId":"G_Impressionist","name":"Impressionist Galleries (815-825)","nameCN":"印象派展厅（815-825）","duration_min":30,"notes":"Van Gogh, Monet, Degas","notesCN":"梵高、莫奈、德加"},{"order":5,"galleryId":"G_Dutch","name":"Dutch Golden Age (614-616)","nameCN":"荷兰黄金时代（614-616）","duration_min":15,"notes":"Vermeer, Rembrandt","notesCN":"维米尔、伦勃朗"},{"order":6,"galleryId":"G_Roof","name":"Roof Garden (if open)","nameCN":"屋顶花园（若开放）","duration_min":15,"notes":"Seasonal; skip if closed","notesCN":"季节性开放；关闭可跳过"}],"totalWalkingTime_min":15,"floorChanges":1},{"id":"impressionist_focus","name":"Impressionist Journey","nameCN":"印象派之旅","duration_min":90,"description":"Deep dive into Monet, Van Gogh, Degas, and French masters","descriptionCN":"深度游览莫奈、梵高、德加与法国大师","stops":[{"order":1,"galleryId":"G_Impressionist","name":"Gallery 815 - Degas","nameCN":"815 厅 · 德加","duration_min":15,"notes":"The Dance Class, Little Dancer","notesCN":"《舞蹈课》《小舞者》"},{"order":2,"galleryId":"G_Impressionist","name":"Gallery 818 - Monet","nameCN":"818 厅 · 莫奈","duration_min":10,"notes":"Garden at Sainte-Adresse","notesCN":"《圣阿德雷斯的花园》"},{"order":3,"galleryId":"G_Impressionist","name":"Gallery 819 - Monet Water Lilies","nameCN":"819 厅 · 莫奈睡莲","duration_min":10,"notes":"Bridge over a Pond of Water Lilies","notesCN":"《睡莲池上的桥》"},{"order":4,"galleryId":"G_Impressionist","name":"Gallery 822 - Van Gogh","nameCN":"822 厅 · 梵高","duration_min":10,"notes":"Wheat Field with Cypresses","notesCN":"《麦田与柏树》"},{"order":5,"galleryId":"G_Impressionist","name":"Gallery 825 - Van Gogh","nameCN":"825 厅 · 梵高","duration_min":15,"notes":"Self-Portrait, Sunflowers, Irises","notesCN":"《自画像》《向日葵》《鸢尾花》"},{"order":6,"galleryId":"G_Modern","name":"Modern Art - Pollock","nameCN":"现代馆 · 波洛克","duration_min":10,"notes":"Autumn Rhythm","notesCN":"《秋之韵》"}],"totalWalkingTime_min":10,"floorChanges":0},{"id":"ancient_civilizations","name":"Ancient Civilizations","nameCN":"古文明巡礼","duration_min":120,"description":"Egypt, Assyria, Greece & Rome - journey through ancient worlds","descriptionCN":"埃及、亚述、希腊与罗马——穿越古代文明","stops":[{"order":1,"galleryId":"G_Egyptian_General","name":"Egyptian Art Galleries","nameCN":"埃及艺术馆","duration_min":25,"notes":"Hatshepsut, mummies, sarcophagi","notesCN":"哈特谢普苏特、木乃伊、石棺"},{"order":2,"galleryId":"G131","name":"Temple of Dendur","nameCN":"丹铎神庙","duration_min":20,"notes":"The crown jewel","notesCN":"镇馆之冠"},{"order":3,"galleryId":"G_Assyrian","name":"Assyrian Sculpture Court","nameCN":"亚述雕塑厅","duration_min":15,"notes":"Lamassu, palace reliefs","notesCN":"拉玛苏巨兽、宫殿浮雕"},{"order":4,"galleryId":"G_GreekRoman","name":"Greek & Roman Sculpture Court","nameCN":"希腊与罗马雕塑厅","duration_min":20,"notes":"Marble statues, Three Graces","notesCN":"大理石雕像、《美惠三女神》"},{"order":5,"galleryId":"G_Islamic","name":"Islamic Art","nameCN":"伊斯兰艺术馆","duration_min":15,"notes":"Geometric beauty","notesCN":"几何之美"}],"totalWalkingTime_min":15,"floorChanges":1},{"id":"instagram_spots","name":"Instagram Photo Spots","nameCN":"Instagram 打卡线","duration_min":90,"description":"Most photogenic spots in The Met","descriptionCN":"大都会最出片的机位","stops":[{"order":1,"galleryId":"G131","name":"Temple of Dendur","nameCN":"丹铎神庙","duration_min":15,"notes":"Iconic backdrop with Central Park view","notesCN":"中央公园背景的标志性机位"},{"order":2,"galleryId":"G_GreekRoman","name":"Greek & Roman Sculpture Court","nameCN":"希腊与罗马雕塑厅","duration_min":15,"notes":"Stunning architecture and light","notesCN":"建筑与光影绝美"},{"order":3,"galleryId":"G_AstorCourt","name":"Astor Court","nameCN":"阿斯特中国庭院","duration_min":10,"notes":"Serene Chinese garden","notesCN":"宁静的中国园林"},{"order":4,"galleryId":"G_ArmsArmor","name":"Arms and Armor","nameCN":"武器与盔甲馆","duration_min":10,"notes":"Dramatic armor displays","notesCN":"盔甲阵列极富戏剧性"},{"order":5,"galleryId":"G_Roof","name":"Roof Garden","nameCN":"屋顶花园","duration_min":20,"notes":"Best views in the museum","notesCN":"全馆最佳景观位"}],"totalWalkingTime_min":15,"floorChanges":2},{"id":"family_kids","name":"Family & Kids Explorer","nameCN":"亲子探索线","duration_min":150,"description":"Engaging exhibits for families with children","descriptionCN":"适合带孩子的家庭互动看点","stops":[{"order":1,"galleryId":"G131","name":"Temple of Dendur","nameCN":"丹铎神庙","duration_min":20,"notes":"Kids love the giant temple!","notesCN":"孩子们超爱这座巨型神庙！"},{"order":2,"galleryId":"G_Assyrian","name":"Assyrian Lamassu","nameCN":"亚述拉玛苏","duration_min":15,"notes":"Giant winged lion - wow factor","notesCN":"巨型翼狮——震撼十足"},{"order":3,"galleryId":"G_ArmsArmor","name":"Arms and Armor","nameCN":"武器与盔甲馆","duration_min":20,"notes":"Knights, swords, samurai!","notesCN":"骑士、刀剑、武士！"},{"order":4,"galleryId":"G_Egyptian_General","name":"Egyptian Mummies","nameCN":"埃及木乃伊","duration_min":20,"notes":"Mummies always fascinate kids","notesCN":"木乃伊总能吸引孩子"},{"order":5,"galleryId":"G_GreekRoman","name":"Greek & Roman Court","nameCN":"希腊与罗马雕塑厅","duration_min":15,"notes":"Giant statues, open space to move","notesCN":"巨型雕像，空间开阔"},{"order":6,"galleryId":"G_Impressionist","name":"Impressionist Gallery","nameCN":"印象派展厅","duration_min":15,"notes":"Colorful, recognizable paintings","notesCN":"色彩明快、耳熟能详的名画"}],"totalWalkingTime_min":20,"floorChanges":1},{"id":"full_day","name":"Full Day Deep Dive","nameCN":"全天深度游","duration_min":300,"description":"Comprehensive tour covering all major departments","descriptionCN":"覆盖所有主要展馆的全景深度之旅","stops":[{"order":1,"galleryId":"G131","name":"Temple of Dendur","nameCN":"丹铎神庙","duration_min":25},{"order":2,"galleryId":"G_Egyptian_General","name":"Egyptian Art","nameCN":"埃及艺术馆","duration_min":30},{"order":3,"galleryId":"G_Assyrian","name":"Assyrian Court","nameCN":"亚述雕塑厅","duration_min":15},{"order":4,"galleryId":"G_Islamic","name":"Islamic Art","nameCN":"伊斯兰艺术馆","duration_min":15},{"order":5,"galleryId":"G_ArmsArmor","name":"Arms and Armor","nameCN":"武器与盔甲馆","duration_min":20},{"order":6,"galleryId":"G_GreekRoman","name":"Greek & Roman Court","nameCN":"希腊与罗马雕塑厅","duration_min":20},{"order":7,"galleryId":"G_AstorCourt","name":"Astor Court","nameCN":"阿斯特中国庭院","duration_min":15},{"order":8,"galleryId":"G_Chinese","name":"Chinese Art","nameCN":"中国艺术馆","duration_min":15},{"order":9,"galleryId":"G_American","name":"American Wing","nameCN":"美国馆","duration_min":25},{"order":10,"galleryId":"G_Dutch","name":"Dutch Golden Age","nameCN":"荷兰黄金时代","duration_min":15},{"order":11,"galleryId":"G_Impressionist","name":"Impressionist Galleries","nameCN":"印象派展厅","duration_min":30},{"order":12,"galleryId":"G_Modern","name":"Modern Art","nameCN":"现当代艺术馆","duration_min":15},{"order":13,"galleryId":"G_Roof","name":"Roof Garden","nameCN":"屋顶花园","duration_min":20}],"totalWalkingTime_min":30,"floorChanges":3}],"artworks":[{"objectID":547802,"title":"The Temple of Dendur","artistDisplayName":"","objectDate":"completed by 10 B.C.","department":"Egyptian Art","galleryNumber":"131","medium":"Aeolian sandstone","primaryImageSmall":"https://images.metmuseum.org/CRDImages/eg/web-large/DP240337.jpg","isHighlight":true,"isPublicDomain":true,"creditLine":"Given to the United States by Egypt in 1965 and awarded to The Metropolitan Museum of Art in 1967.","period":"Roman Period","culture":""},{"objectID":11417,"title":"Washington Crossing the Delaware","artistDisplayName":"Emanuel Leutze","objectDate":"1851","department":"The American Wing","galleryNumber":"760","medium":"Oil on canvas","primaryImageSmall":"https://images.metmuseum.org/CRDImages/ad/web-large/DP215410.jpg","isHighlight":true,"isPublicDomain":true,"creditLine":"Gift of John Stewart Kennedy, 1897","period":"","culture":"American"},{"objectID":436532,"title":"Self-Portrait with a Straw Hat (obverse: The Potato Peeler)","artistDisplayName":"Vincent van Gogh","objectDate":"1887","department":"European Paintings","galleryNumber":"825","medium":"Oil on canvas","primaryImageSmall":"https://images.metmuseum.org/CRDImages/ep/web-large/DT1502_cropped2.jpg","isHighlight":true,"isPublicDomain":true,"creditLine":"Bequest of Miss Adelaide Milton de Groot (1876-1967), 1967","period":"","culture":""},{"objectID":437127,"title":"Bridge over a Pond of Water Lilies","artistDisplayName":"Claude Monet","objectDate":"1899","department":"European Paintings","galleryNumber":"819","medium":"Oil on canvas","primaryImageSmall":"","isHighlight":true,"isPublicDomain":false,"creditLine":"H. O. Havemeyer Collection, Bequest of Mrs. H. O. Havemeyer, 1929","period":"","culture":""},{"objectID":437879,"title":"Study of a Young Woman","artistDisplayName":"Johannes Vermeer","objectDate":"ca. 1665–67","department":"European Paintings","galleryNumber":"614","medium":"Oil on canvas","primaryImageSmall":"https://images.metmuseum.org/CRDImages/ep/web-large/DP353256.jpg","isHighlight":true,"isPublicDomain":true,"creditLine":"Gift of Mr. and Mrs. Charles Wrightsman, in memory of Theodore Rousseau Jr., 1979","period":"","culture":""},{"objectID":437394,"title":"Aristotle with a Bust of Homer","artistDisplayName":"Rembrandt (Rembrandt van Rijn)","objectDate":"1653","department":"European Paintings","galleryNumber":"616","medium":"Oil on canvas","primaryImageSmall":"https://images.metmuseum.org/CRDImages/ep/web-large/DP-30758-001.jpg","isHighlight":true,"isPublicDomain":true,"creditLine":"Purchase, special contributions and funds given or bequeathed by friends of the Museum, 1961","period":"","culture":""},{"objectID":438817,"title":"The Dance Class","artistDisplayName":"Edgar Degas","objectDate":"1874","department":"European Paintings","galleryNumber":"815","medium":"Oil on canvas","primaryImageSmall":"https://images.metmuseum.org/CRDImages/ep/web-large/DP-20101-001.jpg","isHighlight":true,"isPublicDomain":true,"creditLine":"Bequest of Mrs. Harry Payne Bingham, 1986","period":"","culture":""},{"objectID":196439,"title":"The Little Fourteen-Year-Old Dancer","artistDisplayName":"Edgar Degas","objectDate":"1922 (cast), 2018 (tutu)","department":"European Sculpture and Decorative Arts","galleryNumber":"815","medium":"Partially tinted bronze, cotton tarlatan, silk satin, and wood","primaryImageSmall":"https://images.metmuseum.org/CRDImages/es/web-large/DP-14939-001.jpg","isHighlight":true,"isPublicDomain":true,"creditLine":"H. O. Havemeyer Collection, Bequest of Mrs. H. O. Havemeyer, 1929","period":"","culture":""},{"objectID":12127,"title":"Madame X (Virginie Amélie Avegno Gautreau)","artistDisplayName":"John Singer Sargent","objectDate":"1883–84","department":"The American Wing","galleryNumber":"771","medium":"Oil on canvas","primaryImageSmall":"https://images.metmuseum.org/CRDImages/ad/web-large/DP-29006-001.jpg","isHighlight":true,"isPublicDomain":true,"creditLine":"Arthur Hoppock Hearn Fund, 1916","period":"","culture":"American"},{"objectID":488978,"title":"Autumn Rhythm: Number 30, 1950","artistDisplayName":"Jackson Pollock","objectDate":"1950","department":"Modern and Contemporary Art","galleryNumber":"851","medium":"Oil-modified alkyd resin on canvas","primaryImageSmall":"","isHighlight":true,"isPublicDomain":false,"creditLine":"George A. Hearn Fund, 1957","period":"","culture":""},{"objectID":544450,"title":"Seated Statue of Hatshepsut","artistDisplayName":"","objectDate":"ca. 1479–1458 B.C.","department":"Egyptian Art","galleryNumber":"","medium":"Indurated limestone, paint","primaryImageSmall":"https://images.metmuseum.org/CRDImages/eg/web-large/DP-24215-002.jpg","isHighlight":true,"isPublicDomain":true,"creditLine":"Rogers Fund, 1929","period":"New Kingdom","culture":""},{"objectID":322609,"title":"Human-headed winged lion (lamassu)","artistDisplayName":"","objectDate":"ca. 883–859 BCE","department":"Ancient West Asian Art","galleryNumber":"","medium":"Gypsum alabaster","primaryImageSmall":"https://images.metmuseum.org/CRDImages/an/web-large/DT880.jpg","isHighlight":true,"isPublicDomain":true,"creditLine":"Gift of John D. Rockefeller Jr., 1932","period":"Neo-Assyrian","culture":"Assyrian"},{"objectID":436524,"title":"Sunflowers","artistDisplayName":"Vincent van Gogh","objectDate":"1887","department":"European Paintings","galleryNumber":"825","medium":"Oil on canvas","primaryImageSmall":"https://images.metmuseum.org/CRDImages/ep/web-large/DP-41223-001.jpg","isHighlight":false,"isPublicDomain":true,"creditLine":"Rogers Fund, 1949","period":"","culture":""},{"objectID":436535,"title":"Wheat Field with Cypresses","artistDisplayName":"Vincent van Gogh","objectDate":"1889","department":"European Paintings","galleryNumber":"822","medium":"Oil on canvas","primaryImageSmall":"https://images.metmuseum.org/CRDImages/ep/web-large/DP-42549-001.jpg","isHighlight":true,"isPublicDomain":true,"creditLine":"Purchase, The Annenberg Foundation Gift, 1993","period":"","culture":""},{"objectID":436529,"title":"L'Arlésienne: Madame Joseph-Michel Ginoux (Marie Julien, 1848–1911)","artistDisplayName":"Vincent van Gogh","objectDate":"1888–89","department":"European Paintings","galleryNumber":"825","medium":"Oil on canvas","primaryImageSmall":"https://images.metmuseum.org/CRDImages/ep/web-large/DT1396.jpg","isHighlight":false,"isPublicDomain":true,"creditLine":"Bequest of Sam A. Lewisohn, 1951","period":"","culture":""},{"objectID":437133,"title":"Garden at Sainte-Adresse","artistDisplayName":"Claude Monet","objectDate":"1867","department":"European Paintings","galleryNumber":"818","medium":"Oil on canvas","primaryImageSmall":"","isHighlight":true,"isPublicDomain":false,"creditLine":"Purchase, special contributions and funds given or bequeathed by friends of the Museum, 1967","period":"","culture":""},{"objectID":437135,"title":"La Grenouillère","artistDisplayName":"Claude Monet","objectDate":"1869","department":"European Paintings","galleryNumber":"818","medium":"Oil on canvas","primaryImageSmall":"","isHighlight":false,"isPublicDomain":false,"creditLine":"H. O. Havemeyer Collection, Bequest of Mrs. H. O. Havemeyer, 1929","period":"","culture":""},{"objectID":436528,"title":"Irises","artistDisplayName":"Vincent van Gogh","objectDate":"1890","department":"European Paintings","galleryNumber":"099","medium":"Oil on canvas","primaryImageSmall":"https://images.metmuseum.org/CRDImages/ep/web-large/DP346474.jpg","isHighlight":true,"isPublicDomain":true,"creditLine":"Gift of Adele R. Levy, 1958","period":"","culture":""},{"objectID":436530,"title":"Oleanders","artistDisplayName":"Vincent van Gogh","objectDate":"1888","department":"European Paintings","galleryNumber":"825","medium":"Oil on canvas","primaryImageSmall":"https://images.metmuseum.org/CRDImages/ep/web-large/DT1494.jpg","isHighlight":false,"isPublicDomain":true,"creditLine":"Gift of Mr. and Mrs. John L. Loeb, 1962","period":"","culture":""},{"objectID":436533,"title":"Shoes","artistDisplayName":"Vincent van Gogh","objectDate":"1888","department":"European Paintings","galleryNumber":"822","medium":"Oil on canvas","primaryImageSmall":"https://images.metmuseum.org/CRDImages/ep/web-large/DT1947.jpg","isHighlight":false,"isPublicDomain":true,"creditLine":"Purchase, The Annenberg Foundation Gift, 1992","period":"","culture":""}],"popularity":[{"id":"temple_dendur","name":"Temple of Dendur","score":1.0,"tier":1},{"id":"van_gogh","name":"Van Gogh (Self-Portrait, Sunflowers, Wheat Field)","score":0.95,"tier":1},{"id":"monet_waterlilies","name":"Monet Water Lilies Bridge","score":0.9,"tier":1},{"id":"european_paintings","name":"European Paintings (overall)","score":0.9,"tier":1},{"id":"roof_garden","name":"Roof Garden","score":0.85,"tier":2},{"id":"greek_roman","name":"Greek & Roman Sculpture Court","score":0.8,"tier":2},{"id":"egyptian_art","name":"Egyptian Art (overall)","score":0.8,"tier":2},{"id":"degas_dance","name":"Degas - The Dance Class / Little Dancer","score":0.75,"tier":2},{"id":"arms_armor","name":"Arms and Armor","score":0.75,"tier":2},{"id":"washington_crossing","name":"Washington Crossing the Delaware","score":0.7,"tier":2},{"id":"astor_court","name":"Astor Court (Chinese Garden)","score":0.7,"tier":2},{"id":"lamassu","name":"Assyrian Lamassu","score":0.65,"tier":3},{"id":"vermeer","name":"Vermeer - Study of a Young Woman","score":0.65,"tier":3},{"id":"rembrandt","name":"Rembrandt - Aristotle with a Bust of Homer","score":0.6,"tier":3},{"id":"madame_x","name":"Madame X (Sargent)","score":0.6,"tier":3},{"id":"islamic_art","name":"Islamic Art","score":0.55,"tier":3},{"id":"pollock","name":"Autumn Rhythm (Pollock)","score":0.5,"tier":3},{"id":"hatshepsut","name":"Hatshepsut Seated","score":0.5,"tier":3}],"practical":{"hours":{"lastUpdated":"2026-07-29","source":"https://www.metmuseum.org/plan-your-visit","schedule":[{"day":"Sunday","open":"10:00","close":"17:00","isOpen":true},{"day":"Monday","open":"10:00","close":"17:00","isOpen":true},{"day":"Tuesday","open":"10:00","close":"17:00","isOpen":true},{"day":"Wednesday","open":null,"close":null,"isOpen":false,"note":"Closed every Wednesday"},{"day":"Thursday","open":"10:00","close":"17:00","isOpen":true},{"day":"Friday","open":"10:00","close":"21:00","isOpen":true,"note":"Extended hours"},{"day":"Saturday","open":"10:00","close":"21:00","isOpen":true,"note":"Extended hours"}],"holidayClosures":[{"date":"Thanksgiving Day","note":"Fourth Thursday of November"},{"date":"December 25","note":"Christmas Day"},{"date":"Every Wednesday","note":"Weekly closure"}]},"admission":{"source":"https://engage.metmuseum.org/admission","nyStateResidents":{"type":"pay-what-you-wish","note":"Must pay something. Must show NY state ID. NY/NJ/CT students also eligible."},"nonNyResidents":{"adult":30,"senior":22,"student":22,"childUnder12":0,"currency":"USD"},"onlinePurchase":{"available":true,"url":"https://engage.metmuseum.org/admission","note":"Direct entry without queuing"}},"roofGarden":{"status":"seasonal","2025Season":{"open":"2025-04-15","close":"2025-10-19","commission":"Jennie C. Jones - Ensemble","admission":"Included with museum admission"},"futureNote":"Roof Garden will close after 2025 season for major renovation, expected closed until ~2030"},"facilities":{"dining":[{"name":"The Dining Room","floor":"F1","type":"Casual"},{"name":"The Petrie Court Cafe","floor":"F1","type":"Cafe"},{"name":"The Roof Garden Bar","floor":"Rooftop","type":"Bar","seasonal":true}],"coatCheck":{"available":true,"floor":"F1"},"accessibility":{"wheelchairAccessible":true}}}};
+
+/* ═══ 启动 ═══ */
+(async function boot() {
+  /* 初始化语言（localStorage 保持） */
+  const saved = localStorage.getItem('cp_lang_met') || 'zh';
+  applyLang(saved);
+
+  const dataReady = loadData();
+
+  /* 品牌闪现 ~600ms */
+  const flash = $('#flash');
+  flash.classList.add('show');
+  await new Promise(r => setTimeout(r, 600));
+  flash.classList.add('hide');
+  await Promise.all([dataReady, new Promise(r => setTimeout(r, 280))]);
+  flash.style.display = 'none';
+
+  renderQuiz();
+  showPhase('quiz');
+})();
+</script>
+</body>
+</html>
